@@ -8,7 +8,7 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 
 ### Original Project Scope
 
-Python Data Structures & Optimization Algorithms: Use scheduling and route optimization algorithms (e.g., Dijkstra, A*).
+**Python Data Structures & Optimization Algorithms**: Use scheduling and route optimization algorithms (e.g., Dijkstra, A*).
 
 **Object Oriented Design**: Classes for users, drivers, ride requests, and schedules.
 
