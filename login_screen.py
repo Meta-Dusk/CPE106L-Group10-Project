@@ -28,8 +28,19 @@ def main(page: ft.Page):
     # UI components
     message = ft.Text(value="", color=ft.Colors.RED)
     username_input = ft.TextField(label="Username", width=300)
-    password_input = ft.TextField(label="Password", password=True, can_reveal_password=True, width=300)
-    confirm_password_input = ft.TextField(label="Confirm Password", password=True, can_reveal_password=True, width=300, visible=False)
+    password_input = ft.TextField(
+        label="Password",
+        password=True,
+        can_reveal_password=True,
+        width=300
+    )
+    confirm_password_input = ft.TextField(
+        label="Confirm Password",
+        password=True,
+        can_reveal_password=True,
+        width=300,
+        visible=False
+    )
 
     # Toggle between login and register mode
     mode = {"is_login": True}
@@ -75,7 +86,8 @@ def main(page: ft.Page):
                 message.value = "Username already exists!"
                 message.color = ft.Colors.RED
             else:
-                hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                hashed = bcrypt.hashpw(
+                    password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
                 collection.insert_one({"username": username, "password": hashed})
                 message.value = "Registration successful! Please log in."
                 message.color = ft.Colors.GREEN
@@ -105,7 +117,12 @@ def main(page: ft.Page):
     form = ft.Column(
         [
             chaewon_image,
-            ft.Text("Chaewon demands your login credentials.", size=20, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+            ft.Text(
+                "Chaewon demands your login credentials.",
+                size=20,
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.CENTER
+            ),
             username_input,
             password_input,
             confirm_password_input,
