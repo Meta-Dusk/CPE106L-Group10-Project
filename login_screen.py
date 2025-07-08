@@ -27,6 +27,12 @@ def main(page: ft.Page):
     page.scroll = "adaptive"
 
     # UI components
+    login_message = ft.Text(
+        "Chaewon demands your login credentials.",
+        size=20,
+        weight=ft.FontWeight.BOLD,
+        text_align=ft.TextAlign.CENTER
+    )
     message = ft.Text(value="", color=ft.Colors.RED)
     username_input = ft.TextField(label="Username", width=300)
     password_input = ft.TextField(
@@ -51,7 +57,7 @@ def main(page: ft.Page):
     current_image = {"src": image_sources["chaewon_stare"]}
     
     # AnimatedSwitcher wrapper
-    image_switcher = ft.AnimatedSwitcher(
+    toggleable_chaewon = ft.AnimatedSwitcher(
         duration=500,
         transition=ft.AnimatedSwitcherTransition.FADE,
         switch_in_curve=ft.AnimationCurve.EASE_IN_OUT,
@@ -74,7 +80,7 @@ def main(page: ft.Page):
             current_image["src"] = image_sources["chaewon_stare"]
 
         # Animate by replacing the content of AnimatedSwitcher
-        image_switcher.content = ft.Image(
+        toggleable_chaewon.content = ft.Image(
             src=current_image["src"],
             width=150,
             height=150,
@@ -165,26 +171,12 @@ def main(page: ft.Page):
         tooltip="Toggle Theme",
         on_click=toggle_theme
     )
-    
-    # Chaewon's image
-    chaewon_image = ft.Image(
-        src=image_sources["chaewon_side"],
-        width=150,
-        height=150,
-        border_radius=75,
-        fit=ft.ImageFit.COVER,
-    )
 
     form = ft.Column(
         [
             theme_toggle,
-            image_switcher,
-            ft.Text(
-                "Chaewon demands your login credentials.",
-                size=20,
-                weight=ft.FontWeight.BOLD,
-                text_align=ft.TextAlign.CENTER
-            ),
+            toggleable_chaewon,
+            login_message,
             username_input,
             password_input,
             confirm_password_input,
