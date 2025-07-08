@@ -24,6 +24,8 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 
 **Flet Desktop App**: Interface for booking rides and managing schedules.
 
-### Scope Alterations
+### Scope Alterations/Additions
 
-**GUI**: Tkinter or ttkbootstrap
+**Tkinter and/or ttkbootstrap**: For testing GUIs for desktop application version of the project (Only if Flet will not be used).
+
+**Render: Cloud Application Platorm**: For when the project is ready to be deployed.
