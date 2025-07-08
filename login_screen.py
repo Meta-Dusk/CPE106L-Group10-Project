@@ -1,37 +1,40 @@
 import flet as ft
+from pymongo import MongoClient
 
-# Dummy credentials
-VALID_USERNAME = "admin"
-VALID_PASSWORD = "1234"
+# Connect to MongoDB
+client = MongoClient("mongodb://localhost:27017/")  # Adjust if hosted remotely
+db = client["ProjectATS"]
+collection = db["accounts"]
 
 def main(page: ft.Page):
     page.title = "Chaewon's Meet and Greet"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    # Feedback Text
     message = ft.Text(value="", color=ft.Colors.RED)
 
-    # Input fields
-    username = ft.TextField(label="Username", width=300)
-    password = ft.TextField(
+    username_input = ft.TextField(label="Username", width=300)
+    password_input = ft.TextField(
         label="Password",
         password=True,
         can_reveal_password=True,
         width=300
     )
 
-    # Login button handler
     def login_click(e):
-        if username.value == VALID_USERNAME and password.value == VALID_PASSWORD:
-            message.value = "Login successful!"
+        username = username_input.value
+        password = password_input.value
+
+        # Check MongoDB for matching credentials
+        user = collection.find_one({"username": username, "password": password})
+        if user:
+            message.value = f"Welcome, {username}!"
             message.color = ft.Colors.GREEN
         else:
             message.value = "Invalid username or password."
             message.color = ft.Colors.RED
         page.update()
 
-    # Main content column
     login_form = ft.Column(
         [
             ft.Text(
@@ -39,8 +42,8 @@ def main(page: ft.Page):
                 size=24,
                 weight=ft.FontWeight.BOLD
             ),
-            username,
-            password,
+            username_input,
+            password_input,
             ft.ElevatedButton(text="Login", on_click=login_click),
             message,
         ],
@@ -49,14 +52,12 @@ def main(page: ft.Page):
         tight=True,
     )
 
-    # Make page fill and center
     page.add(
         ft.Container(
             content=login_form,
             alignment=ft.alignment.center,
-            expand=True,  # allows it to resize with the window
+            expand=True,
         )
     )
 
-# Run the app
 ft.app(target=main)
