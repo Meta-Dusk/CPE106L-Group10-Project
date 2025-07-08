@@ -56,40 +56,57 @@ def main(page: ft.Page):
     }
     current_image = {"src": image_sources["chaewon_stare"]}
     
-    # AnimatedSwitcher wrapper
-    toggleable_chaewon = ft.AnimatedSwitcher(
-        duration=500,
-        transition=ft.AnimatedSwitcherTransition.FADE,
-        switch_in_curve=ft.AnimationCurve.EASE_IN_OUT,
-        switch_out_curve=ft.AnimationCurve.EASE_IN_OUT,
+    # Animated container with fade + scale + rotation
+    toggleable_chaewon = ft.Container(
         content=ft.Image(
             src=current_image["src"],
             width=150,
             height=150,
             border_radius=75,
             fit=ft.ImageFit.COVER,
-            key=current_image["src"]  # must use key for animation to trigger
         ),
+        animate_opacity=300,
+        animate_scale=500,
+        animate_rotation=500,
+        scale=0.8,       # initial zoom (smaller)
+        opacity=1.0,     # start visible
+        rotate=0.0,      # no spin initially
+        alignment=ft.alignment.center,
     )
     
     def chaewon_toggle(e=None):
-    # Swap the image source
+        # Step 1: Fade out and shrink slightly
+        toggleable_chaewon.opacity = 0.0
+        toggleable_chaewon.scale = 0.7
+        page.update()
+        time.sleep(0.2)
+
+        # Step 2: Swap the image
         if current_image["src"] == image_sources["chaewon_stare"]:
             current_image["src"] = image_sources["chaewon_side"]
         else:
             current_image["src"] = image_sources["chaewon_stare"]
 
-        # Animate by replacing the content of AnimatedSwitcher
         toggleable_chaewon.content = ft.Image(
             src=current_image["src"],
             width=150,
             height=150,
             border_radius=75,
             fit=ft.ImageFit.COVER,
-            key=current_image["src"]
         )
         page.update()
 
+        # Step 3: Dramatic entrance – scale up, rotate, fade in
+        toggleable_chaewon.opacity = 1.0
+        toggleable_chaewon.scale = 1.2
+        toggleable_chaewon.rotate = 0.15
+        page.update()
+        time.sleep(0.3)
+
+        # Step 4: Return to normal size/rotation
+        toggleable_chaewon.scale = 1.0
+        toggleable_chaewon.rotate = 0.0
+        page.update()
     
     # Toggle between light and dark modes
     def toggle_theme(e):
