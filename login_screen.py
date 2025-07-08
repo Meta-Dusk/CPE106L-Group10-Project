@@ -1,6 +1,7 @@
 import flet as ft
 from pymongo import MongoClient
 import bcrypt
+import time
 
 # Connect to MongoDB
 client = MongoClient("mongodb://localhost:27017/")  # Adjust if hosted remotely
@@ -22,7 +23,7 @@ def main(page: ft.Page):
     page.title = "Chaewon's Meet and Greet"
     page.window_width = 400
     page.window_height = 600
-    page.theme_mode = ft.ThemeMode.LIGHT
+    page.theme_mode = ft.ThemeMode.DARK
     page.scroll = "adaptive"
 
     # UI components
@@ -41,6 +42,60 @@ def main(page: ft.Page):
         width=300,
         visible=False
     )
+    
+    # Chaewon toggle
+    image_sources = {
+        "chaewon_stare" : "https://image.koreaboo.com/2025/04/Header-Image-2025-04-08T171312.835.jpg",
+        "chaewon_side" : "https://koreajoongangdaily.joins.com/data/photo/2022/04/07/3e7dd04f-cadc-4336-9577-95a96e153801.jpg"
+    }
+    current_image = {"src": image_sources["chaewon_stare"]}
+    
+    # AnimatedSwitcher wrapper
+    image_switcher = ft.AnimatedSwitcher(
+        duration=500,
+        transition=ft.AnimatedSwitcherTransition.FADE,
+        switch_in_curve=ft.AnimationCurve.EASE_IN_OUT,
+        switch_out_curve=ft.AnimationCurve.EASE_IN_OUT,
+        content=ft.Image(
+            src=current_image["src"],
+            width=150,
+            height=150,
+            border_radius=75,
+            fit=ft.ImageFit.COVER,
+            key=current_image["src"]  # must use key for animation to trigger
+        ),
+    )
+    
+    def chaewon_toggle(e=None):
+    # Swap the image source
+        if current_image["src"] == image_sources["chaewon_stare"]:
+            current_image["src"] = image_sources["chaewon_side"]
+        else:
+            current_image["src"] = image_sources["chaewon_stare"]
+
+        # Animate by replacing the content of AnimatedSwitcher
+        image_switcher.content = ft.Image(
+            src=current_image["src"],
+            width=150,
+            height=150,
+            border_radius=75,
+            fit=ft.ImageFit.COVER,
+            key=current_image["src"]
+        )
+        page.update()
+
+    
+    # Toggle between light and dark modes
+    def toggle_theme(e):
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            page.theme_mode = ft.ThemeMode.DARK
+            theme_toggle.icon = ft.Icons.DARK_MODE
+            chaewon_toggle(e)
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
+            theme_toggle.icon = ft.Icons.LIGHT_MODE
+            chaewon_toggle(e)
+        page.update()
 
     # Toggle between login and register mode
     mode = {"is_login": True}
@@ -105,9 +160,15 @@ def main(page: ft.Page):
 
     toggle_button.on_click = lambda e: (switch_mode(e), update_button_text())
 
+    theme_toggle = ft.IconButton(
+        icon=ft.Icons.DARK_MODE,
+        tooltip="Toggle Theme",
+        on_click=toggle_theme
+    )
+    
     # Chaewon's image
     chaewon_image = ft.Image(
-        src="https://image.koreaboo.com/2025/04/Header-Image-2025-04-08T171312.835.jpg",
+        src=image_sources["chaewon_side"],
         width=150,
         height=150,
         border_radius=75,
@@ -116,7 +177,8 @@ def main(page: ft.Page):
 
     form = ft.Column(
         [
-            chaewon_image,
+            theme_toggle,
+            image_switcher,
             ft.Text(
                 "Chaewon demands your login credentials.",
                 size=20,
