@@ -49,6 +49,7 @@ def main(page: ft.Page):
         visible=False
     )
     
+    
     # Chaewon toggle
     image_sources = {
         "chaewon_stare" : "https://image.koreaboo.com/2025/04/Header-Image-2025-04-08T171312.835.jpg",
@@ -112,11 +113,11 @@ def main(page: ft.Page):
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
-            theme_toggle.icon = ft.Icons.DARK_MODE
+            theme_toggle.icon = ft.Icons.LIGHT_MODE
             chaewon_toggle(e)
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
-            theme_toggle.icon = ft.Icons.LIGHT_MODE
+            theme_toggle.icon = ft.Icons.DARK_MODE
             chaewon_toggle(e)
         page.update()
 
@@ -184,7 +185,7 @@ def main(page: ft.Page):
     toggle_button.on_click = lambda e: (switch_mode(e), update_button_text())
 
     theme_toggle = ft.IconButton(
-        icon=ft.Icons.DARK_MODE,
+        icon=ft.Icons.LIGHT_MODE,
         tooltip="Toggle Theme",
         on_click=toggle_theme
     )
