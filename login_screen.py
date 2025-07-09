@@ -3,33 +3,95 @@ from pymongo import MongoClient
 import bcrypt
 import time
 
-# Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")  # Adjust if hosted remotely
-db = client["ProjectATS"]
-collection = db["accounts"]
+MONGODB_CONNECTION_STRING = "localhost:27017" # Adjust if hosted remotely
+collection = None
 
-# Hash password for storing
-def hash_password(password):
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+ENCODING_FORMAT = "utf-8"
 
-# Check hashed password
-def verify_password(password, hashed):
-    if isinstance(hashed, str):
-        hashed = hashed.encode("utf-8")  # only encode if it's a string
-    return bcrypt.checkpw(password.encode("utf-8"), hashed)
+# Chaewon images
+image_sources = {
+    "chaewon_stare" : "https://image.koreaboo.com/2025/04/Header-Image-2025-04-08T171312.835.jpg",
+    "chaewon_side" : "https://koreajoongangdaily.joins.com/data/photo/2022/04/07/3e7dd04f-cadc-4336-9577-95a96e153801.jpg",
+    "chaewon_sad" : "https://i.pinimg.com/736x/33/63/84/336384d11ac51be54c6b6b64cb93ff7e.jpg"
+}
 
-# Main Flet App
-def main(page: ft.Page):
-    page.title = "Chaewon's Meet and Greet"
-    page.window_width = 400
-    page.window_height = 600
-    page.theme_mode = ft.ThemeMode.DARK
-    page.scroll = "adaptive"
+text_label_size = 25
+input_field_width = 300
 
+default_image = ft.Image(
+    src=image_sources["chaewon_stare"],
+    width=150,
+    height=150,
+    border_radius=75,
+    fit=ft.ImageFit.COVER,
+    gapless_playback=True,
+)
+
+def connect_to_mongo():
+    try:
+        client = MongoClient(
+            f"mongodb://{MONGODB_CONNECTION_STRING}/",
+            serverSelectionTimeoutMS=2000
+        )
+        client.admin.command("ping")  # Check if the server is reachable
+        db = client["ProjectATS"]
+        return db["accounts"]
+    except Exception as e:
+        print("MongoDB connection failed:", e)
+        return None
+
+def check_mongo_connection(page):
+    global collection
+    collection = connect_to_mongo()
+    
+    image_sad_chaewon = default_image
+    image_sad_chaewon.src = image_sources["chaewon_sad"]
+    
+    warning_message = ft.Text("Failed to connect to MongoDB.", color=ft.Colors.RED, size=text_label_size)
+    warning_subtitle = ft.Text(f"Please ensure the MongoDB server is running on {MONGODB_CONNECTION_STRING}.")
+    
+    def retry_connection(e):
+        page.controls.clear()
+        page.update()
+        if not check_mongo_connection(page):
+            return
+        main_login_ui(page)  # continue to full UI if retry succeeds
+    
+    retry_button = ft.ElevatedButton(text="Retry Connection", on_click=retry_connection)
+    
+    if collection is None:
+        form = ft.Column(
+            [
+                image_sad_chaewon,
+                warning_message,
+                warning_subtitle,
+                retry_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            tight=True,
+        )
+        
+        page.add(
+            ft.Container(
+                content=form,
+                alignment=ft.alignment.center,
+                expand=True,
+                # bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.RED),
+            )
+        )
+        
+        return False
+    return True
+
+def main_login_ui(page):
+    text_login = "Already have an account? Login"
+    text_register = "Don't have an account? Register"
+    
     # UI components
     login_message = ft.Text(
         "Chaewon demands your login credentials.",
-        size=20,
+        size=text_label_size,
         weight=ft.FontWeight.BOLD,
         text_align=ft.TextAlign.CENTER
     )
@@ -39,33 +101,22 @@ def main(page: ft.Page):
         label="Password",
         password=True,
         can_reveal_password=True,
-        width=300
+        width=input_field_width
     )
     confirm_password_input = ft.TextField(
         label="Confirm Password",
         password=True,
         can_reveal_password=True,
-        width=300,
+        width=input_field_width,
         visible=False
     )
     
-    
-    # Chaewon toggle
-    image_sources = {
-        "chaewon_stare" : "https://image.koreaboo.com/2025/04/Header-Image-2025-04-08T171312.835.jpg",
-        "chaewon_side" : "https://koreajoongangdaily.joins.com/data/photo/2022/04/07/3e7dd04f-cadc-4336-9577-95a96e153801.jpg"
-    }
-    current_image = {"src": image_sources["chaewon_stare"]}
+    current_image = default_image
+    current_image.src = image_sources["chaewon_stare"]
     
     # Animated container with fade + scale + rotation
     toggleable_chaewon = ft.Container(
-        content=ft.Image(
-            src=current_image["src"],
-            width=150,
-            height=150,
-            border_radius=75,
-            fit=ft.ImageFit.COVER,
-        ),
+        content=current_image,
         animate_opacity=300,
         animate_scale=500,
         animate_rotation=500,
@@ -83,18 +134,12 @@ def main(page: ft.Page):
         time.sleep(0.2)
 
         # Step 2: Swap the image
-        if current_image["src"] == image_sources["chaewon_stare"]:
-            current_image["src"] = image_sources["chaewon_side"]
+        if current_image.src == image_sources["chaewon_stare"]:
+            current_image.src = image_sources["chaewon_side"]
         else:
-            current_image["src"] = image_sources["chaewon_stare"]
+            current_image.src = image_sources["chaewon_stare"]
 
-        toggleable_chaewon.content = ft.Image(
-            src=current_image["src"],
-            width=150,
-            height=150,
-            border_radius=75,
-            fit=ft.ImageFit.COVER,
-        )
+        toggleable_chaewon.content = current_image
         page.update()
 
         # Step 3: Dramatic entrance – scale up, rotate, fade in
@@ -123,15 +168,15 @@ def main(page: ft.Page):
 
     # Toggle between login and register mode
     mode = {"is_login": True}
-    toggle_button = ft.TextButton(text="Don't have an account? Register")
+    toggle_button = ft.TextButton(text=text_register)
 
     def switch_mode(e):
         mode["is_login"] = not mode["is_login"]
         if mode["is_login"]:
-            toggle_button.text = "Don't have an account? Register"
+            toggle_button.text = text_register
             confirm_password_input.visible = False
         else:
-            toggle_button.text = "Already have an account? Login"
+            toggle_button.text = text_login
             confirm_password_input.visible = True
         message.value = ""
         page.update()
@@ -166,7 +211,7 @@ def main(page: ft.Page):
                 message.color = ft.Colors.RED
             else:
                 hashed = bcrypt.hashpw(
-                    password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                    password.encode(ENCODING_FORMAT), bcrypt.gensalt()).decode(ENCODING_FORMAT)
                 collection.insert_one({"username": username, "password": hashed})
                 message.value = "Registration successful! Please log in."
                 message.color = ft.Colors.GREEN
@@ -208,6 +253,31 @@ def main(page: ft.Page):
     )
 
     page.add(ft.Container(content=form, alignment=ft.alignment.center, expand=True))
+
+# Hash password for storing
+def hash_password(password):
+    return bcrypt.hashpw(password.encode(ENCODING_FORMAT), bcrypt.gensalt()).decode(ENCODING_FORMAT)
+
+# Check hashed password
+def verify_password(password, hashed):
+    if isinstance(hashed, str):
+        hashed = hashed.encode(ENCODING_FORMAT)  # only encode if it's a string
+    return bcrypt.checkpw(password.encode(ENCODING_FORMAT), hashed)
+
+# Main Flet App
+def main(page: ft.Page):
+    page.title = "Chaewon's Meet and Greet"
+    # page.window_width = 400
+    # page.window_height = 600
+    page.theme_mode = ft.ThemeMode.DARK
+    page.scroll = "adaptive"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    
+    if not check_mongo_connection(page):
+        return # Stop app setup if MongoDB is unreachable
+
+    main_login_ui(page)
 
 # Run app
 ft.app(target=main)
