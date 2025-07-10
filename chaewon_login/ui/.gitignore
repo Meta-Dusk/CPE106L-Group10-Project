@@ -1,0 +1,16 @@
+# Ignore VSCode settings
+.vscode/
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# SQLite DB (if you don't want to push it)
+*.db
