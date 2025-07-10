@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-MONGODB_CONNECTION_STRING = "localhost:27016" # Adjust if hosted remotely
+MONGODB_CONNECTION_STRING = "localhost:27017" # Adjust if hosted remotely
 
 def connect_to_mongo():
     try:
