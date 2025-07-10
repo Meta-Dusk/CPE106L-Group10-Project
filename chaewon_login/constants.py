@@ -5,6 +5,6 @@ class DBMode(Enum):
     SQLITE = "SQLite"
 
 ENCODING_FORMAT = "utf-8"
-text_label_size = 25
-text_subtitle_size = 18
-input_field_width = 300
+TEXT_LABEL_SIZE = 25
+TEXT_SUBTITLE_SIZE = 18
+INPUT_FIELD_WIDTH = 300

@@ -3,7 +3,7 @@ import flet as ft
 
 from auth.encryption import hash_password, verify_password
 from assets.images import image_sources, default_image
-from constants import DBMode, text_label_size, text_subtitle_size, input_field_width
+from constants import DBMode, TEXT_LABEL_SIZE, TEXT_LABEL_SIZE, INPUT_FIELD_WIDTH
 from db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
 
 def main_login_ui(page: ft.Page):
@@ -12,14 +12,14 @@ def main_login_ui(page: ft.Page):
 
     login_message = ft.Text(
         "Chaewon demands your login credentials.",
-        size=text_label_size,
+        size=TEXT_LABEL_SIZE,
         weight=ft.FontWeight.BOLD,
         text_align=ft.TextAlign.CENTER
     )
     message = ft.Text(value="", color=ft.Colors.RED)
-    username_input = ft.TextField(label="Username", width=input_field_width)
-    password_input = ft.TextField(label="Password", password=True, can_reveal_password=True, width=input_field_width)
-    confirm_password_input = ft.TextField(label="Confirm Password", password=True, can_reveal_password=True, width=input_field_width, visible=False)
+    username_input = ft.TextField(label="Username", width=INPUT_FIELD_WIDTH)
+    password_input = ft.TextField(label="Password", password=True, can_reveal_password=True, width=INPUT_FIELD_WIDTH)
+    confirm_password_input = ft.TextField(label="Confirm Password", password=True, can_reveal_password=True, width=INPUT_FIELD_WIDTH, visible=False)
 
     current_image = default_image()
 
@@ -63,14 +63,15 @@ def main_login_ui(page: ft.Page):
             theme_toggle.icon = ft.Icons.DARK_MODE
         chaewon_toggle(e)
         page.update()
-
-    mode = {"is_login": True}
+        
+    is_login = "is_login"
+    mode = {is_login: True}
     toggle_button = ft.TextButton(text=text_register)
 
     def switch_mode(e):
-        mode["is_login"] = not mode["is_login"]
-        toggle_button.text = text_register if mode["is_login"] else text_login
-        confirm_password_input.visible = not mode["is_login"]
+        mode[is_login] = not mode[is_login]
+        toggle_button.text = text_register if mode[is_login] else text_login
+        confirm_password_input.visible = not mode[is_login]
         message.value = ""
         update_button_text()
         page.update()
@@ -84,10 +85,10 @@ def main_login_ui(page: ft.Page):
         if not username or not password:
             message.value = "Please fill in all fields."
             message.color = ft.Colors.RED
-        elif mode["is_login"]:
+        elif mode[is_login]:
             user = find_user(username)
             if user and verify_password(password, user["password"]):
-                message.value = f"Welcome, {username}! Using {get_current_mode().value}"
+                message.value = f"Welcome, {username}! (Logged in with {get_current_mode().value}.)"
                 message.color = ft.Colors.GREEN
             else:
                 message.value = "Invalid username or password."
@@ -103,16 +104,16 @@ def main_login_ui(page: ft.Page):
             else:
                 hashed = hash_password(password)
                 insert_user(username, hashed)
-                message.value = f"Registration successful! Now using {get_current_mode().value}"
-                message.color = ft.Colors.GREEN
                 switch_mode(None)
+                message.value = f"Registration successful! (Registered in {get_current_mode().value}.)"
+                message.color = ft.Colors.GREEN
 
         page.update()
 
     action_button = ft.ElevatedButton(text="Login", on_click=login_or_register)
 
     def update_button_text():
-        action_button.text = "Login" if mode["is_login"] else "Register"
+        action_button.text = "Login" if mode[is_login] else "Register"
         page.update()
 
     theme_toggle = ft.IconButton(
@@ -126,7 +127,7 @@ def main_login_ui(page: ft.Page):
         init_database()
         
         dialog_content_text = "You are now using " + get_current_mode().value + "."
-        dialog_content = ft.Text(dialog_content_text, text_align=ft.TextAlign.CENTER, size=text_subtitle_size)
+        dialog_content = ft.Text(dialog_content_text, text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE)
         
         if get_current_mode() == DBMode.SQLITE:
             dialog_content.color = ft.Colors.BLUE
@@ -134,7 +135,7 @@ def main_login_ui(page: ft.Page):
             dialog_content.color = ft.Colors.PINK
         
         dialog = ft.AlertDialog(
-            title=ft.Text("Database Switched", text_align=ft.TextAlign.CENTER, size=text_label_size, weight=ft.FontWeight.BOLD),
+            title=ft.Text("Database Switched", text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE, weight=ft.FontWeight.BOLD),
             content=dialog_content,
             alignment=ft.alignment.center,
             on_dismiss=lambda e: page.update(),
