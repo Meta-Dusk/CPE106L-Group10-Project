@@ -2,13 +2,17 @@ import time
 import flet as ft
 
 from auth.encryption import hash_password, verify_password
-from assets.images import image_sources, default_image
+from assets.images import ImageData, default_image
 from constants import DBMode, TEXT_LABEL_SIZE, TEXT_LABEL_SIZE, INPUT_FIELD_WIDTH
 from db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
 
 def main_login_ui(page: ft.Page):
+    page.controls.clear()
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
+    current_mode = get_current_mode().value
+    text_mongo = f"Switch to SQLite (Currently {current_mode})"
+    text_sqlite = f"Switch to MongoDB (Currently {current_mode})"
 
     login_message = ft.Text(
         "Chaewon demands your login credentials.",
@@ -35,12 +39,20 @@ def main_login_ui(page: ft.Page):
     )
 
     def chaewon_toggle(e=None):
+        chaewon_stare = ImageData.CHAEWON_STARE.value
+        chaewon_side = ImageData.CHAEWON_SIDE.value
         toggleable_chaewon.opacity = 0.0
         toggleable_chaewon.scale = 0.7
         page.update()
         time.sleep(0.2)
-
-        current_image.src = image_sources["chaewon_side"] if current_image.src == image_sources["chaewon_stare"] else image_sources["chaewon_stare"]
+        
+        if current_image.src == chaewon_stare.url:
+            current_image.src = chaewon_side.url
+            current_image.tooltip = chaewon_side.description
+        else:
+            current_image.src = chaewon_stare.url
+            current_image.tooltip = chaewon_stare.description
+        
         toggleable_chaewon.content = current_image
         page.update()
 
@@ -88,7 +100,7 @@ def main_login_ui(page: ft.Page):
         elif mode[is_login]:
             user = find_user(username)
             if user and verify_password(password, user["password"]):
-                message.value = f"Welcome, {username}! (Logged in with {get_current_mode().value}.)"
+                message.value = f"Welcome, {username}! (Logged in with {current_mode}.)"
                 message.color = ft.Colors.GREEN
             else:
                 message.value = "Invalid username or password."
@@ -105,7 +117,7 @@ def main_login_ui(page: ft.Page):
                 hashed = hash_password(password)
                 insert_user(username, hashed)
                 switch_mode(None)
-                message.value = f"Registration successful! (Registered in {get_current_mode().value}.)"
+                message.value = f"Registration successful! (Registered in {current_mode}.)"
                 message.color = ft.Colors.GREEN
 
         page.update()
@@ -122,32 +134,57 @@ def main_login_ui(page: ft.Page):
         on_click=toggle_theme
     )
     
+    def reset(e):
+        page.controls.clear()
+        main_login_ui(page)
+        page.update()
+    
     def handle_db_toggle(e):
         toggle_db()
-        init_database()
+        collection = init_database(page)
         
-        dialog_content_text = "You are now using " + get_current_mode().value + "."
-        dialog_content = ft.Text(dialog_content_text, text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE)
+        dialog_content_text = "You are now using " + current_mode + "."
+        dialog_title = "Database Switched"
+        dialog_content_color = ft.Colors.BLUE
         
-        if get_current_mode() == DBMode.SQLITE:
-            dialog_content.color = ft.Colors.BLUE
+        if collection is None:
+            dialog_content_color = ft.Colors.RED
+            dialog_content_text = "Failed to switch databases. Please try again."
+            dialog_title = "Error"
+            toggle_db()
+            collection = init_database()
+        elif get_current_mode() == DBMode.SQLITE:
+            dialog_content_color = ft.Colors.BLUE
+            db_toggle_button.text = text_sqlite
         else:
-            dialog_content.color = ft.Colors.PINK
+            dialog_content_color = ft.Colors.PINK
+            db_toggle_button.text = text_mongo
         
+        dialog_content = ft.Text(
+            dialog_content_text,
+            color=dialog_content_color,
+            text_align=ft.TextAlign.CENTER,
+            size=TEXT_LABEL_SIZE
+        )
+            
         dialog = ft.AlertDialog(
-            title=ft.Text("Database Switched", text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE, weight=ft.FontWeight.BOLD),
+            title=ft.Text(dialog_title, text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE, weight=ft.FontWeight.BOLD),
             content=dialog_content,
             alignment=ft.alignment.center,
-            on_dismiss=lambda e: page.update(),
+            on_dismiss=reset,
             title_padding=ft.padding.all(25),
             adaptive=True,
             icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
-            # icon_padding=ft.padding.all(10),
         )
         page.open(dialog)
         page.update()
 
-    db_toggle_button = ft.TextButton(text="Switch DB", on_click=handle_db_toggle)
+    db_toggle_button = ft.TextButton(
+        icon=ft.Icons.CODE_SHARP,
+        text=text_mongo if current_mode == DBMode.MONGO.value else text_sqlite,
+        tooltip="Switch between available databases",
+        on_click=handle_db_toggle
+    )
 
 
     form = ft.Column(
