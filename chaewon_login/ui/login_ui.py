@@ -3,7 +3,7 @@ import flet as ft
 
 from auth.encryption import hash_password, verify_password
 from assets.images import image_sources, default_image
-from constants import text_label_size, input_field_width, DBMode
+from constants import DBMode, text_label_size, text_subtitle_size, input_field_width
 from db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
 
 def main_login_ui(page: ft.Page):
@@ -124,7 +124,26 @@ def main_login_ui(page: ft.Page):
     def handle_db_toggle(e):
         toggle_db()
         init_database()
-        message.value = f"Switched to {get_current_mode().value}"
+        
+        dialog_content_text = "You are now using " + get_current_mode().value + "."
+        dialog_content = ft.Text(dialog_content_text, text_align=ft.TextAlign.CENTER, size=text_subtitle_size)
+        
+        if get_current_mode() == DBMode.SQLITE:
+            dialog_content.color = ft.Colors.BLUE
+        else:
+            dialog_content.color = ft.Colors.PINK
+        
+        dialog = ft.AlertDialog(
+            title=ft.Text("Database Switched", text_align=ft.TextAlign.CENTER, size=text_label_size, weight=ft.FontWeight.BOLD),
+            content=dialog_content,
+            alignment=ft.alignment.center,
+            on_dismiss=lambda e: page.update(),
+            title_padding=ft.padding.all(25),
+            adaptive=True,
+            icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+            # icon_padding=ft.padding.all(10),
+        )
+        page.open(dialog)
         page.update()
 
     db_toggle_button = ft.TextButton(text="Switch DB", on_click=handle_db_toggle)
