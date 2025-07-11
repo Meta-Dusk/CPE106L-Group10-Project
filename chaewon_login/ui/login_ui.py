@@ -11,8 +11,8 @@ def main_login_ui(page: ft.Page):
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
     current_mode = get_current_mode().value
-    text_mongo = f"Switch to SQLite (Currently {current_mode})"
-    text_sqlite = f"Switch to MongoDB (Currently {current_mode})"
+    text_switch_to_sqlite = f"Switch to SQLite (Currently {current_mode})"
+    text_switch_to_mongo = f"Switch to MongoDB (Currently {current_mode})"
 
     login_message = ft.Text(
         "Chaewon demands your login credentials.",
@@ -155,10 +155,10 @@ def main_login_ui(page: ft.Page):
             collection = init_database()
         elif get_current_mode() == DBMode.SQLITE:
             dialog_content_color = ft.Colors.BLUE
-            db_toggle_button.text = text_sqlite
+            db_toggle_button.text = text_switch_to_mongo
         else:
             dialog_content_color = ft.Colors.PINK
-            db_toggle_button.text = text_mongo
+            db_toggle_button.text = text_switch_to_sqlite
         
         dialog_content = ft.Text(
             dialog_content_text,
@@ -181,7 +181,7 @@ def main_login_ui(page: ft.Page):
 
     db_toggle_button = ft.TextButton(
         icon=ft.Icons.CODE_SHARP,
-        text=text_mongo if current_mode == DBMode.MONGO.value else text_sqlite,
+        text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
         tooltip="Switch between available databases",
         on_click=handle_db_toggle
     )

@@ -34,6 +34,8 @@ def default_image():
         tooltip=ImageData.CHAEWON_STARE.value.description,
     )
 
+""" Run images.py to test the image data and to check the available images. """
+
 def main():
     print("The following are the available images:")
     for image in ImageData:
