@@ -17,7 +17,7 @@ def verify_password(password: str, hashed: str) -> bool:
         hashed = hashed.encode(ENCODING_FORMAT)
     return bcrypt.checkpw(password.encode(ENCODING_FORMAT), hashed)
 
-def main():
+def test():
     password = "test_password"
     hashed = hash_password(password)
     print(f"Original: {password}")
@@ -25,4 +25,4 @@ def main():
     print(f"Verification: {verify_password(password, hashed)}")
     
 if __name__ == "__main__":
-    main()
+    test()

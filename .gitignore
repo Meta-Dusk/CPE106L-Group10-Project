@@ -3,7 +3,6 @@
 
 # Ignore virtual environments
 venv/
-.env/
 
 # Byte-compiled / cache files
 __pycache__/
@@ -14,3 +13,8 @@ __pycache__/
 
 # SQLite DB (if you don't want to push it)
 *.db
+
+# Ignoring sensitive files
+chaewon_login/auth/keys/
+chaewon_login/auth/enc/
+.env

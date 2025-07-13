@@ -1,25 +1,45 @@
 from pymongo import MongoClient
+from cryptography.fernet import Fernet
+from chaewon_login.config import Config
 
-MONGODB_CONNECTION_STRING = "localhost:27017" # Adjust if hosted remotely
+def load_key():
+    print("🔓 Loading encryption key and decrypting MongoDB URI...")
+
+    key = Config.KEY_PATH.read_bytes()
+    fernet = Fernet(key)
+
+    encrypted = Config.ENC_PATH.read_bytes()
+    decrypted_uri = fernet.decrypt(encrypted).decode()
+
+    print("✅ Decrypted MongoDB URI successfully.")
+    return decrypted_uri
 
 def connect_to_mongo():
     try:
-        client = MongoClient(f"mongodb://{MONGODB_CONNECTION_STRING}/", serverSelectionTimeoutMS=2000)
-        client.admin.command("ping")
-        db = client["ProjectATS"]
-        print("Connected to MongoDB successfully.")
-        return db["accounts"]
+        uri = load_key()
+        client = MongoClient(uri, serverSelectionTimeoutMS=2000)
+        client.admin.command("ping")  # Confirm connection
+        db = client[Config.DB_NAME]
+        print("✅ Connected to MongoDB.")
+        return db[Config.COLLECTION_NAME]
     except Exception as e:
-        print("MongoDB connection failed:", e)
+        print("❌ MongoDB connection failed:", e)
         return None
 
-""" Run mongo.py to test database connection to MONGOD_CONNECTION_STRING """
-def main():
+"""
+Run mongo.py to test database connection.
+If in VSCode, you can run it with:
+```Python
+py -m chaewon_login.db.mongo
+```
+"""
+
+def test():
     accounts_collection = connect_to_mongo()
     if accounts_collection is not None:
-        print("Connected to MongoDB and 'accounts' collection is ready.")
+        print(f"📦 Collection '{Config.COLLECTION_NAME}' is ready.")
     else:
-        print("Failed to connect to MongoDB.")
-        
+        print("🚫 Could not connect to MongoDB.")
+
 if __name__ == "__main__":
-    main()
+    test()

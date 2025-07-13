@@ -1,10 +1,10 @@
 import time
 import flet as ft
 
-from auth.encryption import hash_password, verify_password
-from assets.images import ImageData, default_image
-from constants import DBMode, TEXT_LABEL_SIZE, TEXT_LABEL_SIZE, INPUT_FIELD_WIDTH
-from db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
+from chaewon_login.auth.hashing import hash_password, verify_password
+from chaewon_login.assets.images import ImageData, default_image
+from chaewon_login.constants import DBMode, TEXT_LABEL_SIZE, TEXT_LABEL_SIZE, INPUT_FIELD_WIDTH
+from chaewon_login.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()

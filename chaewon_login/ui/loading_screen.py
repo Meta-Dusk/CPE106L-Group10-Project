@@ -24,7 +24,7 @@ def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
     page.update()
 
 
-def main(page: ft.Page):
+def test(page: ft.Page):
     show_loading_screen(page, "Loading application...")
 
     # Simulate some loading time
@@ -40,4 +40,4 @@ def main(page: ft.Page):
     threading.Thread(target=remove_loading).start()
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(target=test)

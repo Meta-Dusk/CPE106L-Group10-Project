@@ -1,9 +1,9 @@
 import flet as ft
-from db.mongo import connect_to_mongo, MONGODB_CONNECTION_STRING
-from ui.login_ui import main_login_ui
-from assets.images import ImageData, default_image
-from constants import TEXT_LABEL_SIZE
-from db.db_manager import init_database, toggle_db
+from chaewon_login.db.mongo import connect_to_mongo
+from chaewon_login.ui.login_ui import main_login_ui
+from chaewon_login.assets.images import ImageData, default_image
+from chaewon_login.constants import TEXT_LABEL_SIZE
+from chaewon_login.db.db_manager import init_database, toggle_db
 
 def check_mongo_connection(page: ft.Page):
     collection = connect_to_mongo()
@@ -16,7 +16,7 @@ def check_mongo_connection(page: ft.Page):
         current_image.tooltip = sad_chaewon.description
 
         warning_title = ft.Text("Failed to connect to MongoDB.", color=ft.Colors.RED, size=TEXT_LABEL_SIZE)
-        warning_desc = ft.Text(f"Please ensure MongoDB is running on {MONGODB_CONNECTION_STRING}.")
+        warning_desc = ft.Text(f"Please ensure the MongoDB cluster is running...")
 
         def retry(e):
             # Show loading while retrying

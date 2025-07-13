@@ -4,7 +4,7 @@ from tkinter import messagebox
 
 # Check for required modules
 def check_required_modules():
-    required_modules = ["flet", "pymongo", "bcrypt"]
+    required_modules = ["flet", "pymongo", "bcrypt", "cryptography"]
     missing = []
     for mod in required_modules:
         try:
