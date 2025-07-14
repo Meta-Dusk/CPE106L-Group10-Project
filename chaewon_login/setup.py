@@ -1,8 +1,9 @@
-from config import Config
+from chaewon_login.config import Config
 from cryptography.fernet import Fernet
 import getpass
 import sys
 import shutil
+from chaewon_login.setup_env import setup_env
 
 def ensure_directories():
     for path in [Config.KEY_PATH, Config.ENC_PATH]:
@@ -38,6 +39,7 @@ def prompt_reset():
     return choice == "y"
 
 def setup():
+    setup_env()
     if Config.KEY_PATH.exists() or Config.ENC_PATH.exists():
         if not prompt_reset():
             print("⚠️ Setup canceled. No changes were made.")

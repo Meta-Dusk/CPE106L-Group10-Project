@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 import os
 import sys
+from chaewon_login.setup import setup
 
 # Ensure current directory is in PYTHONPATH
 env = os.environ.copy()
@@ -14,13 +15,18 @@ print("""
 How would you like to run the app?"
 [1] Native window (default)"
 [2] Web browser
+[3] Setup (run once)
 """)
-choice = input("Enter choice [1/2] or just press [enter]: ").strip()
+choice = input("Enter choice [1,2,3] or just press [enter] for (default): ").strip()
 
 # Decide mode
 mode_args = []
 if choice == "2":
     mode_args = ["--web"]
+elif choice == "3":
+    setup()
+    
+print("✅ Attempting to run Flet app...")
 
 # Run the Flet app
 try:
