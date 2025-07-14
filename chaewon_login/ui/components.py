@@ -2,7 +2,7 @@ import flet as ft
 
 from chaewon_login.ui.styles import *
 from enum import Enum
-from typing import Callable, Any
+from typing import Callable
 
 class InputFieldType(Enum):
     USERNAME = "username"
@@ -13,7 +13,10 @@ class TextType(Enum):
     SUBTITLE = "subtitle"
     DEFAULT = "default"
 
-def default_text(input_type: TextType, input_text: str) -> ft.Text:
+def default_text(
+    input_type: TextType,
+    input_text: str | None = None
+) -> ft.Text:
     if input_type == TextType.TITLE:
         return ft.Text(
             value=input_text,
@@ -53,14 +56,7 @@ def default_input_field(input_type: InputFieldType) -> ft.TextField:
     else:
         raise ValueError(f"Unsupported input type: {input_type}")
 
-def default_container(content=None):
-    return ft.Container(
-        content=content,
-        alignment=ft.alignment.center,
-        expand=True
-    )
-
-def default_column(controls=None):
+def default_column(controls: ft.Control | list[ft.Control] | None = None):  
     return ft.Column(
         controls=controls,
         alignment=ft.MainAxisAlignment.CENTER,
@@ -68,10 +64,20 @@ def default_column(controls=None):
         tight=True
     )
 
+def default_container(content: ft.Control | list[ft.Control] | None = None):
+    if isinstance(content, list):
+        content = default_column(controls=content)
+    
+    return ft.Container(
+        content=content,
+        alignment=ft.alignment.center,
+        expand=True
+    )
+
 def default_alert_dialog(
     title: ft.Text | str | None = None,
     content: ft.Control | list[ft.Control] | None = None,
-    on_dismiss: Callable[[ft.AlertDialog], Any] | None = None
+    on_dismiss: Callable[[ft.AlertDialog], None] | None = None
 ) -> ft.AlertDialog:
     dialog = ft.AlertDialog(
         icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
