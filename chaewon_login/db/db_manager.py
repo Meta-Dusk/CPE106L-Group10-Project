@@ -1,7 +1,11 @@
 from chaewon_login.db.mongo import connect_to_mongo
 from chaewon_login.db.sqlite import connect_to_sqlite, find_user_sqlite, insert_user_sqlite
-from chaewon_login.constants import DBMode
 from chaewon_login.ui.loading_screen import show_loading_screen
+from enum import Enum
+
+class DBMode(Enum):
+    MONGO = "MongoDB"
+    SQLITE = "SQLite"
 
 mode = "mode"
 username = "username"

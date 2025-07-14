@@ -1,28 +1,31 @@
 import flet as ft
 
-"""
-Try to import TEXT_LABEL_SIZE from constants; if it fails, use a default value.
-Run loading_screen.py to test the loading screen UI.
-"""
-try:
-    from constants import TEXT_LABEL_SIZE
-except (ImportError, ModuleNotFoundError, AttributeError):
-    TEXT_LABEL_SIZE = 25  # Fallback value
+from chaewon_login.ui.components import (
+    default_text,
+    TextType,
+    default_column,
+    default_container
+)
 
 def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
-    loading_text = ft.Text(message, size=TEXT_LABEL_SIZE)
+    loading_text = default_text(TextType.TITLE, message)
     loading_spinner = ft.ProgressRing()
 
-    loading_ui = ft.Column(
-        [loading_spinner, loading_text],
-        alignment=ft.MainAxisAlignment.CENTER,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        tight=True,
+    loading_ui = default_column(controls=
+        [
+            loading_spinner,
+            loading_text
+        ]
     )
 
-    page.add(ft.Container(content=loading_ui, alignment=ft.alignment.center, expand=True))
+    page.add(default_container(loading_ui))
     page.update()
 
+"""
+Run loading_screen.py to test the loading screen UI.
+Use the following command to run:
+py -m chaewon_login.ui.loading_screen
+"""
 
 def test(page: ft.Page):
     show_loading_screen(page, "Loading application...")
