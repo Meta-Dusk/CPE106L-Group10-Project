@@ -1,9 +1,16 @@
 import flet as ft
+
 from chaewon_login.db.mongo import connect_to_mongo
 from chaewon_login.ui.login_ui import main_login_ui
 from chaewon_login.assets.images import ImageData, default_image
-from chaewon_login.constants import TEXT_LABEL_SIZE
 from chaewon_login.db.db_manager import init_database, toggle_db
+from chaewon_login.ui.components import (
+    default_text,
+    TextType,
+    default_container,
+    default_column,
+    default_alert_dialog
+)
 
 def check_mongo_connection(page: ft.Page):
     collection = connect_to_mongo()
@@ -15,8 +22,9 @@ def check_mongo_connection(page: ft.Page):
         current_image.src = sad_chaewon.url
         current_image.tooltip = sad_chaewon.description
 
-        warning_title = ft.Text("Failed to connect to MongoDB.", color=ft.Colors.RED, size=TEXT_LABEL_SIZE)
-        warning_desc = ft.Text(f"Please ensure the MongoDB cluster is running...")
+        warning_title = default_text(TextType.TITLE, "Failed to connect to MongoDB.")
+        warning_title.color = ft.Colors.RED
+        warning_desc = default_text(TextType.SUBTITLE, "Please ensure the MongoDB cluster is running...")
 
         def retry(e):
             # Show loading while retrying
@@ -33,21 +41,22 @@ def check_mongo_connection(page: ft.Page):
             if conn:
                 main_login_ui(page)
             else:
-                dialog_content = ft.Text(
-                    "Failed to connect to SQLite.",
-                    color=ft.Colors.RED,
-                    text_align=ft.TextAlign.CENTER,
-                    size=TEXT_LABEL_SIZE
-                )
-                dialog = ft.AlertDialog(
-                    title=ft.Text("Error", text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE, weight=ft.FontWeight.BOLD),
+                dialog_content = default_text(TextType.TITLE, "Failed to connect to SQLite.")
+                dialog_content.color = ft.Colors.RED
+                dialog = default_alert_dialog(
+                    title=default_text(TextType.TITLE, "Error"),
                     content=dialog_content,
-                    alignment=ft.alignment.center,
-                    on_dismiss=lambda e: page.update(),
-                    title_padding=ft.padding.all(25),
-                    adaptive=True,
-                    icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+                    on_dismiss=lambda e: page.update()
                 )
+                # dialog = ft.AlertDialog(
+                #     title=default_text(TextType.TITLE, "Error"),
+                #     content=dialog_content,
+                #     alignment=ft.alignment.center,
+                #     on_dismiss=lambda e: page.update(),
+                #     title_padding=ft.padding.all(25),
+                #     adaptive=True,
+                #     icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+                # )
                 dialog.open = True
                 page.update()
 
@@ -55,25 +64,18 @@ def check_mongo_connection(page: ft.Page):
         retry_button = ft.ElevatedButton(text="Retry Connection", on_click=retry)
         switch_button = ft.ElevatedButton(text="Switch to SQLite", on_click=switch_db)
 
-        retry_ui = ft.Column(
+        retry_ui = default_column(controls=
             [
                 current_image,
                 warning_title,
                 warning_desc,
                 retry_button,
                 switch_button
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            tight=True,
+            ]
         )
 
         page.add(
-            ft.Container(
-                content=retry_ui,
-                alignment=ft.alignment.center,
-                expand=True,
-            )
+            default_container(retry_ui)
         )
         page.update()
         return None

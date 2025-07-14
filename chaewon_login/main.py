@@ -1,6 +1,7 @@
 import sys
 import tkinter as tk
 from tkinter import messagebox
+from chaewon_login.ui.styles import apply_default_page_config
 
 # Check for required modules
 def check_required_modules():
@@ -39,10 +40,7 @@ from ui.retry_ui import check_mongo_connection
 
 def main(page: ft.Page):
     page.title = "Chaewon's Meet and Greet"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.scroll = "adaptive"
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    apply_default_page_config(page)
 
     collection = init_database(page)
     if collection is not None:
@@ -50,4 +48,4 @@ def main(page: ft.Page):
     else:
         check_mongo_connection(page)
 
-ft.app(target=main)
+ft.app(target=main, assets_dir="assets")

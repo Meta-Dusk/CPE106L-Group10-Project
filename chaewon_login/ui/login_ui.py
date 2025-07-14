@@ -3,8 +3,23 @@ import flet as ft
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
-from chaewon_login.constants import DBMode, TEXT_LABEL_SIZE, TEXT_LABEL_SIZE, INPUT_FIELD_WIDTH
-from chaewon_login.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user
+from chaewon_login.db.db_manager import (
+    init_database,
+    get_current_mode,
+    toggle_db,
+    find_user,
+    insert_user,
+    DBMode
+)
+from chaewon_login.ui.components import (
+    default_input_field,
+    InputFieldType,
+    default_text,
+    TextType,
+    default_column,
+    default_container,
+    default_alert_dialog
+)
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()
@@ -14,16 +29,13 @@ def main_login_ui(page: ft.Page):
     text_switch_to_sqlite = f"Switch to SQLite (Currently {current_mode})"
     text_switch_to_mongo = f"Switch to MongoDB (Currently {current_mode})"
 
-    login_message = ft.Text(
-        "Chaewon demands your login credentials.",
-        size=TEXT_LABEL_SIZE,
-        weight=ft.FontWeight.BOLD,
-        text_align=ft.TextAlign.CENTER
-    )
+    login_message = default_text(TextType.TITLE, "Chaewon demands your login credentials.")
     message = ft.Text(value="", color=ft.Colors.RED)
-    username_input = ft.TextField(label="Username", width=INPUT_FIELD_WIDTH)
-    password_input = ft.TextField(label="Password", password=True, can_reveal_password=True, width=INPUT_FIELD_WIDTH)
-    confirm_password_input = ft.TextField(label="Confirm Password", password=True, can_reveal_password=True, width=INPUT_FIELD_WIDTH, visible=False)
+    username_input = default_input_field(InputFieldType.USERNAME)
+    password_input = default_input_field(InputFieldType.PASSWORD)
+    confirm_password_input = default_input_field(InputFieldType.PASSWORD)
+    confirm_password_input.label = "Confirm Password"
+    confirm_password_input.visible = False
 
     current_image = default_image()
 
@@ -140,17 +152,15 @@ def main_login_ui(page: ft.Page):
         page.update()
     
     def handle_db_toggle(e):
-        toggle_db()
+        dialog_content_text = f"You are now using {toggle_db().value}."
         collection = init_database(page)
-        
-        dialog_content_text = "You are now using " + current_mode + "."
-        dialog_title = "Database Switched"
+        dialog_title_text = "Database Switched"
         dialog_content_color = ft.Colors.BLUE
         
         if collection is None:
             dialog_content_color = ft.Colors.RED
             dialog_content_text = "Failed to switch databases. Please try again."
-            dialog_title = "Error"
+            dialog_title_text = "Error"
             toggle_db()
             collection = init_database()
         elif get_current_mode() == DBMode.SQLITE:
@@ -159,23 +169,25 @@ def main_login_ui(page: ft.Page):
         else:
             dialog_content_color = ft.Colors.PINK
             db_toggle_button.text = text_switch_to_sqlite
-        
-        dialog_content = ft.Text(
-            dialog_content_text,
-            color=dialog_content_color,
-            text_align=ft.TextAlign.CENTER,
-            size=TEXT_LABEL_SIZE
-        )
             
-        dialog = ft.AlertDialog(
-            title=ft.Text(dialog_title, text_align=ft.TextAlign.CENTER, size=TEXT_LABEL_SIZE, weight=ft.FontWeight.BOLD),
+        dialog_content = default_text(TextType.TITLE, dialog_content_text)
+        dialog_content.color = dialog_content_color
+        
+        dialog_title = default_text(TextType.TITLE, dialog_title_text)
+        dialog = default_alert_dialog(
+            title=dialog_title,
             content=dialog_content,
-            alignment=ft.alignment.center,
-            on_dismiss=reset,
-            title_padding=ft.padding.all(25),
-            adaptive=True,
-            icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+            on_dismiss=reset
         )
+        # dialog = ft.AlertDialog(
+        #     title=dialog_title,
+        #     content=dialog_content,
+        #     alignment=ft.alignment.center,
+        #     on_dismiss=reset,
+        #     title_padding=ft.padding.all(25),
+        #     adaptive=True,
+        #     icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+        # )
         page.open(dialog)
         page.update()
 
@@ -186,8 +198,7 @@ def main_login_ui(page: ft.Page):
         on_click=handle_db_toggle
     )
 
-
-    form = ft.Column(
+    form = default_column(controls=
         [
             theme_toggle,
             db_toggle_button,
@@ -199,10 +210,7 @@ def main_login_ui(page: ft.Page):
             action_button,
             toggle_button,
             message,
-        ],
-        alignment=ft.MainAxisAlignment.CENTER,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        tight=True,
+        ]
     )
 
-    page.add(ft.Container(content=form, alignment=ft.alignment.center, expand=True))
+    page.add(default_container(form))
