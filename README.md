@@ -29,3 +29,11 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 **Tkinter and/or ttkbootstrap**: For testing GUIs for desktop application version of the project (Only if Flet will not be used).
 
 **Render: Cloud Application Platorm**: For when the project is ready to be deployed.
+
+### Initial Setup (Dev)
+
+1. Copy `.env.sample` to `.env`:
+
+```bash
+cp .env.sample .env
+```

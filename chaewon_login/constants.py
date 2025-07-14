@@ -1,0 +1,10 @@
+from enum import Enum
+
+class DBMode(Enum):
+    MONGO = "MongoDB"
+    SQLITE = "SQLite"
+
+ENCODING_FORMAT = "utf-8"
+TEXT_LABEL_SIZE = 25
+TEXT_SUBTITLE_SIZE = 18
+INPUT_FIELD_WIDTH = 300
