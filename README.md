@@ -30,10 +30,8 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 
 **Render: Cloud Application Platorm**: For when the project is ready to be deployed.
 
-### Initial Setup (Dev)
+### Setup
 
-1. Copy `.env.sample` to `.env`:
-
-```bash
-cp .env.sample .env
-```
+1. Run `launch.py`.
+2. Enter MongoDB atlas connection string (admin only).
+3. Choose startup mode (1,2,3); select 3 for first-time startup.
