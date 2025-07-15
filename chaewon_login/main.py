@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 
 from tkinter import messagebox
-from chaewon_login.ui.styles import apply_default_page_config
+
 
 # Check for required modules
 def check_required_modules():
@@ -37,15 +37,16 @@ if missing:
 # Only import your actual app logic if no missing modules
 import flet as ft
 
-from chaewon_login.db.db_manager import init_database
-from chaewon_login.ui.login_ui import main_login_ui
-from chaewon_login.ui.retry_ui import check_mongo_connection
-from chaewon_login.ui.components import (
-    default_text,
-    TextType,
-    default_container,
-    PageRoute
+from chaewon_login.ui.styles import apply_default_page_config
+from chaewon_login.ui.route_handling import (
+    ROUTE_HANDLERS,
+    handle_not_found,
+    match_dynamic_route
 )
+from chaewon_login.ui.route_data import PageRoute
+from chaewon_login.ui.transitions import fade_in
+from chaewon_login.auth.user import is_authenticated
+
 
 def main(page: ft.Page):
     page.title = "Chaewon's Meet and Greet"
@@ -54,34 +55,24 @@ def main(page: ft.Page):
     def route_change(e: ft.RouteChangeEvent):
         page.controls.clear()
 
-        if page.route == PageRoute.LOADING.value:
-            # import threading
-            # def check_connection():
-            #     collection = init_database(page)
-            #     if collection is not None:
-            #         page.go("/login")
-            #     else:
-            #         page.go("/retry")
-
-            # threading.Thread(target=check_connection).start()
-            collection = init_database(page)
-            if collection is not None:
+        route = ROUTE_HANDLERS.get(page.route)
+        if route:
+            if route.auth_required and not is_authenticated(page):
                 page.go(PageRoute.LOGIN.value)
-            else:
-                page.go(PageRoute.RETRY.value)
-
-        elif page.route == PageRoute.LOGIN.value:
-            main_login_ui(page)
-
-        elif page.route == PageRoute.RETRY.value:
-            check_mongo_connection(page)
-
+                return
+            route.handler(page, e)
         else:
-            error_msg = default_text(TextType.TITLE, "404 - Page not found")
-            error_msg.color = ft.Colors.RED
-            page.add(default_container(error_msg))
+            dynamic, params = match_dynamic_route(page.route)
+            if dynamic:
+                if dynamic["auth_required"] and not is_authenticated(page):
+                    page.go(PageRoute.LOGIN.value)
+                    return
+                dynamic["handler"](page, e, **params)
+            else:
+                handle_not_found(page, e)
 
-        page.update()
+        fade_in(page)
+
 
     page.on_route_change = route_change
     page.go(page.route or PageRoute.LOADING.value)

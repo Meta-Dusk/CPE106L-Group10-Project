@@ -11,15 +11,15 @@ from chaewon_login.db.db_manager import (
     insert_user,
     DBMode
 )
-from chaewon_login.ui.components import (
-    default_input_field,
-    InputFieldType,
+from chaewon_login.ui.components.containers import default_column, default_container
+from chaewon_login.ui.components.dialogs import default_alert_dialog
+from chaewon_login.ui.components.text import (
     default_text,
     TextType,
-    default_column,
-    default_container,
-    default_alert_dialog
+    default_input_field,
+    InputFieldType
 )
+from chaewon_login.ui.route_data import PageRoute
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()
@@ -114,6 +114,9 @@ def main_login_ui(page: ft.Page):
             if user and verify_password(password, user["password"]):
                 message.value = f"Welcome, {username}! (Logged in with {current_mode}.)"
                 message.color = ft.Colors.GREEN
+                page.session.set("user_authenticated", True)
+                page.session.set("user_id", username)
+                page.go(PageRoute.DASHBOARD.value)
             else:
                 message.value = "Invalid username or password."
                 message.color = ft.Colors.RED

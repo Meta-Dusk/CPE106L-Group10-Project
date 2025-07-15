@@ -1,20 +1,14 @@
 import flet as ft
-from enum import Enum
+
 
 DEFAULT_FONT_FAMILY = "Arial"
 DEFAULT_INPUT_FIELD_WIDTH = 300
 
-class TKINTER(Enum):
-    DEFAULT_BG_COLOR = "#1e1e1e"
-    DEFAULT_FG_COLOR = "#ffffff"
-    DEFAULT_ACCENT_COLOR = "#4CAF50"
-    DEFAULT_CANCEL_COLOR = "#f44336"
-    DEFAULT_RADIO_BG = "#2c2c2c"
-
 default_text_style = ft.TextStyle(
-    font_family=DEFAULT_FONT_FAMILY,
     size=15,
-    weight=ft.FontWeight.NORMAL
+    weight=ft.FontWeight.BOLD,
+    color=ft.Colors.PRIMARY,
+    font_family="Roboto"
 )
 
 default_title_style = ft.TextStyle(
@@ -31,12 +25,16 @@ default_subtitle_style = ft.TextStyle(
 
 def apply_default_page_config(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
+    page.theme = ft.Theme(
+        color_scheme_seed=ft.Colors.INDIGO,
+        font_family="Roboto",
+    )
     page.scroll = "adaptive"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-def test():
-    print(TKINTER.DEFAULT_BG_COLOR.value)
-    
-if __name__ == "__main__":
-    test()
+default_action_button_style = ft.ButtonStyle(
+    overlay_color={"hovered": ft.Colors.with_opacity(0.1, ft.Colors.ON_SURFACE)},
+    shape=ft.RoundedRectangleBorder(radius=12),
+    elevation={"pressed": 1, "default": 3}
+)

@@ -1,11 +1,8 @@
 import flet as ft
 
-from chaewon_login.ui.components import (
-    default_text,
-    TextType,
-    default_column,
-    default_container
-)
+from chaewon_login.ui.components.containers import default_column, default_container
+from chaewon_login.ui.components.text import default_text, TextType
+
 
 def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
     loading_text = default_text(TextType.TITLE, message)
