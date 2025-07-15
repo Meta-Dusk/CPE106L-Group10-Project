@@ -19,7 +19,7 @@ def check_mongo_connection(page: ft.Page):
         page.controls.clear()
         current_image = default_image()
         sad_chaewon = ImageData.CHAEWON_SAD.value
-        current_image.src = sad_chaewon.url
+        current_image.src = sad_chaewon.path
         current_image.tooltip = sad_chaewon.description
 
         warning_title = default_text(TextType.TITLE, "Failed to connect to MongoDB.")
