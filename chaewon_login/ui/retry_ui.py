@@ -30,16 +30,16 @@ def check_mongo_connection(page: ft.Page):
             # Show loading while retrying
             new_collection = init_database(page)
             if new_collection is not None:
-                main_login_ui(page, new_collection)
+                page.go("/login")
             else:
-                check_mongo_connection(page)  # show again if still fails
+                page.go("/retry")  # show again if still fails
 
         def switch_db(e):
             toggle_db()
             conn = init_database(page)
 
             if conn:
-                main_login_ui(page)
+                page.go("/login")
             else:
                 dialog_content = default_text(TextType.TITLE, "Failed to connect to SQLite.")
                 dialog_content.color = ft.Colors.RED
@@ -48,15 +48,6 @@ def check_mongo_connection(page: ft.Page):
                     content=dialog_content,
                     on_dismiss=lambda e: page.update()
                 )
-                # dialog = ft.AlertDialog(
-                #     title=default_text(TextType.TITLE, "Error"),
-                #     content=dialog_content,
-                #     alignment=ft.alignment.center,
-                #     on_dismiss=lambda e: page.update(),
-                #     title_padding=ft.padding.all(25),
-                #     adaptive=True,
-                #     icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
-                # )
                 dialog.open = True
                 page.update()
 

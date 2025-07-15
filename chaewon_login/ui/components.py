@@ -9,6 +9,11 @@ from pathlib import Path
 
 ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "chae.ico"
 
+class PageRoute(Enum):
+    LOADING = "/"
+    LOGIN = "/login"
+    RETRY = "/retry"
+
 class InputFieldType(Enum):
     USERNAME = "username"
     PASSWORD = "password"
@@ -61,18 +66,25 @@ def default_input_field(input_type: InputFieldType) -> ft.TextField:
     else:
         raise ValueError(f"Unsupported input type: {input_type}")
 
-def default_column(controls: ft.Control | list[ft.Control] | None = None):  
+def default_column(controls: ft.Control | list[ft.Control] | None = None) -> ft.Column:
+    normalized = (
+        [controls] if isinstance(controls, ft.Control)
+        else controls if isinstance(controls, list)
+        else []
+    )
     return ft.Column(
-        controls=controls,
+        controls=normalized,
         alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         tight=True
     )
 
-def default_container(content: ft.Control | list[ft.Control] | None = None):
+def default_container(content: ft.Control | list[ft.Control] | None = None) -> ft.Container:
     if isinstance(content, list):
         content = default_column(controls=content)
-    
+    elif content is None:
+        content = ft.Container()  # placeholder to avoid None content error
+
     return ft.Container(
         content=content,
         alignment=ft.alignment.center,
