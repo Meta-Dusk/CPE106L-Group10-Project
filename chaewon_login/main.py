@@ -48,4 +48,4 @@ def main(page: ft.Page):
     else:
         check_mongo_connection(page)
 
-ft.app(target=main, assets_dir="assets")
+ft.app(target=main, assets_dir="chaewon_login/assets")

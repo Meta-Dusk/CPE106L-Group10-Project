@@ -1,8 +1,13 @@
 import flet as ft
+import tkinter as tk
+import re
 
 from chaewon_login.ui.styles import *
 from enum import Enum
 from typing import Callable
+from pathlib import Path
+
+ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "chae.ico"
 
 class InputFieldType(Enum):
     USERNAME = "username"
@@ -23,13 +28,13 @@ def default_text(
             style=default_title_style,
             text_align=ft.TextAlign.CENTER
         )
-    elif input_text == TextType.SUBTITLE:
+    elif input_type == TextType.SUBTITLE:
         return ft.Text(
             value=input_text,
             style=default_subtitle_style,
             text_align=ft.TextAlign.CENTER
         )
-    elif input_text == TextType.DEFAULT:
+    elif input_type == TextType.DEFAULT:
         return ft.Text(
             value=input_text,
             style=default_text_style,
@@ -97,7 +102,38 @@ def default_alert_dialog(
         on_dismiss=on_dismiss
     )
     return dialog
+
+def is_valid_hex_color(code: str) -> bool:
+    return isinstance(code, str) and re.fullmatch(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})", code) is not None
+
+def default_root_window(
+    title: str | None = None,
+    width: int = 400,
+    height: int = 300,
+    resizable: bool = False,
+    bg_color: str = TKINTER.DEFAULT_BG_COLOR.value
+) -> tk.Tk:
+    if not is_valid_hex_color(bg_color):
+        raise ValueError(f"Invalid hex color code: '{bg_color}'")
     
+    window = tk.Tk()
+    window.title(title or "Window")
+    window.config(bg=bg_color)
+    
+    if ICON_PATH.exists():
+        window.iconbitmap(str(ICON_PATH))
+    else:
+        print("⚠️ Icon not found:", ICON_PATH)
+    
+    # Center and size
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = int((screen_width - width) / 2)
+    y = int((screen_height - height) / 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
+    window.resizable(resizable, resizable)
+    
+    return window
 
 def test(page: ft.Page):
     page.title = "Test GUI"

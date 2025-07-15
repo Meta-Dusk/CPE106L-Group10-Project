@@ -58,11 +58,11 @@ def main_login_ui(page: ft.Page):
         page.update()
         time.sleep(0.2)
         
-        if current_image.src == chaewon_stare.url:
-            current_image.src = chaewon_side.url
+        if current_image.src == chaewon_stare.path:
+            current_image.src = chaewon_side.path
             current_image.tooltip = chaewon_side.description
         else:
-            current_image.src = chaewon_stare.url
+            current_image.src = chaewon_stare.path
             current_image.tooltip = chaewon_stare.description
         
         toggleable_chaewon.content = current_image
