@@ -7,7 +7,7 @@ from typing import Callable
 from chaewon_login.ui.components.text import default_input_field, InputFieldType
 
 
-ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "chae.ico"
+# ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "chae.ico"
 
 def default_column(controls: ft.Control | list[ft.Control] | None = None) -> ft.Column:
     normalized = (
