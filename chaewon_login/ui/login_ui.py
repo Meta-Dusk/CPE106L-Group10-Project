@@ -182,15 +182,6 @@ def main_login_ui(page: ft.Page):
             content=dialog_content,
             on_dismiss=reset
         )
-        # dialog = ft.AlertDialog(
-        #     title=dialog_title,
-        #     content=dialog_content,
-        #     alignment=ft.alignment.center,
-        #     on_dismiss=reset,
-        #     title_padding=ft.padding.all(25),
-        #     adaptive=True,
-        #     icon=ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
-        # )
         page.open(dialog)
         page.update()
 
