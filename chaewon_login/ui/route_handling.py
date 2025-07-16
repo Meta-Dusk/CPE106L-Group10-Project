@@ -4,13 +4,26 @@ import flet as ft
 from chaewon_login.db.db_manager import init_database
 from chaewon_login.ui.login_ui import main_login_ui
 from chaewon_login.ui.retry_ui import check_mongo_connection
-from chaewon_login.ui.components.buttons import profile_button
+from chaewon_login.ui.components.buttons import profile_button, logout_button
 from chaewon_login.ui.components.text import default_text, TextType
 from chaewon_login.db.mongo import connect_to_mongo
-from chaewon_login.auth.user import is_authenticated
-from chaewon_login.ui.components.dialogs import logout_button
+from chaewon_login.auth.user import is_authenticated, yes_clicked, no_clicked
 from chaewon_login.ui.route_data import RouteHandler, PageRoute
+from chaewon_login.ui.components.dialogs import confirm_logout_dialog
 
+
+def preset_logout_button(
+    page: ft.Page,
+    page_destination: str
+) -> ft.ElevatedButton:
+    def on_click(e):
+        dialog = confirm_logout_dialog(
+            page=page,
+            yes_clicked=lambda e: yes_clicked(page, dialog, page_destination),
+            no_clicked=lambda e: no_clicked(page, dialog)
+        )
+
+    return logout_button(on_click=on_click)
 
 # Shared page renderer
 def render_page(page: ft.Page, content: ft.Control | list[ft.Control]):
@@ -54,7 +67,7 @@ def handle_not_found(page: ft.Page, _):
     render_page(page, error_msg)
 
 def handle_dashboard(page: ft.Page, _):
-    logout_btn = logout_button(page)
+    logout_btn = preset_logout_button(page, PageRoute.LOGIN.value)
     profile_btn = profile_button(page)
     msg = default_text(TextType.TITLE, "This is the dashboard 😔🤚")
     render_page(page, [msg, profile_btn, logout_btn])
@@ -70,7 +83,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         title = default_text(TextType.TITLE, "User not found 😢")
         subtitle = default_text(TextType.SUBTITLE, f"User ID: {user_id}")
 
-    logout_btn = logout_button(page)
+    logout_btn = preset_logout_button(page, PageRoute.LOGIN.value)
     render_page(page, [title, subtitle, logout_btn])
 
 DYNAMIC_ROUTE_HANDLERS = [

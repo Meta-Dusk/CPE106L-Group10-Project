@@ -11,17 +11,11 @@ from chaewon_login.ui.components.buttons import (
 
 DEFAULT_TITLE_PADDING = 25
 
-def confirm_logout_dialog(page: ft.Page) -> ft.AlertDialog:
-    def yes_clicked(e):
-        page.session.clear()
-        page.close(dialog)
-        page.go(PageRoute.LOGIN.value)
-        page.update()
-
-    def no_clicked(e):
-        page.close(dialog)
-        page.update()
-
+def confirm_logout_dialog(
+    page: ft.Page,
+    yes_clicked: Callable[[ft.ControlEvent], None],
+    no_clicked: Callable[[ft.ControlEvent], None]
+) -> ft.AlertDialog:
     dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("Confirm Logout"),
@@ -43,16 +37,7 @@ def confirm_logout_dialog(page: ft.Page) -> ft.AlertDialog:
     page.open(dialog)
     page.update()
     return dialog
-    
-def logout_button(page: ft.Page):
-    return ft.ElevatedButton(
-        text="Log Out",
-        icon=ft.Icons.LOGOUT,
-        on_click=lambda e: page.open(confirm_logout_dialog(page)),
-        bgcolor=ft.Colors.RED_400,
-        color=ft.Colors.WHITE
-    )
-    
+
     
 def default_notif_dialog(
     icon: ft.Icon | None = ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),

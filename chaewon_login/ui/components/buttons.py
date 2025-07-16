@@ -103,3 +103,13 @@ def profile_button(page: ft.Page):
         on_click=open_profile
     )
     
+def logout_button(
+    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Logout button pressed! {f.text}")
+) -> ft.ElevatedButton:
+    return ft.ElevatedButton(
+        text="Log Out",
+        icon=ft.Icons.LOGOUT,
+        on_click=on_click,
+        bgcolor=ft.Colors.RED_400,
+        color=ft.Colors.WHITE
+    )

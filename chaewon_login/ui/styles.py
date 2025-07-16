@@ -32,9 +32,23 @@ def apply_default_page_config(page: ft.Page):
     page.scroll = "adaptive"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.window.center()
+
+def apply_launcher_page_config(page: ft.Page):
+    page.title = "Chaewon App Launcher"
+    page.window.width = 320
+    page.window.height = 460
+    apply_default_page_config(page)
+    page.window.to_front()
+    page.window.resizable = False
+    page.window.maximizable = False
+    page.window.minimizable = False
+    page.decoration = ft.BoxDecoration(
+        border=ft.border.all(5, ft.Colors.INDIGO_900),
+    )
 
 default_action_button_style = ft.ButtonStyle(
-    overlay_color={"hovered": ft.Colors.with_opacity(0.1, ft.Colors.ON_SURFACE)},
+    overlay_color={"hovered": ft.Colors.with_opacity(0.5, ft.Colors.ON_SURFACE)},
     shape=ft.RoundedRectangleBorder(radius=12),
     elevation={"pressed": 1, "default": 3}
 )

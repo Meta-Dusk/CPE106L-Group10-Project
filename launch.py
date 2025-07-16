@@ -5,8 +5,8 @@ from pathlib import Path
 import flet as ft
 
 from chaewon_login.setup_env import setup_env
-from chaewon_login.ui.styles import apply_default_page_config
-from chaewon_login.ui.components.containers import (default_column, default_row)
+from chaewon_login.ui.styles import apply_default_page_config, apply_launcher_page_config
+from chaewon_login.ui.components.containers import default_row
 from chaewon_login.ui.components.buttons import (
     launch_button,
     cancel_button,
@@ -41,8 +41,7 @@ def launch_main_script(mode: str, page: ft.Page):
 
 
 def main(page: ft.Page):
-    page.title = "Chaewon App Launcher"
-    apply_default_page_config(page)
+    apply_launcher_page_config(page)
 
     selected_mode = ft.Ref[ft.RadioGroup]()
 
@@ -69,24 +68,22 @@ def main(page: ft.Page):
             launch_btn,
             cancel_btn
         ],
-        alignment=ft.MainAxisAlignment.START,
-        vertical_alignment=ft.CrossAxisAlignment.START
+        alignment=ft.MainAxisAlignment.CENTER,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER
     )
 
-    page.add(
-        # default_column([label, launch_modes, buttons])
-        ft.Column(
-            controls=([
-                label,
-                ft.Divider(),
-                launch_modes,
-                buttons
-            ]),
-            spacing=50,
-            alignment=ft.MainAxisAlignment.START,
-            horizontal_alignment=ft.CrossAxisAlignment.START
-        )
+    form = ft.Column(
+        controls=([
+            label,
+            ft.Divider(),
+            launch_modes,
+            buttons
+        ]),
+        spacing=50,
+        alignment=ft.MainAxisAlignment.START,
+        horizontal_alignment=ft.CrossAxisAlignment.START
     )
+    page.add(form)
 
 
 if __name__ == "__main__":

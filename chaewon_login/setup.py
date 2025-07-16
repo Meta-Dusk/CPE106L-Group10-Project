@@ -126,7 +126,7 @@ def main(page: ft.Page):
         bg_color=ft.Colors.GREEN
     )
 
-    cancel_btn = cancel_button(on_click=lambda e: page.window_close())
+    cancel_btn = cancel_button(on_click=lambda e: page.window.close())
 
     button_row = default_row([
         save_btn,
