@@ -1,5 +1,6 @@
 import time
 import flet as ft
+import threading
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
@@ -12,7 +13,7 @@ from chaewon_login.db.db_manager import (
     DBMode
 )
 from chaewon_login.ui.components.containers import default_column, default_container
-from chaewon_login.ui.components.dialogs import default_alert_dialog
+from chaewon_login.ui.components.dialogs import default_notif_dialog
 from chaewon_login.ui.components.text import (
     default_text,
     TextType,
@@ -20,9 +21,11 @@ from chaewon_login.ui.components.text import (
     InputFieldType
 )
 from chaewon_login.ui.route_data import PageRoute
+from chaewon_login.ui.loading_screen import show_loading_screen
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()
+    page.scroll = ft.ScrollMode.AUTO
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
     current_mode = get_current_mode().value
@@ -30,6 +33,7 @@ def main_login_ui(page: ft.Page):
     text_switch_to_mongo = f"Switch to MongoDB (Currently {current_mode})"
 
     login_message = default_text(TextType.TITLE, "Chaewon demands your login credentials.")
+    login_message.color = ft.Colors.PRIMARY
     message = ft.Text(value="", color=ft.Colors.RED)
     username_input = default_input_field(InputFieldType.USERNAME)
     password_input = default_input_field(InputFieldType.PASSWORD)
@@ -44,7 +48,6 @@ def main_login_ui(page: ft.Page):
         animate_opacity=300,
         animate_scale=500,
         animate_rotation=500,
-        scale=0.8,
         opacity=1.0,
         rotate=0.0,
         alignment=ft.alignment.center,
@@ -54,7 +57,7 @@ def main_login_ui(page: ft.Page):
         chaewon_stare = ImageData.CHAEWON_STARE.value
         chaewon_side = ImageData.CHAEWON_SIDE.value
         toggleable_chaewon.opacity = 0.0
-        toggleable_chaewon.scale = 0.7
+        toggleable_chaewon.scale = 0.8
         page.update()
         time.sleep(0.2)
         
@@ -155,35 +158,53 @@ def main_login_ui(page: ft.Page):
         page.update()
     
     def handle_db_toggle(e):
-        dialog_content_text = f"You are now using {toggle_db().value}."
-        collection = init_database(page)
-        dialog_title_text = "Database Switched"
-        dialog_content_color = ft.Colors.BLUE
-        
-        if collection is None:
-            dialog_content_color = ft.Colors.RED
-            dialog_content_text = "Failed to switch databases. Please try again."
-            dialog_title_text = "Error"
-            toggle_db()
-            collection = init_database()
-        elif get_current_mode() == DBMode.SQLITE:
-            dialog_content_color = ft.Colors.BLUE
-            db_toggle_button.text = text_switch_to_mongo
-        else:
-            dialog_content_color = ft.Colors.PINK
-            db_toggle_button.text = text_switch_to_sqlite
-            
-        dialog_content = default_text(TextType.TITLE, dialog_content_text)
-        dialog_content.color = dialog_content_color
-        
-        dialog_title = default_text(TextType.TITLE, dialog_title_text)
-        dialog = default_alert_dialog(
-            title=dialog_title,
-            content=dialog_content,
-            on_dismiss=reset
-        )
-        page.open(dialog)
-        page.update()
+        # Show the loading screen right away
+        show_loading_screen(page, f"Switching to {toggle_db().value}...")
+
+        def toggle_and_notify():
+            # Attempt to initialize database
+            conn = init_database()
+
+            # Determine result message
+            if conn is None:
+                dialog_content_color = ft.Colors.ERROR
+                dialog_content_text = "Failed to switch databases. Please try again."
+                dialog_title_text = "Error"
+                toggle_db()  # Revert back
+                init_database()
+            else:
+                current_mode = get_current_mode()
+                if current_mode == DBMode.SQLITE:
+                    dialog_content_color = ft.Colors.BLUE
+                    dialog_content_text = f"You are now using {current_mode.value}."
+                    dialog_title_text = "Database Switched"
+                    db_toggle_button.text = text_switch_to_mongo
+                else:
+                    dialog_content_color = ft.Colors.PINK
+                    dialog_content_text = f"You are now using {current_mode.value}."
+                    dialog_title_text = "Database Switched"
+                    db_toggle_button.text = text_switch_to_sqlite
+
+            # Build dialog content
+            dialog_content = default_text(TextType.TITLE, dialog_content_text)
+            dialog_content.color = dialog_content_color
+            dialog_title = default_text(TextType.TITLE, dialog_title_text)
+
+            dialog = default_notif_dialog(
+                title=dialog_title,
+                content=dialog_content,
+                on_dismiss=reset
+            )
+
+            # Return to main thread to update UI
+            page.controls.clear()
+            page.add(default_container(form))
+            page.open(dialog)
+            page.update()
+
+        # Run DB switching logic in a background thread
+        threading.Thread(target=toggle_and_notify).start()
+
 
     db_toggle_button = ft.TextButton(
         icon=ft.Icons.CODE_SHARP,
@@ -194,10 +215,10 @@ def main_login_ui(page: ft.Page):
 
     form = default_column(controls=
         [
-            theme_toggle,
-            db_toggle_button,
+            ft.Row([theme_toggle, db_toggle_button], alignment=ft.MainAxisAlignment.END),
             toggleable_chaewon,
             login_message,
+            ft.Divider(),
             username_input,
             password_input,
             confirm_password_input,

@@ -22,19 +22,22 @@ def default_text(
         return ft.Text(
             value=input_text,
             style=default_title_style,
-            text_align=ft.TextAlign.CENTER
+            text_align=ft.TextAlign.CENTER,
+            color=ft.Colors.PRIMARY,
         )
     elif input_type == TextType.SUBTITLE:
         return ft.Text(
             value=input_text,
             style=default_subtitle_style,
-            text_align=ft.TextAlign.CENTER
+            text_align=ft.TextAlign.CENTER,
+            color=ft.Colors.ON_PRIMARY,
         )
     elif input_type == TextType.DEFAULT:
         return ft.Text(
             value=input_text,
             style=default_text_style,
-            text_align=ft.TextAlign.CENTER
+            text_align=ft.TextAlign.CENTER,
+            color=ft.Colors.ON_SECONDARY,
         )
     else:
         raise ValueError(f"Unsupported input type: {input_type}")
@@ -64,3 +67,11 @@ def default_input_field(
         )
     else:
         raise ValueError(f"Unsupported input type: {input_type}")
+    
+uri_input_field = ft.TextField(
+    label="MongoDB URI",
+    hint_text="Input the full connection string here",
+    width=500,
+    password=True,
+    can_reveal_password=True
+)

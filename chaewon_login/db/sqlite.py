@@ -37,7 +37,8 @@ def insert_user_sqlite(conn, username, hashed_password):
 
 """ Run sqlite.py to test database connection and table creation """
 def main():
-    conn = connect_to_sqlite()
+    # conn = connect_to_sqlite()
+    conn = get_sqlite_conn()
     cursor = conn.cursor()
 
     cursor.execute(f"SELECT 1 FROM {database_name} LIMIT 1;")
