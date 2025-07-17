@@ -5,6 +5,7 @@ from chaewon_login.ui.styles import (
     default_text_style,
     default_subtitle_style,
     default_title_style,
+    default_error_text_style,
     DEFAULT_INPUT_FIELD_WIDTH
 )
 
@@ -13,32 +14,28 @@ class TextType(Enum):
     TITLE = "title"
     SUBTITLE = "subtitle"
     DEFAULT = "default"
+    ERROR = "error"
 
 def default_text(
     input_type: TextType,
     input_text: str | None = None
 ) -> ft.Text:
+    styled_text = ft.Text(
+        value=input_text,
+        text_align=ft.TextAlign.CENTER
+    )
     if input_type == TextType.TITLE:
-        return ft.Text(
-            value=input_text,
-            style=default_title_style,
-            text_align=ft.TextAlign.CENTER,
-            color=ft.Colors.PRIMARY,
-        )
+        styled_text.style = default_title_style
+        return styled_text
     elif input_type == TextType.SUBTITLE:
-        return ft.Text(
-            value=input_text,
-            style=default_subtitle_style,
-            text_align=ft.TextAlign.CENTER,
-            color=ft.Colors.ON_PRIMARY,
-        )
+        styled_text.style = default_subtitle_style
+        return styled_text
     elif input_type == TextType.DEFAULT:
-        return ft.Text(
-            value=input_text,
-            style=default_text_style,
-            text_align=ft.TextAlign.CENTER,
-            color=ft.Colors.ON_SECONDARY,
-        )
+        styled_text.style = default_text_style
+        return styled_text
+    elif input_type == TextType.ERROR:
+        styled_text.style = default_error_text_style
+        return styled_text
     else:
         raise ValueError(f"Unsupported input type: {input_type}")
     

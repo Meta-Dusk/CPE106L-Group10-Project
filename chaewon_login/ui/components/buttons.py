@@ -2,7 +2,7 @@ import flet as ft
 
 from chaewon_login.ui.components.containers import default_column
 from typing import Callable, Optional
-from chaewon_login.ui.styles import default_action_button_style
+from chaewon_login.ui.styles import default_action_button_style, build_action_button_style
 from enum import Enum
 
 
@@ -72,57 +72,32 @@ class DefaultButton(Enum):
     LAUNCH = "Launch"
     LOGOUT = "Log Out"
     LOGIN = "Log In"
+    ERROR = "Okay"
     
 def preset_button(
     type: DefaultButton,
     on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"{DefaultButton.value} button pressed! {f.text}"),
-    preset_icon: ft.IconValue = None
+    preset_icon: ft.IconValue = None,
+    style: ft.ButtonStyle = None
 ) -> ft.ElevatedButton:
     if type == DefaultButton.LOGOUT:
         preset_icon = ft.Icons.LOGOUT
     elif type == DefaultButton.LOGIN:
         preset_icon = ft.Icons.LOGIN
+    elif type == DefaultButton.ERROR:
+        style = build_action_button_style(
+            primary=ft.Colors.ERROR,
+            on_primary=ft.Colors.ON_ERROR,
+            highlight=ft.Colors.ERROR
+        )
     
     return default_action_button(
         text=type.value,
         on_click=on_click,
-        icon=preset_icon
+        icon=preset_icon,
+        style=style
     )
     
-def cancel_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Cancel button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Cancel",
-        on_click=on_click,
-    )
-    
-def launch_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Launch button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Launch",
-        on_click=on_click,
-    )
-    
-def okay_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Okay button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Okay",
-        on_click=on_click,
-    )
-    
-def logout_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Logout button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return ft.ElevatedButton(
-        text="Log Out",
-        icon=ft.Icons.LOGOUT,
-        on_click=on_click,
-        bgcolor=ft.Colors.RED_400,
-        color=ft.Colors.WHITE
-    )
     
 def profile_button(page: ft.Page):
     def open_profile(e):

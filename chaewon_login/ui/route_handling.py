@@ -4,9 +4,13 @@ import flet as ft
 from chaewon_login.db.db_manager import init_database
 from chaewon_login.ui.login_ui import main_login_ui
 from chaewon_login.ui.retry_ui import check_mongo_connection
-from chaewon_login.ui.components.buttons import profile_button, logout_button
+from chaewon_login.ui.components.buttons import (
+    profile_button,
+    preset_button,
+    DefaultButton
+)
 from chaewon_login.ui.components.text import default_text, TextType
-from chaewon_login.db.mongo import connect_to_mongo
+from chaewon_login.db.db_manager import find_user
 from chaewon_login.auth.user import is_authenticated, yes_clicked, no_clicked
 from chaewon_login.ui.route_data import RouteHandler, PageRoute
 from chaewon_login.ui.components.dialogs import confirm_logout_dialog
@@ -23,7 +27,7 @@ def preset_logout_button(
             no_clicked=lambda e: no_clicked(page, dialog)
         )
 
-    return logout_button(on_click=on_click)
+    return preset_button(DefaultButton.LOGOUT, on_click=on_click)
 
 # Shared page renderer
 def render_page(page: ft.Page, content: ft.Control | list[ft.Control]):
@@ -44,13 +48,20 @@ def logout(page: ft.Page):
     page.session.clear()
     page.go(PageRoute.LOGIN.value)
 
-# Route logic
+# == Route logic ==
 def handle_loading(page: ft.Page, _):
-    collection = init_database(page)
-    if collection is not None:
-        page.go(PageRoute.LOGIN.value)
-    else:
-        page.go(PageRoute.RETRY.value)
+    def after_init():
+        from chaewon_login.db.db_manager import get_collection
+        collection = get_collection()
+
+        if collection is not None:
+            print("Time to log in! - Chae.Debug")
+            page.go(PageRoute.LOGIN.value)
+        else:
+            print("Why no connection - Chae.Debug")
+            page.go(PageRoute.RETRY.value)
+
+    init_database(page, callback=after_init)
 
 def handle_login(page: ft.Page, _):
     if is_authenticated(page):
@@ -73,8 +84,7 @@ def handle_dashboard(page: ft.Page, _):
     render_page(page, [msg, profile_btn, logout_btn])
 
 def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
-    accounts_collection = connect_to_mongo()
-    user_doc = accounts_collection.find_one({"username": user_id}) if accounts_collection is not None else None
+    user_doc = find_user(user_id)
 
     if user_doc:
         title = default_text(TextType.TITLE, f"👤 {user_doc['username']}'s Profile")

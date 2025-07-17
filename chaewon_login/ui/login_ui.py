@@ -167,7 +167,6 @@ def main_login_ui(page: ft.Page):
 
             # Determine result message
             if conn is None:
-                dialog_content_color = ft.Colors.ERROR
                 dialog_content_text = "Failed to switch databases. Please try again."
                 dialog_title_text = "Error"
                 toggle_db()  # Revert back
@@ -175,19 +174,16 @@ def main_login_ui(page: ft.Page):
             else:
                 current_mode = get_current_mode()
                 if current_mode == DBMode.SQLITE:
-                    dialog_content_color = ft.Colors.BLUE
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
                     db_toggle_button.text = text_switch_to_mongo
                 else:
-                    dialog_content_color = ft.Colors.PINK
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
                     db_toggle_button.text = text_switch_to_sqlite
 
             # Build dialog content
-            dialog_content = default_text(TextType.TITLE, dialog_content_text)
-            dialog_content.color = dialog_content_color
+            dialog_content = default_text(TextType.SUBTITLE, dialog_content_text)
             dialog_title = default_text(TextType.TITLE, dialog_title_text)
 
             dialog = default_notif_dialog(
@@ -201,6 +197,13 @@ def main_login_ui(page: ft.Page):
             page.add(default_container(form))
             page.open(dialog)
             page.update()
+            
+            # Auto-close after n amount of seconds
+            def auto_close():
+                page.close(dialog)
+                page.update()
+
+            threading.Timer(1.0, auto_close).start()
 
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
@@ -218,7 +221,7 @@ def main_login_ui(page: ft.Page):
             ft.Row([theme_toggle, db_toggle_button], alignment=ft.MainAxisAlignment.END),
             toggleable_chaewon,
             login_message,
-            ft.Divider(),
+            ft.Divider(color=ft.Colors.ON_PRIMARY),
             username_input,
             password_input,
             confirm_password_input,
