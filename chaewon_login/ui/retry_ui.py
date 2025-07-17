@@ -5,7 +5,7 @@ from chaewon_login.assets.images import ImageData, default_image
 from chaewon_login.db.db_manager import init_database, toggle_db
 from chaewon_login.ui.components.containers import default_container, default_column
 from chaewon_login.ui.components.text import default_text, TextType
-from chaewon_login.ui.components.dialogs import default_alert_dialog
+from chaewon_login.ui.components.dialogs import default_notif_dialog
 from chaewon_login.ui.route_data import PageRoute
 from chaewon_login.ui.components.buttons import default_action_button
 
@@ -42,9 +42,9 @@ def check_mongo_connection(page: ft.Page):
             if conn:
                 page.go(login_page)
             else:
-                dialog_content = default_text(TextType.TITLE, "Failed to connect to SQLite.")
+                dialog_content = default_text(TextType.SUBTITLE, "Failed to connect to SQLite.")
                 dialog_content.color = ft.Colors.RED
-                dialog = default_alert_dialog(
+                dialog = default_notif_dialog(
                     title=default_text(TextType.TITLE, "Error"),
                     content=dialog_content,
                     on_dismiss=lambda e: page.update()

@@ -21,15 +21,8 @@ def confirm_logout_dialog(
         title=ft.Text("Confirm Logout"),
         content=ft.Text("Are you sure you want to log out?"),
         actions=[
-            cancel_button(
-                on_click=no_clicked,
-                bg_color=ft.Colors.GREY
-            ),
-            default_action_button(
-                text="Log Out",
-                on_click=yes_clicked,
-                bg_color=ft.Colors.RED
-            )
+            cancel_button(on_click=no_clicked),
+            default_action_button(text="Log Out", on_click=yes_clicked)
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -41,7 +34,7 @@ def confirm_logout_dialog(
     
 def default_notif_dialog(
     icon: ft.Icon | None = ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
-    title: ft.Text | str | None = "Alert Dialog",
+    title: ft.Text | str | None = "Notif Dialog",
     content: ft.Control | list[ft.Control] | None = None,
     on_dismiss: Callable[[ft.AlertDialog], None] | None = None
 ) -> ft.AlertDialog:

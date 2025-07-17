@@ -1,11 +1,50 @@
+import sys
+import tkinter as tk
+
+from tkinter import messagebox
+
+
+# Check for required modules
+def check_required_modules():
+    required_modules = ["flet", "pymongo", "bcrypt", "cryptography"]
+    missing = []
+    for mod in required_modules:
+        try:
+            __import__(mod)
+        except ImportError:
+            missing.append(mod)
+    return missing
+
+# Show missing module alert with tkinter
+def show_missing_modules_message(missing_modules):
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showerror(
+        "Missing Required Modules",
+        "The following modules are missing:\n\n" +
+        "\n".join(missing_modules) +
+        "\n\nPlease install them before running the application."
+    )
+    root.destroy()
+
+# Run the check before importing anything else
+missing = check_required_modules()
+if missing:
+    show_missing_modules_message(missing)
+    sys.exit(1)
+else:
+    print("No missing modules. Starting launcher now...")
+
+# == Flet App starts here ==
+# Only import your actual app logic if no missing modules
+
 import subprocess
 import os
-import sys
 from pathlib import Path
 import flet as ft
 
 from chaewon_login.setup_env import setup_env
-from chaewon_login.ui.styles import apply_default_page_config, apply_launcher_page_config
+from chaewon_login.ui.styles import apply_launcher_page_config
 from chaewon_login.ui.components.containers import default_row
 from chaewon_login.ui.components.buttons import (
     launch_button,
@@ -56,6 +95,7 @@ def main(page: ft.Page):
         page.window.close()
 
     label = default_text(TextType.TITLE, "How would you like to run the app?")
+    label.color = ft.Colors.PRIMARY
 
     launch_modes = launch_mode_radio_group(ref=selected_mode)
 
@@ -75,11 +115,11 @@ def main(page: ft.Page):
     form = ft.Column(
         controls=([
             label,
-            ft.Divider(),
+            ft.Divider(color=ft.Colors.ON_PRIMARY),
             launch_modes,
             buttons
         ]),
-        spacing=50,
+        spacing=10,
         alignment=ft.MainAxisAlignment.START,
         horizontal_alignment=ft.CrossAxisAlignment.START
     )

@@ -2,20 +2,22 @@ import flet as ft
 
 from chaewon_login.ui.components.containers import default_column
 from typing import Callable, Optional
-from chaewon_login.ui.styles import default_text_style, default_action_button_style
+from chaewon_login.ui.styles import default_action_button_style
 
 def launch_mode_radio_choice(
     value: str | None = None,
     label: str | ft.Text | None = "Launch Mode",
     label_style: Optional[ft.TextStyle] = None,
-    fill_color: ft.ControlStateValue[ft.Colors] = ft.Colors.WHITE
+    fill_color: ft.ControlStateValue[ft.Colors] = ft.Colors.PRIMARY_CONTAINER
 ) -> ft.Radio:
     return ft.Radio(
         value=value,
         label=label,
-        label_style=label_style or default_text_style,
+        label_style=label_style or ft.TextStyle(color=ft.Colors.ON_PRIMARY_CONTAINER),
         fill_color=fill_color,
-        autofocus=True
+        autofocus=True,
+        active_color=ft.Colors.PRIMARY_CONTAINER,
+        splash_radius=15
     )
     
 def launch_mode_radio_group(
@@ -44,31 +46,27 @@ def launch_mode_radio_group(
         content=default_column(controls=radios)
     )
 
-
     
 def default_action_button(
     text: str | None = "Action Button",
-    on_click: Callable[[ft.Control], None] = lambda f: print(f"Action button pressed! {f.text}"),
-    bg_color: ft.ColorValue = ft.Colors.WHITE,
-    color: ft.ColorValue = ft.Colors.BLACK
+    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f.text}"),
+    style: ft.ButtonStyle = default_action_button_style
 ) -> ft.ElevatedButton:
     return ft.ElevatedButton(
         text=text,
         on_click=on_click,
-        bgcolor=bg_color,
-        color=color,
         width=120,
-        style=default_action_button_style
+        style=style,
+        # bgcolor=ft.Colors.PRIMARY,
+        color=ft.Colors.ON_PRIMARY
     )
     
 def cancel_button(
     on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Cancel button pressed! {f.text}"),
-    bg_color: ft.Colors = ft.Colors.RED
 ) -> ft.ElevatedButton:
     return default_action_button(
         text="Cancel",
         on_click=on_click,
-        bg_color=bg_color
     )
     
 def launch_button(
@@ -77,7 +75,6 @@ def launch_button(
     return default_action_button(
         text="Launch",
         on_click=on_click,
-        bg_color=ft.Colors.GREEN
     )
     
 def okay_button(
@@ -86,7 +83,6 @@ def okay_button(
     return default_action_button(
         text="Okay",
         on_click=on_click,
-        bg_color=ft.Colors.GREEN
     )
     
 def profile_button(page: ft.Page):

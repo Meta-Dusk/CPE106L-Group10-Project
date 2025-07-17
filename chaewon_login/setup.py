@@ -4,12 +4,12 @@ import shutil
 from chaewon_login.config import Config
 from cryptography.fernet import Fernet
 from chaewon_login.setup_env import setup_env
-from chaewon_login.ui.styles import apply_default_page_config
+from chaewon_login.ui.styles import apply_setup_page_config
 from chaewon_login.ui.components.containers import default_container, default_row
 from chaewon_login.ui.components.text import (
     default_text,
     TextType,
-    default_input_field,
+    uri_input_field,
     InputFieldType
 )
 from chaewon_login.ui.components.buttons import default_action_button, cancel_button
@@ -20,18 +20,15 @@ def ensure_directories():
     for path in [Config.KEY_PATH, Config.ENC_PATH]:
         path.parent.mkdir(parents=True, exist_ok=True)
 
-
 def generate_key():
     key = Fernet.generate_key()
     Config.KEY_PATH.write_bytes(key)
     return key
 
-
 def encrypt_uri(key: bytes, uri: str):
     fernet = Fernet(key)
     encrypted = fernet.encrypt(uri.encode())
     Config.ENC_PATH.write_bytes(encrypted)
-
 
 def delete_directories():
     try:
@@ -112,18 +109,16 @@ def perform_encryption(page: ft.Page, uri: str):
 
 
 def main(page: ft.Page):
-    page.title = "Chaewon Setup"
-    apply_default_page_config(page)
+    apply_setup_page_config(page)
 
     label = default_text(TextType.TITLE, "MongoDB URI Setup")
     sublabel = default_text(TextType.SUBTITLE, "Enter your MongoDB URI:")
 
-    entry = default_input_field(InputFieldType.PASSWORD, width=400)
+    entry = uri_input_field
 
     save_btn = default_action_button(
-        "Save & Encrypt",
+        text="Save & Encrypt",
         on_click=lambda e: handle_setup(page, entry),
-        bg_color=ft.Colors.GREEN
     )
 
     cancel_btn = cancel_button(on_click=lambda e: page.window.close())

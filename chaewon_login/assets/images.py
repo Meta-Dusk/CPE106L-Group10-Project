@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import Path
 
 ASSETS_DIR = Path(__file__).parent.parent / "assets" / "images"
+ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "chae.ico"
 
 class Image:
     def __init__(self, filename: str, description: str):

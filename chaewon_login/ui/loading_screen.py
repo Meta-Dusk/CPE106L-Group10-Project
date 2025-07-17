@@ -6,7 +6,7 @@ from chaewon_login.ui.components.text import default_text, TextType
 
 def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
     loading_text = default_text(TextType.TITLE, message)
-    loading_spinner = ft.ProgressRing()
+    loading_spinner = ft.ProgressRing(width=200,height=200)
 
     loading_ui = default_column(controls=
         [
@@ -17,6 +17,7 @@ def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
 
     page.add(default_container(loading_ui))
     page.update()
+
 
 """
 Run loading_screen.py to test the loading screen UI.
