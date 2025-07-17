@@ -47,9 +47,9 @@ from chaewon_login.setup_env import setup_env
 from chaewon_login.ui.styles import apply_launcher_page_config
 from chaewon_login.ui.components.containers import default_row
 from chaewon_login.ui.components.buttons import (
-    launch_button,
-    cancel_button,
-    launch_mode_radio_group
+    launch_mode_radio_group,
+    DefaultButton,
+    preset_button
 )
 from chaewon_login.ui.components.text import default_text, TextType
 
@@ -95,22 +95,13 @@ def main(page: ft.Page):
         page.window.close()
 
     label = default_text(TextType.TITLE, "How would you like to run the app?")
-    label.color = ft.Colors.PRIMARY
 
     launch_modes = launch_mode_radio_group(ref=selected_mode)
 
-    launch_btn = launch_button(on_click=on_submit)
-    cancel_btn = cancel_button(on_click=on_cancel)
+    launch_btn = preset_button(DefaultButton.LAUNCH, on_click=on_submit)
+    cancel_btn = preset_button(DefaultButton.CANCEL, on_click=on_cancel)
 
     buttons = default_row([launch_btn, cancel_btn])
-    buttons = ft.Row(
-        controls=[
-            launch_btn,
-            cancel_btn
-        ],
-        alignment=ft.MainAxisAlignment.CENTER,
-        vertical_alignment=ft.CrossAxisAlignment.CENTER
-    )
 
     form = ft.Column(
         controls=([
