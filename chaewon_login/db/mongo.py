@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from cryptography.fernet import Fernet
 from chaewon_login.config import Config
 
+collection = None
+
 def load_key():
     print("🔓 Loading encryption key and decrypting MongoDB URI...")
 
@@ -25,6 +27,12 @@ def connect_to_mongo():
     except Exception as e:
         print("❌ MongoDB connection failed:", e)
         return None
+
+def get_collection():
+    global collection
+    if collection is None:
+        collection = connect_to_mongo()
+    return collection
 
 """
 Run mongo.py to test database connection.

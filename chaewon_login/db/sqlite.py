@@ -1,6 +1,7 @@
 import sqlite3
 
 database_name = "accounts"
+sqlite_conn = None
 
 def connect_to_sqlite():
     conn = sqlite3.connect(f"{database_name}.db")
@@ -14,6 +15,12 @@ def connect_to_sqlite():
     conn.commit()
     print("Connected to SQLite and 'accounts' table is ready.")
     return conn
+
+def get_sqlite_conn():
+    global sqlite_conn
+    if sqlite_conn is None:
+        sqlite_conn = connect_to_sqlite()
+    return sqlite_conn
 
 def find_user_sqlite(conn, username):
     cursor = conn.cursor()
@@ -30,7 +37,8 @@ def insert_user_sqlite(conn, username, hashed_password):
 
 """ Run sqlite.py to test database connection and table creation """
 def main():
-    conn = connect_to_sqlite()
+    # conn = connect_to_sqlite()
+    conn = get_sqlite_conn()
     cursor = conn.cursor()
 
     cursor.execute(f"SELECT 1 FROM {database_name} LIMIT 1;")
