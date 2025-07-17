@@ -1,11 +1,11 @@
 import flet as ft
 
-from chaewon_login.ui.route_data import PageRoute
 from typing import Callable
 from chaewon_login.ui.components.buttons import (
     okay_button,
     default_action_button,
-    cancel_button
+    preset_button,
+    DefaultButton
 )
 
 
@@ -21,7 +21,7 @@ def confirm_logout_dialog(
         title=ft.Text("Confirm Logout"),
         content=ft.Text("Are you sure you want to log out?"),
         actions=[
-            cancel_button(on_click=no_clicked),
+            preset_button(DefaultButton.CANCEL, on_click=no_clicked),
             default_action_button(text="Log Out", on_click=yes_clicked)
         ],
         actions_alignment=ft.MainAxisAlignment.END,

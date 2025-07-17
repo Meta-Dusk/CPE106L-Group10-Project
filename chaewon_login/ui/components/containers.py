@@ -38,7 +38,8 @@ def default_row(controls: ft.Control | list[ft.Control] | None = None) -> ft.Row
 
     return ft.Row(
         controls=controls,
-        alignment=ft.MainAxisAlignment.CENTER
+        alignment=ft.MainAxisAlignment.CENTER,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER
     )
 
 

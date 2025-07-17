@@ -109,6 +109,7 @@ def perform_encryption(page: ft.Page, uri: str):
 
 
 def main(page: ft.Page):
+    page.controls.clear()
     apply_setup_page_config(page)
 
     label = default_text(TextType.TITLE, "MongoDB URI Setup")
@@ -128,7 +129,13 @@ def main(page: ft.Page):
         cancel_btn
     ])
 
-    content = default_container([label, sublabel, entry, button_row])
+    content = default_container([
+        label,
+        ft.Divider(),
+        sublabel,
+        entry,
+        button_row
+    ])
     page.add(content)
 
 

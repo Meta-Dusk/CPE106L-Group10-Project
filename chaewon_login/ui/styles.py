@@ -68,7 +68,7 @@ def apply_setup_page_config(page: ft.Page):
     default_page_border(page)
     page.title = f"{APP_NAME} | Setup"
     page.window.width = 600
-    page.window.height = 250
+    page.window.height = 350
 
 
 # == Border Styles
@@ -86,7 +86,8 @@ def border_side(
 # == Button Styles
 default_action_button_style = ft.ButtonStyle(
     animation_duration=200,
-    text_style=default_text_style,
+    icon_color=ft.Colors.ON_SECONDARY,
+    icon_size=15,
     bgcolor=ft.Colors.PRIMARY,
     shape={
         ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
