@@ -52,7 +52,8 @@ def default_input_field(
         return ft.TextField(
             label=f"{InputFieldType.USERNAME.value.capitalize()}",
             hint_text=f"Enter your {InputFieldType.USERNAME.value}",
-            width=width
+            width=width,
+            autofocus=True
         )
     elif input_type == InputFieldType.PASSWORD:
         return ft.TextField(

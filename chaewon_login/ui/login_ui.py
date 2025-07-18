@@ -1,31 +1,24 @@
-import time
 import flet as ft
 import threading
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
 from chaewon_login.db.db_manager import (
-    init_database,
-    get_current_mode,
-    toggle_db,
-    find_user,
-    insert_user,
-    DBMode
+    init_database, get_current_mode, toggle_db,
+    find_user, insert_user, DBMode
 )
-from chaewon_login.ui.components.containers import default_column, default_container
+from chaewon_login.ui.components.containers import default_column, default_container, div
 from chaewon_login.ui.components.dialogs import default_notif_dialog
-from chaewon_login.ui.components.text import (
-    default_text,
-    TextType,
-    default_input_field,
-    InputFieldType
-)
+from chaewon_login.ui.components.text import default_text, TextType, default_input_field, InputFieldType
 from chaewon_login.ui.route_data import PageRoute
 from chaewon_login.ui.loading_screen import show_loading_screen
+from chaewon_login.ui.animations import animate_fade_in, animate_fade_out, animate_reset, container_setup
+from chaewon_login.ui.styles import apply_default_page_config
+
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()
-    page.scroll = ft.ScrollMode.AUTO
+    apply_default_page_config(page)
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
     current_mode = get_current_mode().value
@@ -33,7 +26,6 @@ def main_login_ui(page: ft.Page):
     text_switch_to_mongo = f"Switch to MongoDB (Currently {current_mode})"
 
     login_message = default_text(TextType.TITLE, "Chaewon demands your login credentials.")
-    login_message.color = ft.Colors.PRIMARY
     message = ft.Text(value="", color=ft.Colors.RED)
     username_input = default_input_field(InputFieldType.USERNAME)
     password_input = default_input_field(InputFieldType.PASSWORD)
@@ -42,45 +34,36 @@ def main_login_ui(page: ft.Page):
     confirm_password_input.visible = False
 
     current_image = default_image()
+    toggleable_chaewon = container_setup(current_image)
 
-    toggleable_chaewon = ft.Container(
-        content=current_image,
-        animate_opacity=300,
-        animate_scale=500,
-        animate_rotation=500,
-        opacity=1.0,
-        rotate=0.0,
-        alignment=ft.alignment.center,
-    )
-
-    def chaewon_toggle(e=None):
+    # == Animated Switching Image ==
+    def chaewon_toggle(page, toggleable_chaewon, current_image, e=None):
         chaewon_stare = ImageData.CHAEWON_STARE.value
         chaewon_side = ImageData.CHAEWON_SIDE.value
-        toggleable_chaewon.opacity = 0.0
-        toggleable_chaewon.scale = 0.8
-        page.update()
-        time.sleep(0.2)
-        
+
+        animate_fade_out(toggleable_chaewon)
+
+        # Toggle the image
         if current_image.src == chaewon_stare.path:
             current_image.src = chaewon_side.path
             current_image.tooltip = chaewon_side.description
         else:
             current_image.src = chaewon_stare.path
             current_image.tooltip = chaewon_stare.description
-        
+
         toggleable_chaewon.content = current_image
         page.update()
 
-        toggleable_chaewon.opacity = 1.0
-        toggleable_chaewon.scale = 1.2
-        toggleable_chaewon.rotate = 0.15
-        page.update()
-        time.sleep(0.3)
+        animate_fade_in(toggleable_chaewon)
+        animate_reset(toggleable_chaewon)
 
-        toggleable_chaewon.scale = 1.0
-        toggleable_chaewon.rotate = 0.0
-        page.update()
-
+    # == Application Theme ==
+    theme_toggle = ft.IconButton(
+        icon=ft.Icons.LIGHT_MODE,
+        tooltip="Toggle Theme",
+        on_click=toggle_theme
+    )
+    
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
@@ -88,9 +71,10 @@ def main_login_ui(page: ft.Page):
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
             theme_toggle.icon = ft.Icons.DARK_MODE
-        chaewon_toggle(e)
+        chaewon_toggle(page, toggleable_chaewon, current_image)
         page.update()
-        
+    
+    # == Login Setup ==
     is_login = "is_login"
     mode = {is_login: True}
     toggle_button = ft.TextButton(text=text_register)
@@ -145,18 +129,13 @@ def main_login_ui(page: ft.Page):
     def update_button_text():
         action_button.text = "Login" if mode[is_login] else "Register"
         page.update()
-
-    theme_toggle = ft.IconButton(
-        icon=ft.Icons.LIGHT_MODE,
-        tooltip="Toggle Theme",
-        on_click=toggle_theme
-    )
     
     def reset(e):
         page.controls.clear()
         main_login_ui(page)
         page.update()
     
+    # == Database Toggle ==
     def handle_db_toggle(e):
         # Show the loading screen right away
         show_loading_screen(page, f"Switching to {toggle_db().value}...")
@@ -208,20 +187,21 @@ def main_login_ui(page: ft.Page):
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
 
-
     db_toggle_button = ft.TextButton(
         icon=ft.Icons.CODE_SHARP,
+        icon_color=ft.Colors.PRIMARY,
         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
         tooltip="Switch between available databases",
         on_click=handle_db_toggle
     )
 
+    # == Page Form ==
     form = default_column(controls=
         [
             ft.Row([theme_toggle, db_toggle_button], alignment=ft.MainAxisAlignment.END),
             toggleable_chaewon,
             login_message,
-            ft.Divider(color=ft.Colors.ON_PRIMARY),
+            div(),
             username_input,
             password_input,
             confirm_password_input,

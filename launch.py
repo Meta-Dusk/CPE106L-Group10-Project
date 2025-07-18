@@ -45,7 +45,7 @@ import flet as ft
 
 from chaewon_login.setup_env import setup_env
 from chaewon_login.ui.styles import apply_launcher_page_config
-from chaewon_login.ui.components.containers import default_row
+from chaewon_login.ui.components.containers import default_row, div
 from chaewon_login.ui.components.buttons import (
     launch_mode_radio_group,
     DefaultButton,
@@ -99,6 +99,7 @@ def main(page: ft.Page):
     launch_modes = launch_mode_radio_group(ref=selected_mode)
 
     launch_btn = preset_button(DefaultButton.LAUNCH, on_click=on_submit)
+    launch_btn.autofocus = True
     cancel_btn = preset_button(DefaultButton.CANCEL, on_click=on_cancel)
 
     buttons = default_row([launch_btn, cancel_btn])
@@ -106,7 +107,7 @@ def main(page: ft.Page):
     form = ft.Column(
         controls=([
             label,
-            ft.Divider(color=ft.Colors.ON_PRIMARY),
+            div(),
             launch_modes,
             buttons
         ]),

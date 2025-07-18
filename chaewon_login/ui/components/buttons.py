@@ -7,8 +7,8 @@ from enum import Enum
 
 
 def launch_mode_radio_choice(
-    value: str | None = None,
-    label: str | ft.Text | None = "Launch Mode",
+    value: Optional[str] = None,
+    label: Optional[str | ft.Text] = "Launch Mode",
     label_style: Optional[ft.TextStyle] = None,
     fill_color: ft.ControlStateValue[ft.Colors] = ft.Colors.PRIMARY_CONTAINER
 ) -> ft.Radio:
@@ -17,7 +17,6 @@ def launch_mode_radio_choice(
         label=label,
         label_style=label_style or ft.TextStyle(color=ft.Colors.ON_PRIMARY_CONTAINER),
         fill_color=fill_color,
-        autofocus=True,
         active_color=ft.Colors.PRIMARY_CONTAINER,
         splash_radius=15
     )
@@ -50,7 +49,7 @@ def launch_mode_radio_group(
 
     
 def default_action_button(
-    text: str | None = "Action Button",
+    text: Optional[str] = "Action Button",
     on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f.text}"),
     style: ft.ButtonStyle = default_action_button_style,
     icon: ft.IconValue = None
@@ -62,8 +61,26 @@ def default_action_button(
         style=style,
         bgcolor=ft.Colors.PRIMARY,
         color=ft.Colors.ON_PRIMARY,
-        icon=icon
+        icon=icon,
+        expand=2
     )
+  
+# TODO: Finish transferring components from login_ui.py here
+  
+# def db_toggle_button(
+#     current_mode,
+#     text_switch_to_sqlite,
+#     text_switch_to_mongo,
+    
+# ):
+#     return ft.TextButton(
+#         icon=ft.Icons.CODE_SHARP,
+#         icon_color=ft.Colors.PRIMARY,
+#         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
+#         tooltip="Switch between available databases",
+#         on_click=handle_db_toggle
+#     )
+    
     
 # == Preset Buttons ==
 class DefaultButton(Enum):
@@ -73,12 +90,14 @@ class DefaultButton(Enum):
     LOGOUT = "Log Out"
     LOGIN = "Log In"
     ERROR = "Okay"
+    PROFILE = "My Profile"
+    BACK = "Back"
     
 def preset_button(
     type: DefaultButton,
     on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"{DefaultButton.value} button pressed! {f.text}"),
     preset_icon: ft.IconValue = None,
-    style: ft.ButtonStyle = None
+    style: ft.ButtonStyle = default_action_button_style
 ) -> ft.ElevatedButton:
     if type == DefaultButton.LOGOUT:
         preset_icon = ft.Icons.LOGOUT
@@ -90,6 +109,10 @@ def preset_button(
             on_primary=ft.Colors.ON_ERROR,
             highlight=ft.Colors.ERROR
         )
+    elif type == DefaultButton.PROFILE:
+        preset_icon = ft.Icons.PERSON
+    elif type == DefaultButton.BACK:
+        preset_icon = ft.Icons.KEYBOARD_RETURN
     
     return default_action_button(
         text=type.value,
@@ -97,19 +120,3 @@ def preset_button(
         icon=preset_icon,
         style=style
     )
-    
-    
-def profile_button(page: ft.Page):
-    def open_profile(e):
-        user_id = page.session.get("user_id")
-        if user_id:
-            page.go(f"/profile/{user_id}")
-            
-    return ft.ElevatedButton(
-        text="Go to My Profile",
-        icon=ft.Icons.PERSON,
-        bgcolor=ft.Colors.BLUE_500,
-        color=ft.Colors.WHITE,
-        on_click=open_profile
-    )
-    

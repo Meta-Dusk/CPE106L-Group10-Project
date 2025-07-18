@@ -17,12 +17,15 @@ def confirm_logout_dialog(
     yes_clicked: Callable[[ft.ControlEvent], None],
     no_clicked: Callable[[ft.ControlEvent], None]
 ) -> ft.AlertDialog:
+    cancel_btn = preset_button(DefaultButton.CANCEL, on_click=no_clicked)
+    cancel_btn.autofocus = True
+    
     dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("Confirm Logout"),
         content=ft.Text("Are you sure you want to log out?"),
         actions=[
-            preset_button(DefaultButton.CANCEL, on_click=no_clicked),
+            cancel_btn,
             preset_button(DefaultButton.LOGOUT, on_click=yes_clicked)
         ],
         actions_alignment=ft.MainAxisAlignment.END,

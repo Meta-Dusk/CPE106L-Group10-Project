@@ -32,6 +32,20 @@ default_error_text_style = ft.TextStyle(
     weight=ft.FontWeight.NORMAL,
     color=ft.Colors.ON_ERROR_CONTAINER,
 )
+def mod_button_text_style(
+    color: ft.ColorValue = ft.Colors.PRIMARY,
+    size: ft.OptionalNumber = 18,
+    weight: ft.FontWeight = ft.FontWeight.NORMAL,
+    font_family: str = DEFAULT_FONT_FAMILY,
+    letter_spacing: ft.OptionalNumber = None
+) -> ft.TextStyle:
+    return ft.TextStyle(
+        color=color,
+        size=size,
+        weight=weight,
+        font_family=font_family,
+        letter_spacing=letter_spacing
+    )
 
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
@@ -41,7 +55,7 @@ def apply_default_page_config(page: ft.Page):
     )
     page.theme_mode = ft.ThemeMode.SYSTEM
     
-    page.scroll = "adaptive"
+    page.scroll = ft.ScrollMode.ADAPTIVE
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.window.center()
@@ -98,16 +112,21 @@ default_action_button_style = ft.ButtonStyle(
     },
     side={
         ft.ControlState.DEFAULT: border_side(color=ft.Colors.PRIMARY),
-        ft.ControlState.FOCUSED: border_side(),
+        ft.ControlState.FOCUSED: border_side(color=ft.Colors.ON_TERTIARY),
     },
     overlay_color={
-        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.ON_SURFACE),
-        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.3, ft.Colors.ON_SURFACE),
-        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.ON_SURFACE),
+        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.TERTIARY),
     },
     elevation={
         ft.ControlState.DEFAULT: 1,
         ft.ControlState.DISABLED: 0
+    },
+    text_style={
+        ft.ControlState.DEFAULT: mod_button_text_style(color=ft.Colors.PRIMARY),
+        ft.ControlState.FOCUSED: mod_button_text_style(color=ft.Colors.ON_TERTIARY),
+        ft.ControlState.PRESSED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.BOLD)
     }
 )
 
