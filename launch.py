@@ -1,39 +1,74 @@
 import sys
+import subprocess
 import tkinter as tk
+import os
 
 from tkinter import messagebox
 
 
-# Check for required modules
+REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography"]
+
 def check_required_modules():
-    required_modules = ["flet", "pymongo", "bcrypt", "cryptography"]
     missing = []
-    for mod in required_modules:
+    for mod in REQUIRED_MODULES:
         try:
             __import__(mod)
         except ImportError:
             missing.append(mod)
     return missing
 
-# Show missing module alert with tkinter
-def show_missing_modules_message(missing_modules):
+# Function to install missing packages using pip
+def install_missing_modules(modules):
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", *modules])
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+# GUI message using tkinter
+def prompt_install_modules(modules):
+    root = tk.Tk()
+    root.withdraw()
+
+    response = messagebox.askyesno(
+        "Missing Required Modules",
+        "The following modules are missing:\n\n" +
+        "\n".join(modules) +
+        "\n\nWould you like to automatically install them now?"
+    )
+
+    root.destroy()
+    return response
+
+# Show fatal error and exit
+def show_fatal_error(modules):
     root = tk.Tk()
     root.withdraw()
     messagebox.showerror(
-        "Missing Required Modules",
-        "The following modules are missing:\n\n" +
-        "\n".join(missing_modules) +
-        "\n\nPlease install them before running the application."
+        "Installation Failed",
+        "The following modules could not be installed:\n\n" +
+        "\n".join(modules) +
+        "\n\nPlease install them manually."
     )
     root.destroy()
-
-# Run the check before importing anything else
-missing = check_required_modules()
-if missing:
-    show_missing_modules_message(missing)
     sys.exit(1)
+
+# Main check before launching app
+missing = check_required_modules()
+
+if missing:
+    if prompt_install_modules(missing):
+        success = install_missing_modules(missing)
+        if not success:
+            show_fatal_error(missing)
+        else:
+            messagebox.showinfo("Success", "All missing modules were installed successfully.")
+            # Optional: Restart the script automatically
+            os.execl(sys.executable, sys.executable, *sys.argv)
+    else:
+        show_fatal_error(missing)
 else:
-    print("No missing modules. Starting launcher now...")
+    print("\n✅ All required modules are installed.\n")
 
 # == Flet App starts here ==
 # Only import your actual app logic if no missing modules

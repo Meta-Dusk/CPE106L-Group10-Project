@@ -1,46 +1,57 @@
 import sqlite3
+from pathlib import Path
+from enum import Enum
 
-database_name = "accounts"
+class db_key(Enum):
+    USERNAME = "username"
+    PASSWORD = "password"
+
+db_name = "accounts"
+db_dir = Path(__file__).parent / "data"
+db_path = db_dir / f"{db_name}.db"
 
 def connect_to_sqlite():
-    conn = sqlite3.connect(f"{database_name}.db")
+    db_dir.mkdir(exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS accounts (
-            username TEXT PRIMARY KEY,
-            password TEXT NOT NULL
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS {db_name} (
+            {db_key.USERNAME.value} TEXT PRIMARY KEY,
+            {db_key.PASSWORD.value} TEXT NOT NULL
         )
     """)
     conn.commit()
-    print("Connected to SQLite and 'accounts' table is ready.")
+    print(f"Connected to SQLite and {db_name} table is ready.")
     return conn
 
 def find_user_sqlite(conn, username):
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM accounts WHERE username = ?", (username,))
+    cursor.execute(f"SELECT * FROM {db_name} WHERE {db_key.USERNAME.value} = ?", (username,))
     row = cursor.fetchone()
     return dict(row) if row else None
 
 
 def insert_user_sqlite(conn, username, hashed_password):
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO accounts (username, password) VALUES (?, ?)", (username, hashed_password))
+    cursor.execute(f"INSERT INTO {db_name} ({db_key.USERNAME.value}, {db_key.PASSWORD.value}) VALUES (?, ?)", (username, hashed_password))
     conn.commit()
+
 
 """ Run sqlite.py to test database connection and table creation """
 def main():
     with connect_to_sqlite() as conn:
         cursor = conn.cursor()
-        cursor.execute(f"SELECT 1 FROM accounts LIMIT 1;")
+        cursor.execute(f"SELECT 1 FROM {db_name} LIMIT 1;")
         result = cursor.fetchone()
 
         if result:
             print("Table has at least one entry.")
-            cursor.execute(f"SELECT username FROM accounts ORDER BY RANDOM() LIMIT 1;")
+            cursor.execute(f"SELECT {db_key.USERNAME.value} FROM {db_name} ORDER BY RANDOM() LIMIT 1;")
             result = cursor.fetchone()
             random_username = result["username"]
             print(f'Such as user "{random_username}"')
+            cursor.execute(f"SELECT COUNT (*) FROM {db_name}")
         else:
             print("Table is empty.")
     

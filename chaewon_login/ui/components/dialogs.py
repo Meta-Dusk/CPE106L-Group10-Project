@@ -2,10 +2,7 @@ import flet as ft
 import asyncio
 
 from typing import Callable
-from chaewon_login.ui.components.buttons import (
-    preset_button,
-    DefaultButton
-)
+from chaewon_login.ui.components.buttons import preset_button, DefaultButton
 from chaewon_login.ui.components.containers import default_column, default_container
 from chaewon_login.ui.components.text import default_text, TextType
 
@@ -22,13 +19,13 @@ def confirm_logout_dialog(
     
     dialog = ft.AlertDialog(
         modal=True,
-        title=ft.Text("Confirm Logout"),
-        content=ft.Text("Are you sure you want to log out?"),
+        title=default_text(TextType.TITLE, "Confirm Logout"),
+        content=default_text(TextType.SUBTITLE, "Are you sure you want to log out?"),
         actions=[
             cancel_btn,
             preset_button(DefaultButton.LOGOUT, on_click=yes_clicked)
         ],
-        actions_alignment=ft.MainAxisAlignment.END,
+        actions_alignment=ft.MainAxisAlignment.CENTER,
     )
 
     page.open(dialog)
@@ -37,7 +34,9 @@ def confirm_logout_dialog(
 
     
 def default_notif_dialog(
-    icon: ft.IconValue | None = ft.Icon(name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE),
+    icon: ft.IconValue | None = ft.Icon(
+        name=ft.Icons.DATA_OBJECT, color=ft.Colors.BLUE, size=50
+    ),
     title: ft.Text | str | None = "Notif Dialog",
     content: ft.Control | list[ft.Control] | None = None,
     on_dismiss: Callable[[ft.AlertDialog], None] | None = None

@@ -1,5 +1,6 @@
 import flet as ft
 import threading
+import time
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
@@ -14,6 +15,7 @@ from chaewon_login.ui.route_data import PageRoute
 from chaewon_login.ui.loading_screen import show_loading_screen
 from chaewon_login.ui.animations import animate_fade_in, animate_fade_out, animate_reset, container_setup
 from chaewon_login.ui.styles import apply_default_page_config
+from chaewon_login.ui.theme_service import save_theme_mode, load_theme_mode
 
 
 def main_login_ui(page: ft.Page):
@@ -58,12 +60,6 @@ def main_login_ui(page: ft.Page):
         animate_reset(toggleable_chaewon)
 
     # == Application Theme ==
-    theme_toggle = ft.IconButton(
-        icon=ft.Icons.LIGHT_MODE,
-        tooltip="Toggle Theme",
-        on_click=toggle_theme
-    )
-    
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
@@ -71,8 +67,15 @@ def main_login_ui(page: ft.Page):
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
             theme_toggle.icon = ft.Icons.DARK_MODE
+        save_theme_mode(page.theme_mode)
         chaewon_toggle(page, toggleable_chaewon, current_image)
         page.update()
+    
+    theme_toggle = ft.IconButton(
+        icon=ft.Icons.LIGHT_MODE,
+        tooltip="Toggle Theme",
+        on_click=toggle_theme
+    )
     
     # == Login Setup ==
     is_login = "is_login"
@@ -186,13 +189,15 @@ def main_login_ui(page: ft.Page):
 
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
+        
 
     db_toggle_button = ft.TextButton(
         icon=ft.Icons.CODE_SHARP,
         icon_color=ft.Colors.PRIMARY,
         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
         tooltip="Switch between available databases",
-        on_click=handle_db_toggle
+        on_click=handle_db_toggle,
+        disabled=True
     )
 
     # == Page Form ==
@@ -212,3 +217,7 @@ def main_login_ui(page: ft.Page):
     )
 
     page.add(default_container(form))
+    
+    # Limit user from spamming the switch database button
+    time.sleep(1)
+    db_toggle_button.disabled = False
