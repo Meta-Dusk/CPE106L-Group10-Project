@@ -1,5 +1,6 @@
 import flet as ft
 from chaewon_login.assets.images import ICON_PATH
+from chaewon_login.ui.theme_service import load_theme_mode
 
 
 DEFAULT_FONT_FAMILY = "Roboto"
@@ -50,10 +51,10 @@ def mod_button_text_style(
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
     page.theme = ft.Theme(
-        color_scheme_seed=ft.Colors.DEEP_PURPLE,
+        color_scheme_seed=ft.Colors.random(), #TODO: Decide on a final color scheme
         font_family=DEFAULT_FONT_FAMILY,
     )
-    page.theme_mode = ft.ThemeMode.SYSTEM
+    page.theme_mode = load_theme_mode()
     
     page.scroll = ft.ScrollMode.ADAPTIVE
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
@@ -102,31 +103,34 @@ def border_side(
 
 # == Button Styles
 default_action_button_style = ft.ButtonStyle(
-    animation_duration=200,
+    animation_duration=100,
     icon_color=ft.Colors.ON_PRIMARY,
     icon_size=15,
     bgcolor=ft.Colors.PRIMARY,
     shape={
         ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
-        ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8))
+        ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8)),
+        ft.ControlState.FOCUSED: ft.RoundedRectangleBorder(ft.border_radius.all(10)),
     },
     side={
         ft.ControlState.DEFAULT: border_side(color=ft.Colors.PRIMARY),
         ft.ControlState.FOCUSED: border_side(color=ft.Colors.ON_TERTIARY),
     },
     overlay_color={
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.7, ft.Colors.SECONDARY),
         ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
-        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
         ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.TERTIARY),
+        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
     },
     elevation={
         ft.ControlState.DEFAULT: 1,
-        ft.ControlState.DISABLED: 0
+        ft.ControlState.DISABLED: 0,
     },
     text_style={
         ft.ControlState.DEFAULT: mod_button_text_style(color=ft.Colors.PRIMARY),
-        ft.ControlState.FOCUSED: mod_button_text_style(color=ft.Colors.ON_TERTIARY),
-        ft.ControlState.PRESSED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.BOLD)
+        ft.ControlState.PRESSED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.BOLD),
+        ft.ControlState.HOVERED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.W_500),
+        ft.ControlState.FOCUSED: mod_button_text_style(color=ft.Colors.ON_TERTIARY,weight=ft.FontWeight.W_600),
     }
 )
 
