@@ -1,10 +1,10 @@
 import sqlite3
 
 database_name = "accounts"
-sqlite_conn = None
 
 def connect_to_sqlite():
     conn = sqlite3.connect(f"{database_name}.db")
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS accounts (
@@ -16,19 +16,12 @@ def connect_to_sqlite():
     print("Connected to SQLite and 'accounts' table is ready.")
     return conn
 
-def get_sqlite_conn():
-    global sqlite_conn
-    if sqlite_conn is None:
-        sqlite_conn = connect_to_sqlite()
-    return sqlite_conn
-
 def find_user_sqlite(conn, username):
     cursor = conn.cursor()
-    cursor.execute("SELECT username, password FROM accounts WHERE username = ?", (username,))
+    cursor.execute("SELECT * FROM accounts WHERE username = ?", (username,))
     row = cursor.fetchone()
-    if row:
-        return {"username": row[0], "password": row[1]}
-    return None
+    return dict(row) if row else None
+
 
 def insert_user_sqlite(conn, username, hashed_password):
     cursor = conn.cursor()
@@ -37,23 +30,19 @@ def insert_user_sqlite(conn, username, hashed_password):
 
 """ Run sqlite.py to test database connection and table creation """
 def main():
-    # conn = connect_to_sqlite()
-    conn = get_sqlite_conn()
-    cursor = conn.cursor()
-
-    cursor.execute(f"SELECT 1 FROM {database_name} LIMIT 1;")
-    result = cursor.fetchone()
-
-    if result:
-        print("Table has at least one entry.")
-        cursor.execute(f"SELECT username FROM {database_name} ORDER BY RANDOM() LIMIT 1;")
+    with connect_to_sqlite() as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT 1 FROM accounts LIMIT 1;")
         result = cursor.fetchone()
-        random_username = result[0]
-        print(f"Such as user \"{random_username}\"")
-    else:
-        print("Table is empty.")
 
-    conn.close()
+        if result:
+            print("Table has at least one entry.")
+            cursor.execute(f"SELECT username FROM accounts ORDER BY RANDOM() LIMIT 1;")
+            result = cursor.fetchone()
+            random_username = result["username"]
+            print(f'Such as user "{random_username}"')
+        else:
+            print("Table is empty.")
     
 if __name__ == "__main__":
     main()

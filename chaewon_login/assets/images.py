@@ -33,6 +33,17 @@ class ImageData(Enum):
         "Chaewon is sad 😔 because MongoDB is not connected"
     )
 
+error_content = ft.Container(
+    ft.Text(
+        value="IMAGE_ERROR",
+        color=ft.Colors.ON_ERROR,
+        text_align=ft.TextAlign.CENTER
+    ),
+    bgcolor=ft.Colors.ERROR,
+    alignment=ft.alignment.center,
+    adaptive=True
+)
+
 def default_image():
     return ft.Image(
         src=ImageData.CHAEWON_STARE.value.path,
@@ -42,6 +53,7 @@ def default_image():
         fit=ft.ImageFit.COVER,
         gapless_playback=True,
         tooltip=ImageData.CHAEWON_STARE.value.description,
+        error_content=error_content
     )
 
 """ Run images.py to test the image data and to check the available images. """

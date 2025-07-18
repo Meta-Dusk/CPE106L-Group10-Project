@@ -14,21 +14,38 @@ default_text_style = ft.TextStyle(
     weight=ft.FontWeight.NORMAL,
     color=ft.Colors.ON_SECONDARY,
 )
-
 default_title_style = ft.TextStyle(
     font_family=DEFAULT_FONT_FAMILY,
     size=25,
     weight=ft.FontWeight.BOLD,
-    color=ft.Colors.ON_PRIMARY,
+    color=ft.Colors.PRIMARY,
 )
-
 default_subtitle_style = ft.TextStyle(
     font_family=DEFAULT_FONT_FAMILY,
     size=18,
     weight=ft.FontWeight.NORMAL,
-    color=ft.Colors.ON_SECONDARY,
+    color=ft.Colors.ON_PRIMARY_CONTAINER,
 )
-
+default_error_text_style = ft.TextStyle(
+    font_family=DEFAULT_FONT_FAMILY,
+    size=18,
+    weight=ft.FontWeight.NORMAL,
+    color=ft.Colors.ON_ERROR_CONTAINER,
+)
+def mod_button_text_style(
+    color: ft.ColorValue = ft.Colors.PRIMARY,
+    size: ft.OptionalNumber = 18,
+    weight: ft.FontWeight = ft.FontWeight.NORMAL,
+    font_family: str = DEFAULT_FONT_FAMILY,
+    letter_spacing: ft.OptionalNumber = None
+) -> ft.TextStyle:
+    return ft.TextStyle(
+        color=color,
+        size=size,
+        weight=weight,
+        font_family=font_family,
+        letter_spacing=letter_spacing
+    )
 
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
@@ -38,7 +55,7 @@ def apply_default_page_config(page: ft.Page):
     )
     page.theme_mode = ft.ThemeMode.SYSTEM
     
-    page.scroll = "adaptive"
+    page.scroll = ft.ScrollMode.ADAPTIVE
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.window.center()
@@ -68,7 +85,7 @@ def apply_setup_page_config(page: ft.Page):
     default_page_border(page)
     page.title = f"{APP_NAME} | Setup"
     page.window.width = 600
-    page.window.height = 350
+    page.window.height = 400
 
 
 # == Border Styles
@@ -86,7 +103,7 @@ def border_side(
 # == Button Styles
 default_action_button_style = ft.ButtonStyle(
     animation_duration=200,
-    icon_color=ft.Colors.ON_SECONDARY,
+    icon_color=ft.Colors.ON_PRIMARY,
     icon_size=15,
     bgcolor=ft.Colors.PRIMARY,
     shape={
@@ -95,15 +112,49 @@ default_action_button_style = ft.ButtonStyle(
     },
     side={
         ft.ControlState.DEFAULT: border_side(color=ft.Colors.PRIMARY),
-        ft.ControlState.FOCUSED: border_side(),
+        ft.ControlState.FOCUSED: border_side(color=ft.Colors.ON_TERTIARY),
     },
     overlay_color={
-        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.ON_SURFACE),
-        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.3, ft.Colors.ON_SURFACE),
-        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.ON_SURFACE),
+        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.TERTIARY),
     },
     elevation={
         ft.ControlState.DEFAULT: 1,
         ft.ControlState.DISABLED: 0
+    },
+    text_style={
+        ft.ControlState.DEFAULT: mod_button_text_style(color=ft.Colors.PRIMARY),
+        ft.ControlState.FOCUSED: mod_button_text_style(color=ft.Colors.ON_TERTIARY),
+        ft.ControlState.PRESSED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.BOLD)
     }
 )
+
+def build_action_button_style(
+    primary: ft.ColorValue = ft.Colors.PRIMARY,
+    on_primary: ft.ColorValue = ft.Colors.ON_PRIMARY,
+    highlight: ft.ColorValue = ft.Colors.PRIMARY
+) -> ft.ButtonStyle:
+    return ft.ButtonStyle(
+        animation_duration=200,
+        icon_color=on_primary,
+        icon_size=15,
+        bgcolor=primary,
+        shape={
+            ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
+            ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8))
+        },
+        side={
+            ft.ControlState.DEFAULT: border_side(color=primary),
+            ft.ControlState.FOCUSED: border_side(),
+        },
+        overlay_color={
+            ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, highlight),
+            ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.3, highlight),
+            ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, highlight),
+        },
+        elevation={
+            ft.ControlState.DEFAULT: 1,
+            ft.ControlState.DISABLED: 0
+        }
+    )

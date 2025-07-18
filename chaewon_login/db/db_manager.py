@@ -1,27 +1,34 @@
 import threading
-
-from chaewon_login.db.mongo import connect_to_mongo, get_collection
-from chaewon_login.db.sqlite import connect_to_sqlite, find_user_sqlite, insert_user_sqlite, get_sqlite_conn
-from chaewon_login.ui.loading_screen import show_loading_screen
 from enum import Enum
+
+from chaewon_login.db.mongo import get_collection
+from chaewon_login.db.sqlite import connect_to_sqlite, find_user_sqlite, insert_user_sqlite
+from chaewon_login.ui.loading_screen import show_loading_screen
+from typing import Callable
+
 
 class DBMode(Enum):
     MONGO = "MongoDB"
     SQLITE = "SQLite"
 
 mode = "mode"
-db_mode = {mode: DBMode.MONGO} # Default db: MongoDB
+db_mode = {mode: DBMode.MONGO}  # Default: MongoDB
 collection = None
 sqlite_conn = None
 initialized = False
 
+
 def toggle_db():
-    global collection, sqlite_conn
-    msg = f"Toggling database mode from {db_mode[mode].value} to "
-    db_mode[mode] = DBMode.SQLITE if db_mode[mode] == DBMode.MONGO else DBMode.MONGO
-    msg += f"{db_mode[mode].value}"
-    print(msg)
-        
+    global db_mode, collection, sqlite_conn, initialized
+    old_mode = db_mode[mode]
+    db_mode[mode] = DBMode.SQLITE if old_mode == DBMode.MONGO else DBMode.MONGO
+    print(f"Toggled DB mode from {old_mode.value} to {db_mode[mode].value}")
+    
+    # Reset initialization state
+    collection = None
+    sqlite_conn = None
+    initialized = False
+
     return db_mode[mode]
 
 def get_current_mode():
@@ -31,44 +38,57 @@ def find_user(username):
     if db_mode[mode] == DBMode.MONGO:
         return get_collection().find_one({"username": username})
     else:
-        return find_user_sqlite(get_sqlite_conn(), username)
+        conn = connect_to_sqlite()
+        return find_user_sqlite(conn, username)
 
 def insert_user(username, hashed_password):
     if db_mode[mode] == DBMode.MONGO:
         get_collection().insert_one({"username": username, "password": hashed_password})
     else:
-        insert_user_sqlite(get_sqlite_conn(), username, hashed_password)
+        conn = connect_to_sqlite()
+        insert_user_sqlite(conn, username, hashed_password)
 
-def init_database(page=None):
+def init_database(page=None, callback: Callable=None):
     global collection, sqlite_conn, initialized
+    print(f"`init_database()` Called with mode={db_mode[mode].value}, initialized={initialized}")
 
     if initialized:
+        if callback:
+            callback()
         return collection if db_mode[mode] == DBMode.MONGO else sqlite_conn
 
-    if page:
-        show_loading_screen(page, f"Connecting to {db_mode[mode].value}...")
+    def db_init():
+        global collection, sqlite_conn, initialized
 
-        def db_init():
-            global collection, sqlite_conn, initialized
-            collection = connect_to_mongo()
+        if initialized:
+            if callback:
+                callback()
+            return
+
+        if db_mode[mode] == DBMode.MONGO:
+            collection = get_collection()
+        else:
             sqlite_conn = connect_to_sqlite()
-            initialized = True
-            # Clear loading screen and refresh the main UI
+
+        initialized = True
+
+        if page:
+            from chaewon_login.ui.login_ui import main_login_ui
             page.controls.clear()
             page.overlay.clear()
             page.update()
-            # Call the login UI again or your intended next screen
-            from chaewon_login.ui.login_ui import main_login_ui
             main_login_ui(page)
 
-        threading.Thread(target=db_init).start()
-        return None  # Since we don’t have the DB yet
+        if callback:
+            callback()
 
-    # Fallback for when no page is passed
-    collection = connect_to_mongo()
-    sqlite_conn = connect_to_sqlite()
-    initialized = True
-    return collection if db_mode[mode] == DBMode.MONGO else sqlite_conn
+    if page:
+        show_loading_screen(page, f"Connecting to {db_mode[mode].value}...")
+        threading.Thread(target=db_init).start()
+        return None
+    else:
+        db_init()
+        return collection if db_mode[mode] == DBMode.MONGO else sqlite_conn
 
 
 def test():
