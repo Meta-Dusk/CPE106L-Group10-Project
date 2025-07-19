@@ -4,10 +4,8 @@ import time
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
-from chaewon_login.db.db_manager import (
-    init_database, get_current_mode, toggle_db,
-    find_user, insert_user, DBMode
-)
+from chaewon_login.db.db_manager import (init_database, get_current_mode, toggle_db, 
+                                         find_user, insert_user, DBMode)
 from chaewon_login.ui.components.containers import default_column, default_container, div
 from chaewon_login.ui.components.dialogs import default_notif_dialog
 from chaewon_login.ui.components.text import default_text, TextType, default_input_field, InputFieldType

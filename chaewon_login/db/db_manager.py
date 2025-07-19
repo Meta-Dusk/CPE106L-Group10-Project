@@ -72,13 +72,6 @@ def init_database(page=None, callback: Callable=None):
 
         initialized = True
 
-        if page:
-            from chaewon_login.ui.screens.login_ui import main_login_ui
-            page.controls.clear()
-            page.overlay.clear()
-            page.update()
-            main_login_ui(page)
-
         if callback:
             callback()
 

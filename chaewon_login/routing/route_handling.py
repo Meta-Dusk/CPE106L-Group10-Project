@@ -1,4 +1,3 @@
-# route_handling.py
 import re
 import flet as ft
 

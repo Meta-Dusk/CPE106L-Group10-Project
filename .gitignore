@@ -21,3 +21,7 @@ chaewon_login/auth/enc/
 
 # Ignoring user configs
 *.json
+
+# Temporary for now
+pyproject.toml
+build/

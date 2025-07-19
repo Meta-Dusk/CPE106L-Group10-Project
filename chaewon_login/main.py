@@ -2,8 +2,7 @@ import flet as ft
 
 from chaewon_login.ui.styles import apply_default_page_config
 from chaewon_login.routing.route_handling import (
-    ROUTE_HANDLERS, handle_not_found, match_dynamic_route
-)
+    ROUTE_HANDLERS, handle_not_found, match_dynamic_route)
 from chaewon_login.routing.route_data import PageRoute
 from chaewon_login.ui.transitions import fade_in
 from chaewon_login.auth.user import is_authenticated
