@@ -6,7 +6,7 @@ from chaewon_login.db.db_manager import init_database, toggle_db
 from chaewon_login.ui.components.containers import default_container, default_column
 from chaewon_login.ui.components.text import default_text, TextType
 from chaewon_login.ui.components.dialogs import default_notif_dialog
-from chaewon_login.ui.route_data import PageRoute
+from chaewon_login.routing.route_data import PageRoute
 from chaewon_login.ui.components.buttons import default_action_button
 
 
