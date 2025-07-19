@@ -7,16 +7,8 @@ from cryptography.fernet import Fernet
 from chaewon_login.setup_env import setup_env
 from chaewon_login.ui.styles import apply_setup_page_config
 from chaewon_login.ui.components.containers import default_container, default_row
-from chaewon_login.ui.components.text import (
-    default_text,
-    TextType,
-    uri_input_field,
-)
-from chaewon_login.ui.components.buttons import (
-    default_action_button,
-    preset_button,
-    DefaultButton
-)
+from chaewon_login.ui.components.text import default_text, TextType, uri_input_field
+from chaewon_login.ui.components.buttons import default_action_button, preset_button, DefaultButton
 from chaewon_login.ui.components.dialogs import default_alert_dialog, show_auto_closing_dialog
 from pymongo.uri_parser import parse_uri
 

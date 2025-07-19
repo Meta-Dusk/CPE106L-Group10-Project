@@ -6,6 +6,7 @@ from chaewon_login.ui.components.text import default_text, TextType
 from chaewon_login.ui.components.buttons import preset_button, DefaultButton
 from chaewon_login.ui.components.containers import div
 from chaewon_login.ui.screens.shared_ui import render_page, preset_logout_button
+from chaewon_login.assets.images import default_image, ImageData
 
 
 def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
@@ -20,10 +21,12 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
 
     back_btn = preset_button(DefaultButton.BACK, lambda e: page.go(PageRoute.DASHBOARD.value))
     logout_btn = preset_logout_button(page)
+    image = default_image()
+    image.src = ImageData.CHAEWON_SIDE.value.path
 
     buttons = ft.Row(
         controls=[logout_btn, back_btn],
         alignment=ft.MainAxisAlignment.END
     )
 
-    render_page(page, [title, subtitle, div(), buttons])
+    render_page(page, [title, image, subtitle, div(), buttons])

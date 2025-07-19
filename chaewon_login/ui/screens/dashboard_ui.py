@@ -1,9 +1,11 @@
 import flet as ft
 
 from chaewon_login.ui.components.text import default_text, TextType
-from chaewon_login.ui.components.buttons import preset_button, DefaultButton
-from chaewon_login.ui.components.containers import div
+from chaewon_login.ui.components.buttons import preset_button, DefaultButton, default_action_button
+from chaewon_login.ui.components.containers import div, default_row
 from chaewon_login.ui.screens.shared_ui import render_page, preset_logout_button
+from chaewon_login.assets.images import default_image
+from chaewon_login.routing.route_data import PageRoute
 
 
 def handle_dashboard(page: ft.Page, _):
@@ -13,12 +15,29 @@ def handle_dashboard(page: ft.Page, _):
             page.go(f"/profile/{user_id}")
 
     msg = default_text(TextType.TITLE, "This is the dashboard 😔🤚")
+    image = default_image()
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile)
-
-    buttons = ft.Row(
-        controls=[profile_btn, logout_btn],
-        alignment=ft.MainAxisAlignment.END
+    mathplot_btn = default_action_button(
+        text="View Plots",
+        icon=ft.Icons.AUTO_GRAPH,
+        on_click=lambda e: page.go(PageRoute.GRAPHS.value)
     )
+    
+    control_buttons = default_row(controls=[profile_btn, logout_btn])
+    other_buttons = default_row(controls=mathplot_btn)
 
-    render_page(page, [msg, div(), buttons])
+    render_page(page, [msg, image, div(), other_buttons, control_buttons])
+
+
+"""
+Run with `py -m chaewon_login.ui.screens.dashboard_ui`.
+Although it's recommended to just simply run the `launch.py` since there are issues.
+"""
+def test(page: ft.Page):
+    page.session.set("user_id", "test_user_123")
+    handle_dashboard(page, None)
+    page.update()
+
+if __name__ == "__main__":
+    ft.app(target=test)

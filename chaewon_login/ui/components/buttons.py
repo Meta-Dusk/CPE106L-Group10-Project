@@ -50,7 +50,7 @@ def launch_mode_radio_group(
     
 def default_action_button(
     text: Optional[str] = "Action Button",
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f.text}"),
+    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f}"),
     style: ft.ButtonStyle = default_action_button_style,
     icon: ft.IconValue = None
 ) -> ft.ElevatedButton:
