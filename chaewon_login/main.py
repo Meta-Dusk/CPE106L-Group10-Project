@@ -1,5 +1,9 @@
 import flet as ft
+from ride_visuals_utils import visualize_user_rides
 
+if __name__ == "__main__":
+    visualize_user_rides("TMTmoney")
+    
 from chaewon_login.ui.styles import apply_default_page_config
 from chaewon_login.routing.route_handling import (
     ROUTE_HANDLERS, handle_not_found, match_dynamic_route)

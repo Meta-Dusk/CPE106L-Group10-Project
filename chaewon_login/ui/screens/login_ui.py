@@ -1,6 +1,11 @@
 import flet as ft
 import threading
 import time
+import sys
+import os
+from chaewon_login import ride_visuals_utils
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
@@ -14,7 +19,6 @@ from chaewon_login.ui.screens.loading_screen import show_loading_screen
 from chaewon_login.ui.animations import animate_fade_in, animate_fade_out, animate_reset, container_setup
 from chaewon_login.ui.styles import apply_default_page_config
 from chaewon_login.ui.theme_service import save_theme_mode
-
 
 def main_login_ui(page: ft.Page):
     page.controls.clear()
@@ -35,6 +39,13 @@ def main_login_ui(page: ft.Page):
 
     current_image = default_image()
     toggleable_chaewon = container_setup(current_image)
+
+     # === Ride Stats Button (initially hidden) ===
+    view_stats_btn = ft.ElevatedButton(
+        text="View My Ride Stats",
+        visible=False,
+        on_click=lambda e: ride_visuals_utils.visualize_user_rides(page.session.get("user_id"))
+    )
 
     # == Animated Switching Image ==
     def chaewon_toggle(page, toggleable_chaewon, current_image, e=None):
@@ -57,7 +68,15 @@ def main_login_ui(page: ft.Page):
         animate_fade_in(toggleable_chaewon)
         animate_reset(toggleable_chaewon)
 
+
     # == Application Theme ==
+    theme_toggle = ft.IconButton(
+        icon=ft.Icons.LIGHT_MODE,
+        tooltip="Toggle Theme",
+        on_click=None
+    )
+
+
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
@@ -68,7 +87,9 @@ def main_login_ui(page: ft.Page):
         save_theme_mode(page.theme_mode)
         chaewon_toggle(page, toggleable_chaewon, current_image)
         page.update()
+
     
+    # Load the saved theme mode
     theme_toggle = ft.IconButton(
         icon=ft.Icons.LIGHT_MODE,
         tooltip="Toggle Theme",
@@ -102,6 +123,7 @@ def main_login_ui(page: ft.Page):
             if user and verify_password(password, user["password"]):
                 message.value = f"Welcome, {username}! (Logged in with {current_mode}.)"
                 message.color = ft.Colors.GREEN
+                view_stats_btn.visible = True # Show stats button on successful login
                 page.session.set("user_authenticated", True)
                 page.session.set("user_id", username)
                 page.go(PageRoute.DASHBOARD.value)
@@ -130,26 +152,22 @@ def main_login_ui(page: ft.Page):
     def update_button_text():
         action_button.text = "Login" if mode[is_login] else "Register"
         page.update()
-    
+
     def reset(e):
         page.controls.clear()
         main_login_ui(page)
         page.update()
-    
-    # == Database Toggle ==
+
     def handle_db_toggle(e):
-        # Show the loading screen right away
         show_loading_screen(page, f"Switching to {toggle_db().value}...")
 
         def toggle_and_notify():
-            # Attempt to initialize database
             conn = init_database()
 
-            # Determine result message
             if conn is None:
                 dialog_content_text = "Failed to switch databases. Please try again."
                 dialog_title_text = "Error"
-                toggle_db()  # Revert back
+                toggle_db()
                 init_database()
             else:
                 current_mode = get_current_mode()
@@ -162,7 +180,6 @@ def main_login_ui(page: ft.Page):
                     dialog_title_text = "Database Switched"
                     db_toggle_button.text = text_switch_to_sqlite
 
-            # Build dialog content
             dialog_content = default_text(TextType.SUBTITLE, dialog_content_text)
             dialog_title = default_text(TextType.TITLE, dialog_title_text)
 
@@ -172,7 +189,6 @@ def main_login_ui(page: ft.Page):
                 on_dismiss=reset
             )
 
-            # Return to main thread to update UI
             page.controls.clear()
             page.add(default_container(form))
             page.open(dialog)
@@ -210,6 +226,7 @@ def main_login_ui(page: ft.Page):
             confirm_password_input,
             action_button,
             toggle_button,
+            view_stats_btn,         # Ride stats button
             message,
         ]
     )
