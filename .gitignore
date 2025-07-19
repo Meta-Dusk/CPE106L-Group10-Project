@@ -25,3 +25,4 @@ chaewon_login/auth/enc/
 # Temporary for now
 pyproject.toml
 build/
+*.lock
