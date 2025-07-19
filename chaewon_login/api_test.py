@@ -1,28 +1,36 @@
-# main.py
+# api_test.py or main.py
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import os, requests
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# === MongoDB Setup ===
+from passlib.context import CryptContext
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os, requests
+from pathlib import Path
+
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".." / ".env")
+# === MongoDB Setup ===
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 client = MongoClient(MONGO_URI)
 db = client["chaewon_db"]
 users_collection = db["users"]
 
-# === Google Maps API ===
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "YOUR_API_KEY")
+# === Google Maps API Key ===
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+print("API KEY:", os.getenv("GOOGLE_MAPS_API_KEY"))
+if not GOOGLE_MAPS_API_KEY:
+    raise RuntimeError("Missing GOOGLE_MAPS_API_KEY in .env")
+
+# === Password Hashing ===
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_password(pw): return pwd_context.hash(pw)
+def verify_password(pw, hashed): return pwd_context.verify(pw, hashed)
 
 # === FastAPI App ===
 app = FastAPI(title="Chaewon Meet & Greet API", version="1.0.0")
 
-# --------------------
-# Models
-# --------------------
+# === Pydantic Models ===
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -41,18 +49,13 @@ class RideRequest(BaseModel):
     pickup: str
     dropoff: str
 
-# --------------------
-# Utils (Hashing)
-# --------------------
-from passlib.context import CryptContext
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(pw): return pwd_context.hash(pw)
-def verify_password(pw, hashed): return pwd_context.verify(pw, hashed)
-
-# --------------------
-# Endpoints
-# --------------------
+# === API Endpoints ===
+@app.get("/")
+def root():
+    return {
+        "message": "Chaewon API is running!",
+        "routes": ["/register", "/login", "/route", "/ride/request"]
+    }
 
 @app.post("/register")
 def register(req: RegisterRequest):
@@ -62,13 +65,13 @@ def register(req: RegisterRequest):
         raise HTTPException(status_code=409, detail="Username already exists")
     hashed_pw = hash_password(req.password)
     users_collection.insert_one({"username": req.username, "password": hashed_pw})
-    return {"status": "success", "message": f"{req.username} registered."}
+    return {"status": "success", "message": f"{req.username} registered successfully"}
 
 @app.post("/login")
 def login(req: LoginRequest):
     user = users_collection.find_one({"username": req.username})
     if not user or not verify_password(req.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid username or password")
     return {"status": "authenticated", "message": f"Welcome, {req.username}"}
 
 @app.post("/route")
@@ -104,13 +107,9 @@ def ride_request(req: RideRequest):
             "user_id": req.user_id,
             "pickup": req.pickup,
             "dropoff": req.dropoff,
-            "estimate": "5-10 min"
+            "estimate": "5–10 min"
         }
     }
-
-@app.get("/")
-def root():
-    return {
-        "message": "Chaewon API Running",
-        "routes": ["/register", "/login", "/route", "/ride/request"]
-    }
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("Missing SECRET_KEY in .env")
