@@ -6,7 +6,7 @@ import os
 from tkinter import messagebox
 
 
-REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography"]
+REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography", "matplotlib"]
 
 def check_required_modules():
     missing = []

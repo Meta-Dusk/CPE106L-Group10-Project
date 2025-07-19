@@ -1,11 +1,11 @@
 import flet as ft
 import threading
 import time
-import sys
-import os
-from chaewon_login import ride_visuals_utils
+# import sys
+# import os
+# from chaewon_login import ride_visuals_utils
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
@@ -41,11 +41,11 @@ def main_login_ui(page: ft.Page):
     toggleable_chaewon = container_setup(current_image)
 
      # === Ride Stats Button (initially hidden) ===
-    view_stats_btn = ft.ElevatedButton(
-        text="View My Ride Stats",
-        visible=False,
-        on_click=lambda e: ride_visuals_utils.visualize_user_rides(page.session.get("user_id"))
-    )
+    # view_stats_btn = ft.ElevatedButton(
+    #     text="View My Ride Stats",
+    #     visible=False,
+    #     on_click=lambda e: ride_visuals_utils.visualize_user_rides(page.session.get("user_id"))
+    # )
 
     # == Animated Switching Image ==
     def chaewon_toggle(page, toggleable_chaewon, current_image, e=None):
@@ -123,7 +123,7 @@ def main_login_ui(page: ft.Page):
             if user and verify_password(password, user["password"]):
                 message.value = f"Welcome, {username}! (Logged in with {current_mode}.)"
                 message.color = ft.Colors.GREEN
-                view_stats_btn.visible = True # Show stats button on successful login
+                # view_stats_btn.visible = True # Show stats button on successful login
                 page.session.set("user_authenticated", True)
                 page.session.set("user_id", username)
                 page.go(PageRoute.DASHBOARD.value)
@@ -226,7 +226,7 @@ def main_login_ui(page: ft.Page):
             confirm_password_input,
             action_button,
             toggle_button,
-            view_stats_btn,         # Ride stats button
+            # view_stats_btn,         # Ride stats button
             message,
         ]
     )
