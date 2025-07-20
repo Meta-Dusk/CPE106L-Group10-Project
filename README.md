@@ -33,7 +33,7 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 2. Once you have navigated to the folder containing the project files, you can then just simply type in the terminal `py launch.py`. To make sure that the launch script is accessible, you can check the files in the current directory (folder) by doing `dir` in the terminal.
 3. Once you have entered `py launch.py` wait a bit, and it will open the launcher for you, which will contain options for you to run.
 > #### Missing Libraries?
-> The launcher has a feature for missing libraries; as of now, it will only show you the missing libraries in a UI made using tkinter. The module names of these dependencies are type-sensitive, therefore you can just copy and paste the listed module names in the UI and just install by doing `pip install {module name}`, make sure to replace `{module name}` with the module name.
+> The launcher has a feature for missing libraries; it can auto-install for you the missing modules, or you can just manually install them. The list shown in the messagebox are case-sensitive, so you can just copy paste them into a `pip install` command.
 > ##### Features to be added:
 > - Auto-install missing libraries by prompting the user during launch.
 > - Relaunch after auto-install has been chosen.
