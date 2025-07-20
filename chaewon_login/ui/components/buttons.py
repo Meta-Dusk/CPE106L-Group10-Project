@@ -3,8 +3,22 @@ import flet as ft
 from chaewon_login.ui.components.containers import default_column
 from typing import Callable, Optional
 from chaewon_login.ui.styles import default_action_button_style, build_action_button_style
+from chaewon_login.utils import log_button_press
 from enum import Enum
+from functools import partial
+from dataclasses import dataclass
 
+
+class LaunchMode(str, Enum):
+    NATIVE = "native"
+    WEB = "web"
+    SETUP = "setup"
+
+DEFAULT_LAUNCH_CHOICES = [
+    (LaunchMode.NATIVE, "Native window (default)"),
+    (LaunchMode.WEB, "Web browser"),
+    (LaunchMode.SETUP, "Run setup")
+]
 
 def launch_mode_radio_choice(
     value: Optional[str] = None,
@@ -23,14 +37,10 @@ def launch_mode_radio_choice(
     
 def launch_mode_radio_group(
     ref: Optional[ft.Ref[ft.RadioGroup]] = None,
-    choices: list[tuple[str, str]] = None
+    choices: Optional[list[tuple[str, str]]] = None
 ) -> ft.RadioGroup:
     if choices is None:
-        choices = [
-            ("native", "Native window (default)"),
-            ("web", "Web browser"),
-            ("setup", "Run setup")
-        ]
+        choices = choices or DEFAULT_LAUNCH_CHOICES
 
     radios = [
         ft.Row(
@@ -50,20 +60,30 @@ def launch_mode_radio_group(
     
 def default_action_button(
     text: Optional[str] = "Action Button",
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f}"),
+    on_click: Callable[[ft.ElevatedButton], None] = None,
     style: ft.ButtonStyle = default_action_button_style,
-    icon: ft.IconValue = None
+    icon: ft.IconValue = None,
+    width: ft.OptionalNumber = 120,
+    height: ft.OptionalNumber = 40,
+    auto_focus: bool = False,
+    tooltip: str = None
 ) -> ft.ElevatedButton:
-    return ft.ElevatedButton(
+    if on_click is None:
+        on_click = partial(log_button_press, text)
+    
+    button = ft.ElevatedButton(
         text=text,
         on_click=on_click,
-        width=120,
+        width=width,
+        height=height,
         style=style,
-        bgcolor=ft.Colors.PRIMARY,
-        color=ft.Colors.ON_PRIMARY,
-        icon=icon,
-        expand=2
+        expand=2,
+        autofocus=auto_focus,
+        tooltip=tooltip
     )
+    if icon:
+        button.icon = icon
+    return button
   
 # TODO: Finish transferring components from login_ui.py here
   
@@ -83,40 +103,50 @@ def default_action_button(
     
     
 # == Preset Buttons ==
+# class ButtonData:
+#     def __init__(self, label: str, tooltip: str, icon: Optional[ft.Icon] = None):
+#         self.label = label
+#         self.tooltip = tooltip
+#         self.icon = icon
+@dataclass
+class ButtonData:
+    label: str
+    tooltip: str
+    icon: Optional[ft.IconValue] = None
+
 class DefaultButton(Enum):
-    CANCEL = "Cancel"
-    OKAY = "Okay"
-    LAUNCH = "Launch"
-    LOGOUT = "Log Out"
-    LOGIN = "Log In"
-    ERROR = "Okay"
-    PROFILE = "My Profile"
-    BACK = "Back"
+    CANCEL = ButtonData(label="Cancel", tooltip="Cancel the current action")
+    OKAY = ButtonData(label="Okay", tooltip="Confirm and proceed")
+    LAUNCH = ButtonData(label="Launch", tooltip="Start the application")
+    LOGOUT = ButtonData(label="Log Out", tooltip="Log out from the current session", icon=ft.Icons.LOGOUT)
+    LOGIN = ButtonData(label="Log In", tooltip="Log into your account", icon=ft.Icons.LOGIN)
+    ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
+    PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
+    BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
     
 def preset_button(
     type: DefaultButton,
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"{DefaultButton.value} button pressed! {f.text}"),
-    preset_icon: ft.IconValue = None,
-    style: ft.ButtonStyle = default_action_button_style
+    on_click: Callable[[ft.ElevatedButton], None] = None,
+    style: ft.ButtonStyle = default_action_button_style,
+    auto_focus: bool = False,
 ) -> ft.ElevatedButton:
-    if type == DefaultButton.LOGOUT:
-        preset_icon = ft.Icons.LOGOUT
-    elif type == DefaultButton.LOGIN:
-        preset_icon = ft.Icons.LOGIN
-    elif type == DefaultButton.ERROR:
+    data = type.value
+    
+    if on_click is None:
+        on_click = partial(log_button_press, data.label)
+        
+    if type == DefaultButton.ERROR:
         style = build_action_button_style(
             primary=ft.Colors.ERROR,
             on_primary=ft.Colors.ON_ERROR,
             highlight=ft.Colors.ERROR
         )
-    elif type == DefaultButton.PROFILE:
-        preset_icon = ft.Icons.PERSON
-    elif type == DefaultButton.BACK:
-        preset_icon = ft.Icons.KEYBOARD_RETURN
     
     return default_action_button(
-        text=type.value,
+        text=data.label,
+        tooltip=data.tooltip,
+        icon=data.icon,
         on_click=on_click,
-        icon=preset_icon,
-        style=style
+        style=style,
+        auto_focus=auto_focus,
     )

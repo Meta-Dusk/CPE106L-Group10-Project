@@ -1,6 +1,7 @@
 import re
 import inspect
 import os
+import flet as ft
 
 def is_valid_hex_color(code: str) -> bool:
     return isinstance(code, str) and re.fullmatch(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})", code) is not None
@@ -25,6 +26,10 @@ def print_call_chain():
         lineno = frame_info.lineno
         func = frame_info.function
         print(f"  {i + 1}. {filename}:{lineno} — {func}()")
+
+def log_button_press(name: str, e: ft.ControlEvent):
+    print(f"\"{name}\": button pressed!")
+
 
 def test():
     print(f"Called from: {where_am_i()}")

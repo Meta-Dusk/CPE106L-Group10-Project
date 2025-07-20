@@ -2,14 +2,12 @@ import flet as ft
 
 from enum import Enum
 from chaewon_login.ui.styles import (
-    default_text_style,
-    default_subtitle_style,
-    default_title_style,
-    default_error_text_style,
-    DEFAULT_INPUT_FIELD_WIDTH
-)
+    default_text_style, default_subtitle_style,
+    default_title_style, default_error_text_style,
+    DEFAULT_INPUT_FIELD_WIDTH)
 
 
+# TODO: Refactor default text types to implement new data structure, as seen in `images.py`
 class TextType(Enum):
     TITLE = "title"
     SUBTITLE = "subtitle"
@@ -46,25 +44,25 @@ class InputFieldType(Enum):
 
 def default_input_field(
     input_type: InputFieldType = InputFieldType.USERNAME,
-    width: int = DEFAULT_INPUT_FIELD_WIDTH
+    width: int = DEFAULT_INPUT_FIELD_WIDTH,
+    auto_focus: bool = False,
+    password: bool = False,
+    can_reveal_password: bool = False
 ) -> ft.TextField:
     if input_type == InputFieldType.USERNAME:
-        return ft.TextField(
-            label=f"{InputFieldType.USERNAME.value.capitalize()}",
-            hint_text=f"Enter your {InputFieldType.USERNAME.value}",
-            width=width,
-            autofocus=True
-        )
+        auto_focus=True
     elif input_type == InputFieldType.PASSWORD:
-        return ft.TextField(
-            label=f"{InputFieldType.PASSWORD.value.capitalize()}",
-            hint_text=f"Enter your {InputFieldType.PASSWORD.value}",
-            width=width,
-            password=True,
-            can_reveal_password=True
-        )
-    else:
-        raise ValueError(f"Unsupported input type: {input_type}")
+        password=True,
+        can_reveal_password=True
+        
+    return ft.TextField(
+        label=f"{input_type.value.capitalize()}",
+        hint_text=f"Enter your {input_type.value}",
+        width=width,
+        autofocus=auto_focus,
+        password=password,
+        can_reveal_password=can_reveal_password
+    )
     
 uri_input_field = ft.TextField(
     label="MongoDB URI",

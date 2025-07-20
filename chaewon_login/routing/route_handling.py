@@ -8,6 +8,7 @@ from chaewon_login.ui.screens.dashboard_ui import handle_dashboard
 from chaewon_login.ui.screens.profile_ui import handle_profile
 from chaewon_login.ui.screens.shared_ui import render_page
 from chaewon_login.ui.screens.viewgraphs import handle_viewgraphs
+from chaewon_login.ui.screens.booking import handle_booking
 from chaewon_login.ui.components.text import default_text, TextType
 from chaewon_login.auth.user import is_authenticated
 from chaewon_login.routing.route_data import RouteHandler, PageRoute
@@ -46,7 +47,8 @@ ROUTE_HANDLERS = {
     PageRoute.LOGIN.value: RouteHandler(PageRoute.LOGIN.value, handle_login),
     PageRoute.RETRY.value: RouteHandler(PageRoute.RETRY.value, check_mongo_connection),
     PageRoute.DASHBOARD.value: RouteHandler(PageRoute.DASHBOARD.value, handle_dashboard, auth_required=True),
-    PageRoute.GRAPHS.value: RouteHandler(PageRoute.GRAPHS.value, handle_viewgraphs, auth_required=True)
+    PageRoute.GRAPHS.value: RouteHandler(PageRoute.GRAPHS.value, handle_viewgraphs, auth_required=True),
+    PageRoute.BOOKING.value: RouteHandler(PageRoute.BOOKING.value, handle_booking)
 }
 
 DYNAMIC_ROUTE_HANDLERS = [

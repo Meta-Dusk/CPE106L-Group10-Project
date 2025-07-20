@@ -3,7 +3,7 @@ import threading
 import time
 # import sys
 # import os
-# from chaewon_login import ride_visuals_utils
+# from chaewon_login.ride_booking.ride_visuals_utils import visualize_user_rides
 
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
@@ -14,20 +14,22 @@ from chaewon_login.db.db_manager import (init_database, get_current_mode, toggle
 from chaewon_login.ui.components.containers import default_column, default_container, div
 from chaewon_login.ui.components.dialogs import default_notif_dialog
 from chaewon_login.ui.components.text import default_text, TextType, default_input_field, InputFieldType
-from chaewon_login.routing.route_data import PageRoute
 from chaewon_login.ui.screens.loading_screen import show_loading_screen
 from chaewon_login.ui.animations import animate_fade_in, animate_fade_out, animate_reset, container_setup
 from chaewon_login.ui.styles import apply_default_page_config
 from chaewon_login.ui.theme_service import save_theme_mode
+from chaewon_login.routing.route_data import PageRoute
+
 
 def main_login_ui(page: ft.Page):
+    # == Login Page setup ==
     page.controls.clear()
     apply_default_page_config(page)
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
     current_mode = get_current_mode().value
-    text_switch_to_sqlite = f"Switch to SQLite (Currently {current_mode})"
-    text_switch_to_mongo = f"Switch to MongoDB (Currently {current_mode})"
+    text_switch_to_sqlite = f"Switch to SQLite? (Currently {current_mode})"
+    text_switch_to_mongo = f"Switch to MongoDB? (Currently {current_mode})"
 
     login_message = default_text(TextType.TITLE, "Chaewon demands your login credentials.")
     message = ft.Text(value="", color=ft.Colors.RED)

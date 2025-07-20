@@ -16,3 +16,4 @@ class PageRoute(Enum):
     RETRY = "/retry"
     DASHBOARD = "/dashboard"
     GRAPHS = "/dashboard/graphs"
+    BOOKING = "/dashboard/booking"
