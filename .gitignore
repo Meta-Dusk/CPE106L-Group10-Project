@@ -19,3 +19,10 @@ chaewon_login/auth/keys/
 chaewon_login/auth/enc/
 .env
 
+# Ignoring user configs
+*.json
+
+# Temporary for now
+pyproject.toml
+build/
+*.lock

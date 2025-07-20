@@ -3,7 +3,7 @@ from enum import Enum
 
 from chaewon_login.db.mongo import get_collection
 from chaewon_login.db.sqlite import connect_to_sqlite, find_user_sqlite, insert_user_sqlite
-from chaewon_login.ui.loading_screen import show_loading_screen
+from chaewon_login.ui.screens.loading_screen import show_loading_screen
 from typing import Callable
 
 
@@ -71,13 +71,6 @@ def init_database(page=None, callback: Callable=None):
             sqlite_conn = connect_to_sqlite()
 
         initialized = True
-
-        if page:
-            from chaewon_login.ui.login_ui import main_login_ui
-            page.controls.clear()
-            page.overlay.clear()
-            page.update()
-            main_login_ui(page)
 
         if callback:
             callback()

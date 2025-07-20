@@ -6,7 +6,7 @@ import os
 from tkinter import messagebox
 
 
-REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography"]
+REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography", "matplotlib"]
 
 def check_required_modules():
     missing = []
@@ -81,11 +81,8 @@ import flet as ft
 from chaewon_login.setup_env import setup_env
 from chaewon_login.ui.styles import apply_launcher_page_config
 from chaewon_login.ui.components.containers import default_row, div
-from chaewon_login.ui.components.buttons import (
-    launch_mode_radio_group,
-    DefaultButton,
-    preset_button
-)
+from chaewon_login.ui.components.buttons import (launch_mode_radio_group,
+                                                 DefaultButton, preset_button)
 from chaewon_login.ui.components.text import default_text, TextType
 
 
@@ -104,13 +101,29 @@ def launch_main_script(mode: str, page: ft.Page):
         subprocess.run(["python", "-m", "chaewon_login.setup"], check=True)
         return
 
-    mode_args = ["--web"] if mode == "web" else []
+    run_args = []
+
+    if mode == "web":
+        run_args.append("--web")
+
+    run_args.append(str(main_script))
 
     try:
-        subprocess.run(["flet", "run", *mode_args, str(main_script)], check=True, env=env)
+        subprocess.run(
+            ["flet", "run", *run_args],
+            check=True,
+            env=env
+        )
     except subprocess.CalledProcessError as e:
-        subprocess.run(["python", "-m", "tkinter", "-c",
-                        f"from tkinter import messagebox; messagebox.showerror('Error', 'Flet app failed to run:\\n{e}')"])
+        subprocess.run([
+            "python", "-c",
+            (
+                "import tkinter as tk; "
+                "from tkinter import messagebox; "
+                "root = tk.Tk(); root.withdraw(); "
+                f"messagebox.showerror('Error', 'Flet app failed to run:\\n{str(e).replace(chr(39), chr(92) + chr(39))}')"
+            )
+        ])
         sys.exit(1)
 
 
@@ -154,4 +167,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(target=main, assets_dir="chaewon_login/assets")
