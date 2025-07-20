@@ -51,7 +51,7 @@ def mod_button_text_style(
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
     page.theme = ft.Theme(
-        color_scheme_seed=ft.Colors.random(), #TODO: Decide on a final color scheme
+        color_scheme_seed=ft.Colors.DEEP_PURPLE, #TODO: Decide on a final color scheme
         font_family=DEFAULT_FONT_FAMILY,
     )
     page.theme_mode = load_theme_mode()
@@ -106,6 +106,7 @@ default_action_button_style = ft.ButtonStyle(
     animation_duration=100,
     icon_color=ft.Colors.ON_PRIMARY,
     icon_size=15,
+    color=ft.Colors.ON_PRIMARY,
     bgcolor=ft.Colors.PRIMARY,
     shape={
         ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
@@ -137,28 +138,39 @@ default_action_button_style = ft.ButtonStyle(
 def build_action_button_style(
     primary: ft.ColorValue = ft.Colors.PRIMARY,
     on_primary: ft.ColorValue = ft.Colors.ON_PRIMARY,
-    highlight: ft.ColorValue = ft.Colors.PRIMARY
+    primary_highlight: ft.ColorValue = ft.Colors.TERTIARY,
+    seconday_highlight: ft.ColorValue = ft.Colors.ON_TERTIARY,
+    text_size: ft.OptionalNumber = 18
 ) -> ft.ButtonStyle:
     return ft.ButtonStyle(
-        animation_duration=200,
+        animation_duration=100,
         icon_color=on_primary,
         icon_size=15,
+        color=on_primary,
         bgcolor=primary,
         shape={
             ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
-            ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8))
+            ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8)),
+            ft.ControlState.FOCUSED: ft.RoundedRectangleBorder(ft.border_radius.all(10)),
         },
         side={
-            ft.ControlState.DEFAULT: border_side(color=primary),
-            ft.ControlState.FOCUSED: border_side(),
+            ft.ControlState.DEFAULT: border_side(primary),
+            ft.ControlState.FOCUSED: border_side(seconday_highlight),
         },
         overlay_color={
-            ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, highlight),
-            ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.3, highlight),
-            ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, highlight),
+            ft.ControlState.DISABLED: ft.Colors.with_opacity(0.7, ft.Colors.SECONDARY),
+            ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, primary_highlight),
+            ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, primary_highlight),
+            ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, primary_highlight),
         },
         elevation={
             ft.ControlState.DEFAULT: 1,
-            ft.ControlState.DISABLED: 0
+            ft.ControlState.DISABLED: 0,
+        },
+        text_style={
+            ft.ControlState.DEFAULT: mod_button_text_style(primary, size=text_size),
+            ft.ControlState.PRESSED: mod_button_text_style(primary_highlight, weight=ft.FontWeight.BOLD, size=text_size),
+            ft.ControlState.HOVERED: mod_button_text_style(primary_highlight, weight=ft.FontWeight.W_500, size=text_size),
+            ft.ControlState.FOCUSED: mod_button_text_style(seconday_highlight, weight=ft.FontWeight.W_600, size=text_size),
         }
     )

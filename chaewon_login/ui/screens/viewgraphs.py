@@ -6,7 +6,7 @@ from chaewon_login.ui.components.containers import div, default_row
 from chaewon_login.ui.screens.shared_ui import render_page, preset_logout_button
 from chaewon_login.assets.images import default_image, ImageData
 from chaewon_login.routing.route_data import PageRoute
-from chaewon_login.ride_visuals_utils import visualize_user_rides
+from chaewon_login.ride_booking.ride_visuals_utils import visualize_user_rides
 """
 TODO: Integrate matplot lib figures into the UI... Somehow.
 The current implementation in `handle_viewgraphs()` isn't recommended.

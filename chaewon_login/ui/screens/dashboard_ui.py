@@ -21,11 +21,18 @@ def handle_dashboard(page: ft.Page, _):
     mathplot_btn = default_action_button(
         text="View Plots",
         icon=ft.Icons.AUTO_GRAPH,
-        on_click=lambda e: page.go(PageRoute.GRAPHS.value)
+        on_click=lambda e: page.go(PageRoute.GRAPHS.value),
+        tooltip="Show the graphs we've been testing"
+    )
+    booking_btn = default_action_button(
+        text="Book Now",
+        icon=ft.Icons.CAR_RENTAL,
+        on_click=lambda e: page.go(PageRoute.BOOKING.value),
+        tooltip="Show the testing screen for the booking feature"
     )
     
     control_buttons = default_row(controls=[profile_btn, logout_btn])
-    other_buttons = default_row(controls=mathplot_btn)
+    other_buttons = default_row(controls=[mathplot_btn, booking_btn])
 
     render_page(page, [msg, image, div(), other_buttons, control_buttons])
 
