@@ -3,7 +3,7 @@ import flet as ft
 def is_authenticated(page: ft.Page) -> bool:
     return bool(page.session.get("user_authenticated"))
 
-def yes_clicked(
+def logout_yes(
     page: ft.Page,
     dialog: ft.AlertDialog,
     page_destination: str
@@ -13,11 +13,13 @@ def yes_clicked(
     page.go(page_destination)
     page.update()
 
-
-def no_clicked(
+def logout_no(
     page: ft.Page,
     dialog: ft.AlertDialog
 ):
     page.close(dialog)
     page.update()
 
+# def logout(page: ft.Page):
+#     page.session.clear()
+#     page.go(PageRoute.LOGIN.value)

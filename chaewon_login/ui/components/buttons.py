@@ -2,13 +2,27 @@ import flet as ft
 
 from chaewon_login.ui.components.containers import default_column
 from typing import Callable, Optional
-from chaewon_login.ui.styles import default_action_button_style
+from chaewon_login.ui.styles import default_action_button_style, build_action_button_style
+from chaewon_login.utils import log_button_press
 from enum import Enum
+from functools import partial
+from dataclasses import dataclass
 
+
+class LaunchMode(Enum):
+    NATIVE = "native"
+    WEB = "web"
+    SETUP = "setup"
+
+DEFAULT_LAUNCH_CHOICES = [
+    (LaunchMode.NATIVE.value, "Native window (default)"),
+    (LaunchMode.WEB.value, "Web browser"),
+    (LaunchMode.SETUP.value, "Run setup")
+]
 
 def launch_mode_radio_choice(
-    value: str | None = None,
-    label: str | ft.Text | None = "Launch Mode",
+    value: Optional[str] = None,
+    label: Optional[str | ft.Text] = "Launch Mode",
     label_style: Optional[ft.TextStyle] = None,
     fill_color: ft.ControlStateValue[ft.Colors] = ft.Colors.PRIMARY_CONTAINER
 ) -> ft.Radio:
@@ -17,21 +31,16 @@ def launch_mode_radio_choice(
         label=label,
         label_style=label_style or ft.TextStyle(color=ft.Colors.ON_PRIMARY_CONTAINER),
         fill_color=fill_color,
-        autofocus=True,
         active_color=ft.Colors.PRIMARY_CONTAINER,
         splash_radius=15
     )
     
 def launch_mode_radio_group(
     ref: Optional[ft.Ref[ft.RadioGroup]] = None,
-    choices: list[tuple[str, str]] = None
+    choices: Optional[list[tuple[str, str]]] = None
 ) -> ft.RadioGroup:
     if choices is None:
-        choices = [
-            ("native", "Native window (default)"),
-            ("web", "Web browser"),
-            ("setup", "Run setup")
-        ]
+        choices = choices or DEFAULT_LAUNCH_CHOICES
 
     radios = [
         ft.Row(
@@ -50,91 +59,101 @@ def launch_mode_radio_group(
 
     
 def default_action_button(
-    text: str | None = "Action Button",
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Action button pressed! {f.text}"),
+    text: Optional[str] = "Action Button",
+    on_click: Callable[[ft.ElevatedButton], None] = None,
     style: ft.ButtonStyle = default_action_button_style,
-    icon: ft.IconValue = None
+    icon: ft.IconValue = None,
+    width: ft.OptionalNumber = 120,
+    height: ft.OptionalNumber = 40,
+    auto_focus: bool = False,
+    tooltip: str = None
 ) -> ft.ElevatedButton:
-    return ft.ElevatedButton(
+    if on_click is None:
+        on_click = partial(log_button_press, text)
+    
+    button = ft.ElevatedButton(
         text=text,
         on_click=on_click,
-        width=120,
+        width=width,
+        height=height,
         style=style,
-        bgcolor=ft.Colors.PRIMARY,
-        color=ft.Colors.ON_PRIMARY,
-        icon=icon
+        expand=2,
+        autofocus=auto_focus,
+        tooltip=tooltip
     )
+    if icon:
+        button.icon = icon
+    return button
+  
+# TODO: Finish transferring components from login_ui.py here
+  
+# def db_toggle_button(
+#     current_mode,
+#     text_switch_to_sqlite,
+#     text_switch_to_mongo,
+    
+# ):
+#     return ft.TextButton(
+#         icon=ft.Icons.CODE_SHARP,
+#         icon_color=ft.Colors.PRIMARY,
+#         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
+#         tooltip="Switch between available databases",
+#         on_click=handle_db_toggle
+#     )
+    
     
 # == Preset Buttons ==
+# class ButtonData:
+#     def __init__(self, label: str, tooltip: str, icon: Optional[ft.Icon] = None):
+#         self.label = label
+#         self.tooltip = tooltip
+#         self.icon = icon
+@dataclass
+class ButtonData:
+    label: str
+    tooltip: str
+    icon: Optional[ft.IconValue] = None
+
 class DefaultButton(Enum):
-    CANCEL = "Cancel"
-    OKAY = "Okay"
-    LAUNCH = "Launch"
-    LOGOUT = "Log Out"
-    LOGIN = "Log In"
+    CANCEL = ButtonData(label="Cancel", tooltip="Cancel the current action")
+    OKAY = ButtonData(label="Okay", tooltip="Confirm and proceed")
+    LAUNCH = ButtonData(label="Launch", tooltip="Start the application")
+    LOGOUT = ButtonData(label="Log Out", tooltip="Log out from the current session", icon=ft.Icons.LOGOUT)
+    LOGIN = ButtonData(label="Log In", tooltip="Log into your account", icon=ft.Icons.LOGIN)
+    REGISTER = ButtonData(label="Register", tooltip="Register a new account", icon=ft.Icons.HOW_TO_REG)
+    ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
+    PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
+    BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
     
 def preset_button(
     type: DefaultButton,
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"{DefaultButton.value} button pressed! {f.text}"),
-    preset_icon: ft.IconValue = None
+    on_click: Callable[[ft.ElevatedButton], None] = None,
+    style: ft.ButtonStyle = default_action_button_style,
+    auto_focus: bool = False,
 ) -> ft.ElevatedButton:
-    if type == DefaultButton.LOGOUT:
-        preset_icon = ft.Icons.LOGOUT
-    elif type == DefaultButton.LOGIN:
-        preset_icon = ft.Icons.LOGIN
+    data = type.value
+    
+    if on_click is None:
+        on_click = partial(log_button_press, data.label)
+        
+    if type == DefaultButton.ERROR:
+        style = build_action_button_style(
+            primary=ft.Colors.ERROR,
+            on_primary=ft.Colors.ON_ERROR,
+            highlight=ft.Colors.ERROR
+        )
     
     return default_action_button(
-        text=type.value,
+        text=data.label,
+        tooltip=data.tooltip,
+        icon=data.icon,
         on_click=on_click,
-        icon=preset_icon
+        style=style,
+        auto_focus=auto_focus,
     )
-    
-def cancel_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Cancel button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Cancel",
-        on_click=on_click,
-    )
-    
-def launch_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Launch button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Launch",
-        on_click=on_click,
-    )
-    
-def okay_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Okay button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return default_action_button(
-        text="Okay",
-        on_click=on_click,
-    )
-    
-def logout_button(
-    on_click: Callable[[ft.ElevatedButton], None] = lambda f: print(f"Logout button pressed! {f.text}")
-) -> ft.ElevatedButton:
-    return ft.ElevatedButton(
-        text="Log Out",
-        icon=ft.Icons.LOGOUT,
-        on_click=on_click,
-        bgcolor=ft.Colors.RED_400,
-        color=ft.Colors.WHITE
-    )
-    
-def profile_button(page: ft.Page):
-    def open_profile(e):
-        user_id = page.session.get("user_id")
-        if user_id:
-            page.go(f"/profile/{user_id}")
-            
-    return ft.ElevatedButton(
-        text="Go to My Profile",
-        icon=ft.Icons.PERSON,
-        bgcolor=ft.Colors.BLUE_500,
-        color=ft.Colors.WHITE,
-        on_click=open_profile
-    )
-    
+
+def test():
+    print(LaunchMode.NATIVE.value)
+
+if __name__ == "__main__":
+    test()

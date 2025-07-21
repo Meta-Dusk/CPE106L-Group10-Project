@@ -1,11 +1,11 @@
 import flet as ft
 
 from chaewon_login.ui.components.containers import default_column, default_container
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 
 
 def show_loading_screen(page: ft.Page, message: str = "Connecting..."):
-    loading_text = default_text(TextType.TITLE, message)
+    loading_text = default_text(DefaultTextStyle.TITLE, message)
     loading_spinner = ft.ProgressRing(width=200,height=200)
 
     loading_ui = default_column(controls=
