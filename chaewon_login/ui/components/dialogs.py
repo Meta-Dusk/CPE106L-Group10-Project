@@ -4,7 +4,7 @@ import asyncio
 from typing import Callable
 from chaewon_login.ui.components.buttons import preset_button, DefaultButton
 from chaewon_login.ui.components.containers import default_column, default_container
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 
 
 DEFAULT_TITLE_PADDING = 25
@@ -19,8 +19,8 @@ def confirm_logout_dialog(
     
     dialog = ft.AlertDialog(
         modal=True,
-        title=default_text(TextType.TITLE, "Confirm Logout"),
-        content=default_text(TextType.SUBTITLE, "Are you sure you want to log out?"),
+        title=default_text(DefaultTextStyle.TITLE, "Confirm Logout"),
+        content=default_text(DefaultTextStyle.SUBTITLE, "Are you sure you want to log out?"),
         actions=[
             cancel_btn,
             preset_button(DefaultButton.LOGOUT, on_click=yes_clicked)
@@ -79,7 +79,7 @@ def default_alert_dialog(
         modal=True,
         adaptive=True,
         scrollable=True,
-        title=default_text(TextType.TITLE,input_text=title) if isinstance(title, str) else title,
+        title=default_text(DefaultTextStyle.TITLE,input_text=title) if isinstance(title, str) else title,
         title_padding=ft.padding.all(DEFAULT_TITLE_PADDING),
         content=default_column(
             controls=content if isinstance(content, list) else [content] if content else []
@@ -107,7 +107,7 @@ def error_dialog(
     okay_btn = preset_button(DefaultButton.OKAY,on_click=close_dialog)
     okay_btn.color = ft.Colors.ON_ERROR
     okay_btn.bgcolor = ft.Colors.ERROR
-    title = default_text(TextType.ERROR, input_text="ERROR")
+    title = default_text(DefaultTextStyle.ERROR, input_text="ERROR")
     title.size = 25
     
     dialog = ft.AlertDialog(
@@ -157,7 +157,7 @@ def test(page: ft.Page):
     
     apply_default_page_config(page)
     
-    test_text = default_text(TextType.SUBTITLE, "Test")
+    test_text = default_text(DefaultTextStyle.SUBTITLE, "Test")
     test_container = default_container(test_text)
     dialog = default_alert_dialog(content=test_text, page=page)
     

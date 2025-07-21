@@ -9,15 +9,15 @@ from functools import partial
 from dataclasses import dataclass
 
 
-class LaunchMode(str, Enum):
+class LaunchMode(Enum):
     NATIVE = "native"
     WEB = "web"
     SETUP = "setup"
 
 DEFAULT_LAUNCH_CHOICES = [
-    (LaunchMode.NATIVE, "Native window (default)"),
-    (LaunchMode.WEB, "Web browser"),
-    (LaunchMode.SETUP, "Run setup")
+    (LaunchMode.NATIVE.value, "Native window (default)"),
+    (LaunchMode.WEB.value, "Web browser"),
+    (LaunchMode.SETUP.value, "Run setup")
 ]
 
 def launch_mode_radio_choice(
@@ -120,6 +120,7 @@ class DefaultButton(Enum):
     LAUNCH = ButtonData(label="Launch", tooltip="Start the application")
     LOGOUT = ButtonData(label="Log Out", tooltip="Log out from the current session", icon=ft.Icons.LOGOUT)
     LOGIN = ButtonData(label="Log In", tooltip="Log into your account", icon=ft.Icons.LOGIN)
+    REGISTER = ButtonData(label="Register", tooltip="Register a new account", icon=ft.Icons.HOW_TO_REG)
     ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
     PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
     BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
@@ -150,3 +151,9 @@ def preset_button(
         style=style,
         auto_focus=auto_focus,
     )
+
+def test():
+    print(LaunchMode.NATIVE.value)
+
+if __name__ == "__main__":
+    test()

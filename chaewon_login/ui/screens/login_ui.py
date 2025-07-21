@@ -9,11 +9,11 @@ import time
 
 from chaewon_login.auth.hashing import hash_password, verify_password
 from chaewon_login.assets.images import ImageData, default_image
-from chaewon_login.db.db_manager import (init_database, get_current_mode, toggle_db, 
-                                         find_user, insert_user, DBMode)
+from chaewon_login.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
 from chaewon_login.ui.components.containers import default_column, default_container, div
 from chaewon_login.ui.components.dialogs import default_notif_dialog
-from chaewon_login.ui.components.text import default_text, TextType, default_input_field, InputFieldType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
+from chaewon_login.ui.components.buttons import preset_button, DefaultButton
 from chaewon_login.ui.screens.loading_screen import show_loading_screen
 from chaewon_login.ui.animations import animate_fade_in, animate_fade_out, animate_reset, container_setup
 from chaewon_login.ui.styles import apply_default_page_config
@@ -31,11 +31,11 @@ def main_login_ui(page: ft.Page):
     text_switch_to_sqlite = f"Switch to SQLite? (Currently {current_mode})"
     text_switch_to_mongo = f"Switch to MongoDB? (Currently {current_mode})"
 
-    login_message = default_text(TextType.TITLE, "Chaewon demands your login credentials.")
+    login_message = default_text(DefaultTextStyle.TITLE, "Chaewon demands your login credentials.")
     message = ft.Text(value="", color=ft.Colors.RED)
-    username_input = default_input_field(InputFieldType.USERNAME)
-    password_input = default_input_field(InputFieldType.PASSWORD)
-    confirm_password_input = default_input_field(InputFieldType.PASSWORD)
+    username_input = default_input_field(DefaultInputFieldType.USERNAME)
+    password_input = default_input_field(DefaultInputFieldType.PASSWORD)
+    confirm_password_input = default_input_field(DefaultInputFieldType.PASSWORD)
     confirm_password_input.label = "Confirm Password"
     confirm_password_input.visible = False
 
@@ -48,7 +48,7 @@ def main_login_ui(page: ft.Page):
     #     visible=False,
     #     on_click=lambda e: ride_visuals_utils.visualize_user_rides(page.session.get("user_id"))
     # )
-
+    
     # == Animated Switching Image ==
     def chaewon_toggle(page, toggleable_chaewon, current_image, e=None):
         chaewon_stare = ImageData.CHAEWON_STARE.value
@@ -95,7 +95,7 @@ def main_login_ui(page: ft.Page):
     theme_toggle = ft.IconButton(
         icon=ft.Icons.LIGHT_MODE,
         tooltip="Toggle Theme",
-        on_click=toggle_theme
+        on_click=toggle_theme,
     )
     
     # == Login Setup ==
@@ -108,7 +108,7 @@ def main_login_ui(page: ft.Page):
         toggle_button.text = text_register if mode[is_login] else text_login
         confirm_password_input.visible = not mode[is_login]
         message.value = ""
-        update_button_text()
+        update_button()
         page.update()
 
     toggle_button.on_click = switch_mode
@@ -149,11 +149,19 @@ def main_login_ui(page: ft.Page):
 
         page.update()
 
-    action_button = ft.ElevatedButton(text="Login", on_click=login_or_register)
+    action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
 
-    def update_button_text():
-        action_button.text = "Login" if mode[is_login] else "Register"
-        page.update()
+    def update_button():
+        if mode[is_login]:
+            updated_btn = preset_button(DefaultButton.LOGIN, on_click=action_button.on_click)
+        else:
+            updated_btn = preset_button(DefaultButton.REGISTER, on_click=action_button.on_click)
+        
+        action_button.text = updated_btn.text
+        action_button.icon = updated_btn.icon
+        action_button.style = updated_btn.style
+        
+        action_button.update()
 
     def reset(e):
         page.controls.clear()
@@ -182,8 +190,8 @@ def main_login_ui(page: ft.Page):
                     dialog_title_text = "Database Switched"
                     db_toggle_button.text = text_switch_to_sqlite
 
-            dialog_content = default_text(TextType.SUBTITLE, dialog_content_text)
-            dialog_title = default_text(TextType.TITLE, dialog_title_text)
+            dialog_content = default_text(DefaultTextStyle.SUBTITLE, dialog_content_text)
+            dialog_title = default_text(DefaultTextStyle.TITLE, dialog_title_text)
 
             dialog = default_notif_dialog(
                 title=dialog_title,
@@ -217,21 +225,19 @@ def main_login_ui(page: ft.Page):
     )
 
     # == Page Form ==
-    form = default_column(controls=
-        [
-            ft.Row([theme_toggle, db_toggle_button], alignment=ft.MainAxisAlignment.END),
-            toggleable_chaewon,
-            login_message,
-            div(),
-            username_input,
-            password_input,
-            confirm_password_input,
-            action_button,
-            toggle_button,
-            # view_stats_btn,         # Ride stats button
-            message,
-        ]
-    )
+    form = default_column([
+        ft.Row([theme_toggle, db_toggle_button], alignment=ft.MainAxisAlignment.END),
+        toggleable_chaewon,
+        login_message,
+        div(),
+        username_input,
+        password_input,
+        confirm_password_input,
+        action_button,
+        toggle_button,
+        # view_stats_btn,         # Ride stats button
+        message,
+    ])
 
     page.add(default_container(form))
     

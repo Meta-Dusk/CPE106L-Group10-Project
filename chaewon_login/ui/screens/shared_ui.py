@@ -22,3 +22,10 @@ def preset_logout_button(page: ft.Page, page_destination: str = PageRoute.LOGIN.
             no_clicked=lambda e: logout_no(page, dialog)
         )
     return preset_button(DefaultButton.LOGOUT, on_click=on_click)
+
+def open_profile(page: ft.Page):
+    def handler(e):
+        user_id = page.session.get("user_id")
+        if user_id:
+            page.go(f"/profile/{user_id}")
+    return handler

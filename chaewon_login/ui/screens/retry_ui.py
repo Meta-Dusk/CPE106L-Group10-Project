@@ -4,7 +4,7 @@ from chaewon_login.db.mongo import connect_to_mongo
 from chaewon_login.assets.images import ImageData, default_image
 from chaewon_login.db.db_manager import init_database, toggle_db
 from chaewon_login.ui.components.containers import default_container, default_column
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 from chaewon_login.ui.components.dialogs import default_notif_dialog
 from chaewon_login.routing.route_data import PageRoute
 from chaewon_login.ui.components.buttons import default_action_button
@@ -23,9 +23,9 @@ def check_mongo_connection(page: ft.Page):
         current_image.src = sad_chaewon.path
         current_image.tooltip = sad_chaewon.description
 
-        warning_title = default_text(TextType.TITLE, "Failed to connect to MongoDB.")
+        warning_title = default_text(DefaultTextStyle.TITLE, "Failed to connect to MongoDB.")
         warning_title.color = ft.Colors.RED
-        warning_desc = default_text(TextType.SUBTITLE, "Please ensure the MongoDB cluster is running...")
+        warning_desc = default_text(DefaultTextStyle.SUBTITLE, "Please ensure the MongoDB cluster is running...")
 
         def retry(e):
             # Show loading while retrying
@@ -42,10 +42,10 @@ def check_mongo_connection(page: ft.Page):
             if conn:
                 page.go(login_page)
             else:
-                dialog_content = default_text(TextType.SUBTITLE, "Failed to connect to SQLite.")
+                dialog_content = default_text(DefaultTextStyle.SUBTITLE, "Failed to connect to SQLite.")
                 dialog_content.color = ft.Colors.RED
                 dialog = default_notif_dialog(
-                    title=default_text(TextType.TITLE, "Error"),
+                    title=default_text(DefaultTextStyle.TITLE, "Error"),
                     content=dialog_content,
                     on_dismiss=lambda e: page.update()
                 )

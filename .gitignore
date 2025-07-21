@@ -20,7 +20,7 @@ chaewon_login/auth/enc/
 .env
 
 # Ignoring user configs
-*.json
+chaewon_login/ui/configs/*.json
 
 # Temporary for now
 pyproject.toml
