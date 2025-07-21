@@ -81,9 +81,8 @@ import flet as ft
 from chaewon_login.setup_env import setup_env
 from chaewon_login.ui.styles import apply_launcher_page_config
 from chaewon_login.ui.components.containers import default_row, div
-from chaewon_login.ui.components.buttons import (launch_mode_radio_group,
-                                                 DefaultButton, preset_button)
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.buttons import (launch_mode_radio_group, DefaultButton, preset_button, LaunchMode)
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 
 
 # === Setup environment ===
@@ -92,18 +91,18 @@ env["PYTHONPATH"] = str(Path(__file__).parent.resolve())
 main_script = Path(__file__).parent / "chaewon_login" / "main.py"
 
 
-def launch_main_script(mode: str, page: ft.Page):
+def launch_main_script(mode: LaunchMode, page: ft.Page):
     # Close Flet window before running subprocess
     page.window.close()
-
-    if mode == "setup":
+    print(f"\nChosen mode: {mode}\n")
+    if mode == LaunchMode.SETUP.value:
         setup_env()
-        subprocess.run(["python", "-m", "chaewon_login.setup"], check=True)
+        subprocess.run(["py", "-m", "chaewon_login.setup"], check=True)
         return
 
     run_args = []
 
-    if mode == "web":
+    if mode == LaunchMode.WEB.value:
         run_args.append("--web")
 
     run_args.append(str(main_script))
@@ -116,7 +115,7 @@ def launch_main_script(mode: str, page: ft.Page):
         )
     except subprocess.CalledProcessError as e:
         subprocess.run([
-            "python", "-c",
+            "py", "-c",
             (
                 "import tkinter as tk; "
                 "from tkinter import messagebox; "
@@ -142,7 +141,7 @@ def main(page: ft.Page):
     def on_cancel(e):
         page.window.close()
 
-    label = default_text(TextType.TITLE, "How would you like to run the app?")
+    label = default_text(DefaultTextStyle.TITLE, "How would you like to run the app?")
 
     launch_modes = launch_mode_radio_group(ref=selected_mode)
 

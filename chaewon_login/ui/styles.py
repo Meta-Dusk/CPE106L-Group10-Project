@@ -1,6 +1,8 @@
 import flet as ft
 from chaewon_login.assets.images import ICON_PATH
 from chaewon_login.ui.theme_service import load_theme_mode
+from dataclasses import dataclass
+from enum import Enum
 
 
 DEFAULT_FONT_FAMILY = "Roboto"
@@ -8,45 +10,103 @@ DEFAULT_INPUT_FIELD_WIDTH = 300
 APP_NAME = "Chae.App"
 
 
-# == Text Styles ==
-default_text_style = ft.TextStyle(
-    font_family=DEFAULT_FONT_FAMILY,
-    size=15,
-    weight=ft.FontWeight.NORMAL,
-    color=ft.Colors.ON_SECONDARY,
-)
-default_title_style = ft.TextStyle(
-    font_family=DEFAULT_FONT_FAMILY,
-    size=25,
-    weight=ft.FontWeight.BOLD,
-    color=ft.Colors.PRIMARY,
-)
-default_subtitle_style = ft.TextStyle(
-    font_family=DEFAULT_FONT_FAMILY,
-    size=18,
-    weight=ft.FontWeight.NORMAL,
-    color=ft.Colors.ON_PRIMARY_CONTAINER,
-)
-default_error_text_style = ft.TextStyle(
-    font_family=DEFAULT_FONT_FAMILY,
-    size=18,
-    weight=ft.FontWeight.NORMAL,
-    color=ft.Colors.ON_ERROR_CONTAINER,
-)
-def mod_button_text_style(
-    color: ft.ColorValue = ft.Colors.PRIMARY,
-    size: ft.OptionalNumber = 18,
-    weight: ft.FontWeight = ft.FontWeight.NORMAL,
-    font_family: str = DEFAULT_FONT_FAMILY,
-    letter_spacing: ft.OptionalNumber = None
-) -> ft.TextStyle:
-    return ft.TextStyle(
+# == Border Styles
+def border_side(
+    width: int = 2,
+    color: ft.ColorValue = ft.Colors.PRIMARY_CONTAINER
+) -> ft.BorderSide:
+    return ft.BorderSide(
+        width=width,
         color=color,
-        size=size,
-        weight=weight,
-        font_family=font_family,
-        letter_spacing=letter_spacing
+        stroke_align=ft.BorderSideStrokeAlign.CENTER
     )
+    
+
+# == Text Styles ==
+@dataclass
+class TextStyle:
+    font_family: str = DEFAULT_FONT_FAMILY
+    size: ft.OptionalNumber = 18
+    weight: ft.FontWeight = ft.FontWeight.NORMAL
+    color: ft.ColorValue = ft.Colors.PRIMARY
+    
+class DefaultTextStyle(Enum):
+    DEFAULT = TextStyle(color=ft.Colors.ON_SECONDARY)
+    SUBTITLE = TextStyle(color=ft.Colors.ON_PRIMARY_CONTAINER, size=20)
+    TITLE = TextStyle(weight=ft.FontWeight.BOLD, size=25)
+    ERROR = TextStyle(color=ft.Colors.ON_ERROR_CONTAINER)
+    LABEL = TextStyle(size=18)
+    HINT = TextStyle(size=16, color=ft.Colors.SECONDARY)
+    
+def build_text_style(style: TextStyle) -> ft.TextStyle:
+    return ft.TextStyle(
+        font_family=style.font_family,
+        size=style.size,
+        weight=style.weight,
+        color=style.color
+    )
+
+
+# == Input Field Styles ==
+@dataclass
+class InputFieldConfig:
+    label: ft.OptionalString = None
+    label_style: ft.TextStyle | None = None
+    width: int = 400
+    height: int = 70
+    auto_focus: bool = False
+    password: bool = False
+    can_reveal_password: bool = False
+    selection_color: ft.ColorValue = ft.Colors.RED
+    bg_color: ft.ColorValue = ft.Colors.PRIMARY_CONTAINER
+    color: ft.ColorValue = ft.Colors.ON_PRIMARY_CONTAINER
+    hint_text: ft.OptionalString = None
+    hint_style: ft.TextStyle = None
+    border_radius: ft.BorderRadiusValue = None
+    adaptive: bool = True
+    size_constraints: ft.BoxConstraints = None
+    expand: bool = True
+    
+    def __post_init__(self):
+        if self.hint_text is None and self.label is not None:
+            self.hint_text = f"Please enter your {self.label.lower()} here."
+        if self.hint_style is None:
+            self.hint_style = build_text_style(DefaultTextStyle.HINT.value)
+        if self.border_radius is None:
+            self.border_radius = ft.border_radius.all(10)
+        if self.label_style is None:
+            self.label_style = build_text_style(DefaultTextStyle.LABEL.value)
+        if self.size_constraints is None:
+            self.size_constraints = ft.BoxConstraints(
+                min_width=self.width,
+                min_height=self.height,
+                max_width=self.width * 1.5,
+                max_height=self.height * 1.5
+            )
+    
+class DefaultInputFieldType(Enum):
+    USERNAME = InputFieldConfig(
+        label="Username",
+        auto_focus=True,
+    )
+    PASSWORD = InputFieldConfig(
+        label="Password",
+        password=True,
+        can_reveal_password=True
+    )
+    URI = InputFieldConfig(
+        label="MongoDB URI",
+        hint_text="Input the full connection string here",
+        width=500,
+        password=True,
+        can_reveal_password=True,
+        auto_focus=True
+    )
+    HOST = InputFieldConfig(
+        label="Host",
+        hint_text="i.e. cluster.mongodb.net"
+    )
+    
 
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
@@ -81,27 +141,33 @@ def apply_launcher_page_config(page: ft.Page):
     page.window.width = 320
     page.window.height = 350
     
-def apply_setup_page_config(page: ft.Page):
+def apply_setup_page_config(page: ft.Page, alt: bool = False):
     static_page_config(page)
     default_page_border(page)
     page.title = f"{APP_NAME} | Setup"
     page.window.width = 600
-    page.window.height = 400
-
-
-# == Border Styles
-def border_side(
-    width: int = 2,
-    color: ft.ColorValue = ft.Colors.PRIMARY_CONTAINER
-) -> ft.BorderSide:
-    return ft.BorderSide(
-        width=width,
-        color=color,
-        stroke_align=ft.BorderSideStrokeAlign.CENTER
-    )
+    if alt:
+        page.window.height = 550
+    else:
+        page.window.height = 380
 
 
 # == Button Styles
+def mod_button_text_style(
+    color: ft.ColorValue = ft.Colors.PRIMARY,
+    size: ft.OptionalNumber = 18,
+    weight: ft.FontWeight = ft.FontWeight.NORMAL,
+    font_family: str = DEFAULT_FONT_FAMILY,
+    letter_spacing: ft.OptionalNumber = None
+) -> ft.TextStyle:
+    return ft.TextStyle(
+        color=color,
+        size=size,
+        weight=weight,
+        font_family=font_family,
+        letter_spacing=letter_spacing
+    )
+    
 default_action_button_style = ft.ButtonStyle(
     animation_duration=100,
     icon_color=ft.Colors.ON_PRIMARY,

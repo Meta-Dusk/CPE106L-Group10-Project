@@ -9,7 +9,7 @@ from chaewon_login.ui.screens.profile_ui import handle_profile
 from chaewon_login.ui.screens.shared_ui import render_page
 from chaewon_login.ui.screens.viewgraphs import handle_viewgraphs
 from chaewon_login.ui.screens.booking import handle_booking
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 from chaewon_login.auth.user import is_authenticated
 from chaewon_login.routing.route_data import RouteHandler, PageRoute
 
@@ -35,7 +35,7 @@ def handle_login(page: ft.Page, _):
     main_login_ui(page)
 
 def handle_not_found(page: ft.Page, _):
-    error_msg = default_text(TextType.TITLE, "404 - Page not found")
+    error_msg = default_text(DefaultTextStyle.TITLE, "404 - Page not found")
     error_msg.color = ft.Colors.RED
     render_page(page, error_msg)
 

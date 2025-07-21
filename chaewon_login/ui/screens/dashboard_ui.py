@@ -1,6 +1,6 @@
 import flet as ft
 
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 from chaewon_login.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from chaewon_login.ui.components.containers import div, default_row
 from chaewon_login.ui.screens.shared_ui import render_page, preset_logout_button
@@ -14,7 +14,7 @@ def handle_dashboard(page: ft.Page, _):
         if user_id:
             page.go(f"/profile/{user_id}")
 
-    msg = default_text(TextType.TITLE, "This is the dashboard 😔🤚")
+    msg = default_text(DefaultTextStyle.TITLE, "This is the dashboard 😔🤚")
     image = default_image()
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile)

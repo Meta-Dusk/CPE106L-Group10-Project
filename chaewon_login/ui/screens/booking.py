@@ -1,6 +1,6 @@
 import flet as ft
 
-from chaewon_login.ui.components.text import default_text, TextType
+from chaewon_login.ui.components.text import default_text, DefaultTextStyle
 from chaewon_login.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from chaewon_login.ui.components.containers import div, default_row, default_column
 from chaewon_login.ui.screens.shared_ui import render_page, preset_logout_button
@@ -27,7 +27,7 @@ assigning that to `tooltip`
 
 
 def handle_booking(page: ft.Page, _):
-    title = default_text(TextType.TITLE, "Book a Ride?")
+    title = default_text(DefaultTextStyle.TITLE, "Book a Ride?")
     
     example_image = build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
     random_image = generate_random_image()
