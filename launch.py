@@ -78,17 +78,17 @@ import os
 from pathlib import Path
 import flet as ft
 
-from chaewon_login.setup_env import setup_env
-from chaewon_login.ui.styles import apply_launcher_page_config
-from chaewon_login.ui.components.containers import default_row, div
-from chaewon_login.ui.components.buttons import (launch_mode_radio_group, DefaultButton, preset_button, LaunchMode)
-from chaewon_login.ui.components.text import default_text, DefaultTextStyle
+from app.setup_env import setup_env
+from app.ui.styles import apply_launcher_page_config
+from app.ui.components.containers import default_row, div
+from app.ui.components.buttons import (launch_mode_radio_group, DefaultButton, preset_button, LaunchMode)
+from app.ui.components.text import default_text, DefaultTextStyle
 
 
 # === Setup environment ===
 env = os.environ.copy()
 env["PYTHONPATH"] = str(Path(__file__).parent.resolve())
-main_script = Path(__file__).parent / "chaewon_login" / "main.py"
+main_script = Path(__file__).parent / "app" / "main.py"
 
 
 def launch_main_script(mode: LaunchMode, page: ft.Page):
@@ -97,7 +97,7 @@ def launch_main_script(mode: LaunchMode, page: ft.Page):
     print(f"\nChosen mode: {mode}\n")
     if mode == LaunchMode.SETUP.value:
         setup_env()
-        subprocess.run(["py", "-m", "chaewon_login.setup"], check=True)
+        subprocess.run(["py", "-m", "app.setup"], check=True)
         return
 
     run_args = []
@@ -166,4 +166,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="chaewon_login/assets")
+    ft.app(target=main, assets_dir="app/assets")
