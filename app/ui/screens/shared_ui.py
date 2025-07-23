@@ -1,4 +1,5 @@
 import flet as ft
+import asyncio
 
 from app.routing.route_data import PageRoute
 from app.ui.components.dialogs import confirm_logout_dialog
@@ -10,6 +11,7 @@ from app.ui.animations import (
     animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right)
 from app.ui.theme_service import save_theme_mode
 from typing import Callable
+from app.utils import enable_control_after_delay
 
 
 def render_page(page: ft.Page, content: ft.Control):
@@ -81,3 +83,32 @@ def theme_toggle_button(on_click: Callable[[ft.ElevatedButton], None] = None):
         tooltip="Toggle Theme",
         on_click=on_click,
     )
+    
+async def mod_toggle_theme(
+    e, page: ft.Page, delay: float = 2.0, toggle_controls: ft.Control | list[ft.Control] = [],
+    toggleable_logo: ft.Container = None, theme_toggle: ft.IconButton = None, logo: ft.Image = None
+):
+    # Launch delay tasks for all passed controls
+    for control in toggle_controls:
+        asyncio.create_task(enable_control_after_delay(control, delay))
+
+    # Then perform the theme toggle
+    await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    
+class StatusMessage:
+    def __init__(self, text_control: ft.Text):
+        self.text_control = text_control
+
+    def show(self, message: str, color: str):
+        self.text_control.value = message
+        self.text_control.color = color
+        self.text_control.update()
+
+    def success(self, message: str):
+        self.show(message, ft.Colors.TERTIARY)
+
+    def error(self, message: str):
+        self.show(message, ft.Colors.ERROR)
+
+    def info(self, message: str):
+        self.show(message, ft.Colors.ON_SECONDARY_CONTAINER)
