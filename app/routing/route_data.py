@@ -9,7 +9,8 @@ class RouteHandler:
     path: str
     handler: Callable[[ft.Page, ft.RouteChangeEvent], None]
     auth_required: bool = False
-    
+
+# Used only for static routes, and type-safety.
 class PageRoute(Enum):
     LOADING = "/"
     LOGIN = "/login"
