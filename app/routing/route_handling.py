@@ -53,6 +53,7 @@ ROUTE_HANDLERS = {
     PageRoute.API_KEY.value: RouteHandler(PageRoute.API_KEY.value, handle_api_key_entry)
 }
 
+# Use for pages that are designed to be unique per user.
 DYNAMIC_ROUTE_HANDLERS = [
     {
         "pattern": re.compile(r"^/profile/(?P<user_id>\w+)$"),

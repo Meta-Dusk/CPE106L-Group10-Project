@@ -84,30 +84,8 @@ def default_action_button(
     if icon:
         button.icon = icon
     return button
-  
-# TODO: Finish transferring components from login_ui.py here
-  
-# def db_toggle_button(
-#     current_mode,
-#     text_switch_to_sqlite,
-#     text_switch_to_mongo,
-    
-# ):
-#     return ft.TextButton(
-#         icon=ft.Icons.CODE_SHARP,
-#         icon_color=ft.Colors.PRIMARY,
-#         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
-#         tooltip="Switch between available databases",
-#         on_click=handle_db_toggle
-#     )
-    
-    
-# == Preset Buttons ==
-# class ButtonData:
-#     def __init__(self, label: str, tooltip: str, icon: Optional[ft.Icon] = None):
-#         self.label = label
-#         self.tooltip = tooltip
-#         self.icon = icon
+
+
 @dataclass
 class ButtonData:
     label: str
@@ -121,7 +99,6 @@ class DefaultButton(Enum):
     LOGOUT = ButtonData(label="Log Out", tooltip="Log out from the current session", icon=ft.Icons.LOGOUT)
     LOGIN = ButtonData(label="Log In", tooltip="Log into your account", icon=ft.Icons.LOGIN)
     REGISTER = ButtonData(label="Register", tooltip="Register a new account", icon=ft.Icons.HOW_TO_REG)
-    ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
     PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
     BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
     SUBMIT = ButtonData(label="Submit", tooltip="Submit the form data", icon=ft.Icons.CHECK)
@@ -136,13 +113,6 @@ def preset_button(
     
     if on_click is None:
         on_click = partial(log_button_press, data.label)
-        
-    if type == DefaultButton.ERROR:
-        style = build_action_button_style(
-            primary=ft.Colors.ERROR,
-            on_primary=ft.Colors.ON_ERROR,
-            highlight=ft.Colors.ERROR
-        )
     
     return default_action_button(
         text=data.label,

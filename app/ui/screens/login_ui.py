@@ -12,9 +12,9 @@ from app.ui.components.buttons import preset_button, DefaultButton
 from app.ui.screens.loading_screen import show_loading_screen
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
-from app.routing.route_data import PageRoute
+from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme
 from app.utils import enable_control_after_delay
-from app.ui.screens.shared_ui import theme_toggle_button, toggle_theme
+from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
@@ -53,9 +53,9 @@ def main_login_ui(page: ft.Page):
     def show_message(text: str, error: bool = False):
         message.value = text
         if error:
-            message.color = ft.Colors.RED
+            message.color = ft.Colors.ERROR
         else:
-            message.color = ft.Colors.GREEN
+            message.color = ft.Colors.TERTIARY
     
     def switch_mode(e):
         mode[is_login] = not mode[is_login]
@@ -177,12 +177,13 @@ def main_login_ui(page: ft.Page):
     logo = set_logo()
     toggleable_logo = container_setup(logo)
     
-    async def mod_toggle_theme(e, delay: float = 2.0):
-        asyncio.create_task(enable_control_after_delay(control_buttons, delay))
-        asyncio.create_task(enable_control_after_delay(action_button, delay))
-        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    async def handle_theme_click(e):
+        await mod_toggle_theme(
+            e, page, toggle_controls=[action_button, control_buttons],
+            toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
+        )
     
-    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    theme_toggle = theme_toggle_button(on_click=handle_theme_click)
     
     # == Buttons ==
     db_toggle_button = ft.TextButton(
