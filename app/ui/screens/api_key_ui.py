@@ -1,19 +1,14 @@
 import flet as ft
 
-from app.ui.components.containers import default_column, default_container, div
-from app.ui.components.text import default_text, DefaultTextStyle, mod_input_field, DefaultInputFieldType
+from app.ui.components.containers import default_column, div, default_row
+from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
-from app.ui.styles import apply_default_page_config
 from app.ui.screens.shared_ui import render_page
 from app.services.api_config import save_api_key, load_api_key, validate_api_key, is_api_configured, clear_api_config
 from app.routing.route_data import PageRoute
 
 
-def handle_api_key_entry(page: ft.Page, _):
-    """Handle API Key configuration screen"""
-    page.controls.clear()
-    apply_default_page_config(page)
-    
+def handle_api_key_entry(page: ft.Page, _):    
     # Check if API key is already configured
     current_api_key = load_api_key()
     is_configured = is_api_configured()
@@ -36,7 +31,7 @@ def handle_api_key_entry(page: ft.Page, _):
     description = default_text(DefaultTextStyle.SUBTITLE, description_text)
     
     # API Key input field
-    api_key_input = mod_input_field(DefaultInputFieldType.API_KEY)
+    api_key_input = default_input_field(input_field_type=DefaultInputFieldType.API_KEY)
     if current_api_key:
         # Show masked version of current key
         api_key_input.value = current_api_key[:10] + "..." if len(current_api_key) > 10 else current_api_key
@@ -80,8 +75,8 @@ def handle_api_key_entry(page: ft.Page, _):
         
         # Save the API key
         if save_api_key(api_key):
-            show_success(f"✅ API key saved successfully! Key: {api_key[:10]}...")
-            print(f"🔑 API Key configured: {api_key}")
+            show_success(f"✅ API key saved successfully! Key: {api_key[:4]}...")
+            # print(f"🔑 API Key configured: {api_key}") # That's a security issue 💀
             
             # Update button states
             update_button_states(True)
@@ -154,8 +149,7 @@ def handle_api_key_entry(page: ft.Page, _):
         text="Save API Key",
         on_click=on_save,
         icon=ft.Icons.SAVE,
-        tooltip="Save the Google Maps API key",
-        auto_focus=True
+        tooltip="Save the Google Maps API key"
     )
     
     clear_button = default_action_button(
@@ -187,22 +181,11 @@ def handle_api_key_entry(page: ft.Page, _):
     )
     
     # Button rows
-    main_buttons = ft.Row(
-        controls=[save_button, clear_button],
-        alignment=ft.MainAxisAlignment.CENTER,
-        spacing=20
-    )
+    main_buttons = default_row([save_button, clear_button])
     
-    config_buttons = ft.Row(
-        controls=[remove_btn, test_btn],
-        alignment=ft.MainAxisAlignment.CENTER,
-        spacing=20
-    )
+    config_buttons = default_row([remove_btn, test_btn])
     
-    back_row = ft.Row(
-        controls=[back_button],
-        alignment=ft.MainAxisAlignment.CENTER
-    )
+    back_row = default_row([back_button])
     
     # Main content column
     content = default_column(
@@ -221,8 +204,8 @@ def handle_api_key_entry(page: ft.Page, _):
         ]
     )
     
-    # Container with proper alignment and spacing
-    container = default_container(content)
+    # # Container with proper alignment and spacing
+    # container = default_container(content)
     
     # Render the page
-    render_page(page, container)
+    render_page(page, content)

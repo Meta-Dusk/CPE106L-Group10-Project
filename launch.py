@@ -12,7 +12,7 @@ Features:
 - Clean UI with radio button selection
 
 Authors: CPE106L Group 10
-Version: 1.0.0
+Version: 0.1.9
 Date: 2025
 """
 
@@ -20,43 +20,49 @@ import sys
 import subprocess
 import tkinter as tk
 import os
+import re
 
 from tkinter import messagebox
-
+from pathlib import Path
 
 # === CONFIGURATION ===
-# List of required Python modules for the application to function properly
-REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography", "matplotlib", "requests"]
+REQUIREMENTS_FILE = Path(__file__).resolve().parent / "requirements.txt"
 
 # === DEPENDENCY MANAGEMENT FUNCTIONS ===
 
-def check_required_modules():
+def parse_requirements(filename: Path):
     """
-    Check if all required modules are installed.
-    
+    Parse module names from requirements.txt
     Returns:
-        list: A list of missing module names. Empty list if all modules are available.
+        list: Module names (e.g., 'flet', 'bcrypt')
     """
+    modules = []
+    if not filename.exists():
+        raise FileNotFoundError(f"{filename} not found.")
+    
+    with filename.open("r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            match = re.match(r"^([a-zA-Z0-9_\-]+)", line)
+            if match:
+                modules.append(match.group(1))
+    return modules
+
+def check_required_modules(modules):
     missing = []
-    for mod in REQUIRED_MODULES:
+    for mod in modules:
         try:
             __import__(mod)
         except ImportError:
+            print(f"❌ Missing: {mod}")
             missing.append(mod)
     return missing
 
-def install_missing_modules(modules):
-    """
-    Install missing Python modules using pip.
-    
-    Args:
-        modules (list): List of module names to install
-        
-    Returns:
-        bool: True if installation was successful, False otherwise
-    """
+def install_requirements_file():
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", *modules])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", REQUIREMENTS_FILE])
         return True
     except subprocess.CalledProcessError:
         return False
@@ -64,38 +70,20 @@ def install_missing_modules(modules):
 # === USER INTERFACE FUNCTIONS ===
 
 def prompt_install_modules(modules):
-    """
-    Show a GUI dialog asking user permission to install missing modules.
-    
-    Args:
-        modules (list): List of missing module names
-        
-    Returns:
-        bool: True if user agrees to install, False otherwise
-    """
     root = tk.Tk()
-    root.withdraw()  # Hide the main tkinter window
-
+    root.withdraw()
     response = messagebox.askyesno(
         "Missing Required Modules",
         "The following modules are missing:\n\n" +
         "\n".join(modules) +
-        "\n\nWould you like to automatically install them now?"
+        "\n\nWould you like to install them now?"
     )
-
     root.destroy()
     return response
 
 def show_fatal_error(modules):
-    """
-    Show an error dialog for failed installations and exit the application.
-    
-    Args:
-        modules (list): List of modules that failed to install
-    """
     root = tk.Tk()
-    root.withdraw()  # Hide the main tkinter window
-    
+    root.withdraw()
     messagebox.showerror(
         "Installation Failed",
         "The following modules could not be installed:\n\n" +
@@ -106,32 +94,30 @@ def show_fatal_error(modules):
     sys.exit(1)
 
 # === MAIN DEPENDENCY CHECK AND INSTALLATION ===
-# Perform dependency check before importing application modules
+try:
+    required_modules = parse_requirements(REQUIREMENTS_FILE)
+except FileNotFoundError as e:
+    tk.Tk().withdraw()
+    messagebox.showerror("Missing File", str(e))
+    sys.exit(1)
 
-missing = check_required_modules()
+missing = check_required_modules(required_modules)
 
 if missing:
-    # Missing modules found - ask user for permission to install
     if prompt_install_modules(missing):
-        success = install_missing_modules(missing)
+        success = install_requirements_file()
         if not success:
             show_fatal_error(missing)
         else:
             messagebox.showinfo("Success", "All missing modules were installed successfully.")
-            # Restart the script to ensure new modules are properly loaded
             os.execl(sys.executable, sys.executable, *sys.argv)
     else:
-        # User declined installation - show error and exit
         show_fatal_error(missing)
 else:
     print("\n✅ All required modules are installed.\n")
 
 # == Flet App starts here ==
 # Only import your actual app logic if no missing modules
-
-import subprocess
-import os
-from pathlib import Path
 import flet as ft
 
 from app.setup_env import setup_env

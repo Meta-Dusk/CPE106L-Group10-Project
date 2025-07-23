@@ -25,6 +25,8 @@ def default_input_field(
     label: str | None = None
 ) -> ft.TextField:
     config = input_field_type.value
+    generated_hint = f"Please enter your {config.label.lower()} here."
+    
     return ft.TextField(
         label=config.label if label is None else label,
         label_style=config.label_style,
@@ -36,7 +38,7 @@ def default_input_field(
         selection_color=config.selection_color,
         bgcolor=config.bg_color,
         color=config.color,
-        hint_text=config.hint_text,
+        hint_text=generated_hint,
         hint_style=config.hint_style,
         border_radius=config.border_radius,
         adaptive=config.adaptive,

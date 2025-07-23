@@ -2,7 +2,6 @@
 API Configuration Service
 Handles Google Maps API key storage and retrieval
 """
-import os
 import json
 from pathlib import Path
 from typing import Optional
@@ -10,7 +9,7 @@ from cryptography.fernet import Fernet
 
 CONFIG_DIR = Path(__file__).parent.parent / "storage" / "data"
 API_CONFIG_FILE = CONFIG_DIR / "api_config.json"
-KEY_FILE = Path(__file__).parent / "auth" / "keys" / "secret.key"
+KEY_FILE = Path(__file__).parent.parent / "auth" / "keys" / "secret.key"
 
 def ensure_config_dir():
     """Ensure the config directory exists"""

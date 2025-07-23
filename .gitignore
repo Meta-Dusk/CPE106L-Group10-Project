@@ -21,6 +21,7 @@ app/auth/enc/
 
 # Ignoring user configs
 app/ui/configs/*.json
+app/storage/
 
 # Temporary for now
 pyproject.toml
