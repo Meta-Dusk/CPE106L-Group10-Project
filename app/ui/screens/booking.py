@@ -37,6 +37,7 @@ def handle_booking(page: ft.Page, _):
     async def mod_toggle_theme(e, delay: float = 2.0):
         asyncio.create_task(enable_control_after_delay(control_buttons, delay))
         asyncio.create_task(enable_control_after_delay(example_buttons, delay))
+        asyncio.create_task(enable_control_after_delay(theme_toggle, delay))
         await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
         
     theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)

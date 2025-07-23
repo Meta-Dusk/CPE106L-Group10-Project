@@ -68,8 +68,6 @@ class InputFieldConfig:
     expand: bool = True
     
     def __post_init__(self):
-        if self.hint_text is None and self.label is not None:
-            self.hint_text = f"Please enter your {self.label.lower()} here."
         if self.hint_style is None:
             self.hint_style = build_text_style(DefaultTextStyle.HINT.value)
         if self.border_radius is None:
@@ -106,12 +104,13 @@ class DefaultInputFieldType(Enum):
         label="Host",
         hint_text="i.e. cluster.mongodb.net"
     )
+    DEFAULT = InputFieldConfig(label="TEMP")
     
 
 # == Page Styles and Configs ==
 def apply_default_page_config(page: ft.Page):
     page.theme = ft.Theme(
-        color_scheme_seed=ft.Colors.DEEP_ORANGE,
+        color_scheme_seed=ft.Colors.DEEP_ORANGE_200,
         font_family=DEFAULT_FONT_FAMILY,
     )
     page.theme_mode = load_theme_mode()
