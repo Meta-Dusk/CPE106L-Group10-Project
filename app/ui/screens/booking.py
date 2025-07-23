@@ -1,12 +1,15 @@
 import flet as ft
+import asyncio
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from app.ui.components.containers import div, default_row, default_column
-from app.ui.screens.shared_ui import render_page, preset_logout_button
+from app.ui.screens.shared_ui import render_page, preset_logout_button, toggle_theme, theme_toggle_button
 from app.ui.styles import build_action_button_style
-from app.assets.images import build_image, ImageData, generate_random_image, update_image_with_random
+from app.ui.animations import container_setup
+from app.assets.images import generate_random_image, update_image_with_random, set_logo
 from app.routing.route_data import PageRoute
+from app.utils import enable_control_after_delay
 
 """
 Example template for an example handle. Just make sure to only import what you need.
@@ -25,11 +28,19 @@ have declared some in the ImageData enum, by instead doing `*.value.description`
 assigning that to `tooltip`
 """
 
-
 def handle_booking(page: ft.Page, _):
     title = default_text(DefaultTextStyle.TITLE, "Book a Ride?")
     
-    example_image = build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
+    logo = set_logo()
+    toggleable_logo = container_setup(logo)
+    
+    async def mod_toggle_theme(e, delay: float = 2.0):
+        asyncio.create_task(enable_control_after_delay(control_buttons, delay))
+        asyncio.create_task(enable_control_after_delay(example_buttons, delay))
+        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+        
+    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    
     random_image = generate_random_image()
     container_text = ft.Text(
         value="I AM AN EXAMPLE 😔🤚",
@@ -37,6 +48,7 @@ def handle_booking(page: ft.Page, _):
         text_align=ft.TextAlign.CENTER,
         size=40
     )
+    
     # If you want a custom container for future stuff, you can just do this:
     example_container = ft.Container(
         content=default_column([
@@ -74,9 +86,10 @@ def handle_booking(page: ft.Page, _):
     control_buttons = default_row([logout_btn, back_btn])
     
     render_page(page, [
-        title,
-        example_image,
+        ft.Row([theme_toggle], ft.MainAxisAlignment.END),
+        toggleable_logo,
         div(),
+        title,
         example_container,
         div(),
         example_buttons,

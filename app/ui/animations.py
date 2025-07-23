@@ -63,7 +63,7 @@ def container_setup(content: ft.Control | None = None) -> ft.Container:
     return ft.Container(
         content=content,
         animate_opacity=500,
-        animate_offset=500,
+        animate_offset=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT),
         animate_rotation=500,
         opacity=1.0,
         offset=ft.Offset(0, 0),

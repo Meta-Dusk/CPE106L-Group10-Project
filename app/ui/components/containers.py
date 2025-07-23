@@ -53,29 +53,3 @@ def div(
         thickness=thickness
     )
 
-
-"""
-Run containers.py to test how the containers look alongside other UI components.
-If in VSCode, run module test with:
-py -m app.ui.components.containers
-"""
-
-def test(page: ft.Page):
-    page.title = "Test GUI"
-    page.theme_mode = ft.ThemeMode.DARK
-    
-    test_username_input = default_input_field(DefaultInputFieldType.USERNAME)
-    test_password_input = default_input_field(DefaultInputFieldType.PASSWORD)
-    
-    test_controls = [
-        test_username_input,
-        test_password_input
-    ]
-    
-    test_column = default_column(controls=test_controls)
-    test_container = default_container(content=test_column)
-    
-    page.add(test_container)
-    
-if __name__ == "__main__":
-    ft.app(target=test)

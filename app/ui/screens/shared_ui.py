@@ -3,22 +3,18 @@ import flet as ft
 from app.routing.route_data import PageRoute
 from app.ui.components.dialogs import confirm_logout_dialog
 from app.ui.components.buttons import preset_button, DefaultButton
-from app.ui.components.containers import default_column, default_container
+from app.ui.components.containers import default_container
 from app.auth.user import logout_yes, logout_no
-from app.assets.images import ImageData
+from app.assets.images import ImageData, build_image
 from app.ui.animations import (
-    animate_slide_in, animated_slide_out, animate_reset, prepare_for_slide_in,
-    teeter_right)
+    animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right)
 from app.ui.theme_service import save_theme_mode
 from typing import Callable
 
 
-def render_page(page: ft.Page, content: ft.Control | list[ft.Control]):
-    if not isinstance(content, list):
-        content = [content]
-    form = default_column(content)
-    container = default_container(form)
-    page.controls.append(container)
+def render_page(page: ft.Page, content: ft.Control):
+    container = default_container(content)
+    page.add(container)
 
 def preset_logout_button(
     page: ft.Page, page_destination: str = PageRoute.LOGIN.value
@@ -64,7 +60,9 @@ async def logo_toggle(
 
 async def toggle_theme(
     page: ft.Page, theme_toggle: ft.IconButton, toggleable_logo: ft.Control,
-    current_image: ft.Image, first_image: ft.Image, second_image: ft.Image,
+    current_image: ft.Image,
+    first_image: ft.Image = build_image(ImageData.LOGO_LIGHT),
+    second_image: ft.Image = build_image(ImageData.LOGO_DARK),
     e=None
 ):
     if page.theme_mode == ft.ThemeMode.LIGHT:

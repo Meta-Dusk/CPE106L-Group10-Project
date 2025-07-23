@@ -170,35 +170,68 @@ def mod_button_text_style(
     
 default_action_button_style = ft.ButtonStyle(
     animation_duration=100,
-    icon_color=ft.Colors.ON_PRIMARY,
     icon_size=15,
-    color=ft.Colors.ON_PRIMARY,
-    bgcolor=ft.Colors.PRIMARY,
+    alignment=ft.alignment.center,
+    
+    icon_color={
+        ft.ControlState.DEFAULT: ft.Colors.ON_PRIMARY,
+        ft.ControlState.FOCUSED: ft.Colors.ON_SECONDARY_CONTAINER,
+        ft.ControlState.PRESSED: ft.Colors.ON_PRIMARY,
+        ft.ControlState.HOVERED: ft.Colors.ON_PRIMARY,
+        ft.ControlState.DISABLED: ft.Colors.OUTLINE_VARIANT,
+    },
+    
+    color={
+        ft.ControlState.DEFAULT: ft.Colors.ON_PRIMARY,
+        ft.ControlState.FOCUSED: ft.Colors.ON_SECONDARY_CONTAINER,
+        ft.ControlState.PRESSED: ft.Colors.ON_PRIMARY,
+        ft.ControlState.HOVERED: ft.Colors.ON_PRIMARY,
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.8, ft.Colors.OUTLINE_VARIANT),
+    },
+    
+    bgcolor={
+        ft.ControlState.DEFAULT: ft.Colors.PRIMARY,
+        ft.ControlState.FOCUSED: ft.Colors.SECONDARY_CONTAINER,
+        ft.ControlState.PRESSED: ft.Colors.PRIMARY,
+        ft.ControlState.HOVERED: ft.Colors.PRIMARY,
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.8, ft.Colors.ON_SURFACE_VARIANT),
+    },
+    
     shape={
         ft.ControlState.DEFAULT: ft.RoundedRectangleBorder(ft.border_radius.all(12)),
-        ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8)),
         ft.ControlState.FOCUSED: ft.RoundedRectangleBorder(ft.border_radius.all(10)),
+        ft.ControlState.PRESSED: ft.RoundedRectangleBorder(ft.border_radius.all(8)),
     },
+    
     side={
-        ft.ControlState.DEFAULT: border_side(color=ft.Colors.PRIMARY),
-        ft.ControlState.FOCUSED: border_side(color=ft.Colors.ON_TERTIARY),
+        ft.ControlState.DEFAULT: border_side(color=ft.Colors.PRIMARY_CONTAINER),
+        ft.ControlState.FOCUSED: border_side(color=ft.Colors.ON_SECONDARY_CONTAINER),
+        ft.ControlState.PRESSED: border_side(color=ft.Colors.PRIMARY_CONTAINER),
+        ft.ControlState.HOVERED: border_side(color=ft.Colors.PRIMARY_CONTAINER),
+        ft.ControlState.DISABLED: border_side(color=ft.Colors.with_opacity(0.8, ft.Colors.OUTLINE_VARIANT)),
     },
+    
     overlay_color={
-        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.7, ft.Colors.SECONDARY),
-        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
-        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.7, ft.Colors.TERTIARY),
-        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.12, ft.Colors.TERTIARY),
+        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.08, ft.Colors.TERTIARY),
+        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.12, ft.Colors.TERTIARY),
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.8, ft.Colors.SECONDARY),
     },
+    
     elevation={
         ft.ControlState.DEFAULT: 1,
+        ft.ControlState.HOVERED: 2,
+        ft.ControlState.PRESSED: 1,
+        ft.ControlState.FOCUSED: 2,
         ft.ControlState.DISABLED: 0,
     },
+    
     text_style={
-        ft.ControlState.DEFAULT: mod_button_text_style(color=ft.Colors.PRIMARY),
-        ft.ControlState.PRESSED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.BOLD),
-        ft.ControlState.HOVERED: mod_button_text_style(color=ft.Colors.TERTIARY,weight=ft.FontWeight.W_500),
-        ft.ControlState.FOCUSED: mod_button_text_style(color=ft.Colors.ON_TERTIARY,weight=ft.FontWeight.W_600),
-        ft.ControlState.DISABLED: mod_button_text_style(color=ft.Colors.SECONDARY),
+        ft.ControlState.DEFAULT: mod_button_text_style(),
+        ft.ControlState.PRESSED: mod_button_text_style(weight=ft.FontWeight.BOLD),
+        ft.ControlState.FOCUSED: mod_button_text_style(weight=ft.FontWeight.W_600),
+        ft.ControlState.HOVERED: mod_button_text_style(weight=ft.FontWeight.W_500),
+        ft.ControlState.DISABLED: mod_button_text_style(),
     }
 )
 

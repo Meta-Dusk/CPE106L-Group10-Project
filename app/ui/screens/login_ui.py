@@ -3,7 +3,7 @@ import threading
 import asyncio
 
 from app.auth.hashing import hash_password, verify_password
-from app.assets.images import ImageData, build_image
+from app.assets.images import set_logo
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
 from app.ui.components.containers import default_column, default_container, div
 from app.ui.components.dialogs import default_notif_dialog
@@ -36,11 +36,6 @@ def main_login_ui(page: ft.Page):
     confirm_password_input = default_input_field(DefaultInputFieldType.PASSWORD)
     confirm_password_input.label = "Confirm Password"
     confirm_password_input.visible = False
-
-    first_image = build_image(ImageData.LOGO_LIGHT)
-    second_image = build_image(ImageData.LOGO_DARK)
-    current_image = build_image(src=first_image.src, color=ft.Colors.PRIMARY, width=404, height=167)
-    toggleable_logo = container_setup(current_image)
     
     # == Login Setup ==
     is_login = "is_login"
@@ -94,7 +89,7 @@ def main_login_ui(page: ft.Page):
                 page.session.set("user_authenticated", True)
                 page.session.set("user_id", username)
                 page.update()
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.5) # Wait for half a second
                 page.go(PageRoute.DASHBOARD.value)
             else:
                 set_error(username_input, "Username mismatch.")
@@ -179,11 +174,16 @@ def main_login_ui(page: ft.Page):
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
     
+    logo = set_logo()
+    toggleable_logo = container_setup(logo)
+    
     async def mod_toggle_theme(e, delay: float = 2.0):
         asyncio.create_task(enable_control_after_delay(control_buttons, delay))
         asyncio.create_task(enable_control_after_delay(action_button, delay))
-        await toggle_theme(page, theme_toggle, toggleable_logo, current_image, first_image, second_image, e)
-        
+        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    
+    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    
     # == Buttons ==
     db_toggle_button = ft.TextButton(
         icon=ft.Icons.CODE_SHARP,
@@ -195,7 +195,6 @@ def main_login_ui(page: ft.Page):
     )
     toggle_button = ft.TextButton(text=text_register, on_click=switch_mode)
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
-    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
     control_buttons = [theme_toggle, db_toggle_button]
     
     # == Page Form ==

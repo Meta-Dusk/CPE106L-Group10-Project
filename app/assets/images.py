@@ -3,6 +3,8 @@ import random
 
 from enum import Enum
 from pathlib import Path
+from app.ui.theme_service import load_theme_mode
+
 
 ASSETS_DIR = Path(__file__).parent.parent / "assets" / "images"
 ICON_PATH = Path(__file__).parent.parent / "assets" / "icons" / "app.ico"
@@ -104,6 +106,15 @@ def update_image_with_random(img: ft.Image):
     
 def default_image() -> ft.Image:
     return build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
+
+def set_logo(src: str = None) -> ft.Image:
+    if src is None:
+        if load_theme_mode == ft.ThemeMode.DARK:
+            src = ImageData.LOGO_LIGHT.value.path
+        else:
+            src = ImageData.LOGO_DARK.value.path
+    return build_image(src=src, color=ft.Colors.PRIMARY, width=404, height=167)
+
 
 """ Run images.py to test the image data and to check the available images. """
 
