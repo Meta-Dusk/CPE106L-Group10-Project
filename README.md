@@ -1,85 +1,117 @@
-# CPE106L-Group10-Project
+# 🚗 CPE106L-Group10-Project
 
-![Insert Mapua Logo Here](https://malaya.com.ph/wp-content/uploads/2024/11/Mapua.png)
+![Mapúa Logo](https://malaya.com.ph/wp-content/uploads/2024/11/Mapua.png)
 
-## Project ATS (Accessible Transportation Scheduler)
+## 🛠 Project ATS: Accessible Transportation Scheduler
 
-## Members and Roles
+---
 
-#### Dayag Jr., Vicente Nigel S.
+## 👨‍💻 Members and Roles
 
-> Project Member
+| Name                          | Role            |
+|-------------------------------|-----------------|
+| Dayag Jr., Vicente Nigel S.   | Project Member  |
+| Dela Cruz, John Andrei M.     | Project Manager |
+| Regalado, John Seth B.        | Project Member  |
 
-#### Dela Cruz, John Andrei M.
+---
 
-> Project Manager
+## 💡 Community Need
 
-#### Regalado, John Seth B.
+To assist elderly individuals or those with accessibility challenges in scheduling transportation with local volunteers or service providers.
 
-> Project Member
+---
 
-## Community Need
+## 🖥 How to Run the Project
 
-Help elderly or individuals with accessibility needs schedule rides with local volunteers or services.
+### ⚙️ Setup via Windows Terminal
 
-## How to Run the Project
+1. **Download the repository** from [GitHub](https://github.com/Meta-Dusk/CPE106L-Group10-Project) by clicking **`<> Code` → `Download ZIP`** or choose **`Open with Visual Studio Code`** *(recommended)*.
 
-### Setup and Open with Windows Terminal
+2. **Navigate to the project folder**:
+   - If ZIP file was downloaded, extract it.
+   - Open Terminal and run:
 
-1. Download repository in [GitHub](https://github.com/Meta-Dusk/CPE106L-Group10-Project) by clicking `<> Code` then selecting `Local` and `Download ZIP` or `Open with Visual Studio` (Recommended Visual Studio Code).
-> #### After Downloading
-> Unzip if you downloaded ZIP file into a folder, then navigate to it by doing `cd "path/to/folder/"`, make sure you navigate to the project folder, which contains the `./launch.py`.
-> If the downloaded file is stored in a different drive, you can switch to it by doing `d:` and just replace the letter to whatever drive letter you want to switch to (make sure it is in lowercase).
-2. Once you have navigated to the folder containing the project files, you can then just simply type in the terminal `py launch.py`. To make sure that the launch script is accessible, you can check the files in the current directory (folder) by doing `dir` in the terminal.
-3. Once you have entered `py launch.py` wait a bit, and it will open the launcher for you, which will contain options for you to run.
-> #### Missing Libraries?
-> The launcher has a feature for missing libraries; it can auto-install for you the missing modules, or you can just manually install them. The list shown in the messagebox are case-sensitive, so you can just copy paste them into a `pip install` command.
-> ##### Features to be added:
-> - Auto-install missing libraries by prompting the user during launch.
-> - Relaunch after auto-install has been chosen.
+     ```bash
+     cd "path/to/project/folder"
+     ```
 
-### Ubuntu Virtual Machine (VM)
+   - If the folder is on a different drive, switch drives by typing:
 
-> Pending :P <br>
-> ![Sad Penguin](https://openclipart.org/image/800px/178504)
+     ```bash
+     d:
+     ```
 
-## Original Project Scope
+3. **Launch the app** by running:
 
-### Already Implemented
+   ```bash
+   py launch.py
+   ```
 
-**Database**: Use MongoDB for flexible ride and user data.
+   - Ensure `launch.py` exists by listing files:
 
-**Flet Desktop App**: Interface for booking rides and managing schedules.
+     ```bash
+     dir
+     ```
 
-**MVC Design Pattern**: Modular structure for maintainability.
+4. **Wait for the launcher interface to appear**, which provides options to run the project.
 
-**Object Oriented Design**: Classes for users, drivers, ride requests, and schedules.
+#### 🧩 Missing Libraries?
 
-> #### Disclaimer
-> Code structure will be frequently updated/refactored depending on the amount of features implemented.
+- The launcher will detect missing modules and prompt to install them automatically.
+- Alternatively, manually install modules:
 
-### Pending Implementations (May or May Not be Included)
+  ```bash
+  pip install flet pymongo bcrypt cryptography
+  ```
 
-**Python Data Structures & Optimization Algorithms**: Use scheduling and route optimization algorithms (e.g., Dijkstra, A*).
+##### 🔜 Upcoming Launcher Features
 
-**API Integration**: Google Maps API for routing and distance calculation.
+- Auto-install libraries on prompt.
+- Relaunch script after successful installation.
 
-**Matplotlib**: Visualize ride frequency, wait times, and service coverage.
+---
 
-**FastAPI**: Backend for ride matching, scheduling, and notifications.
+### 🐧 Ubuntu Virtual Machine (VM)
 
-## Scope Alterations/Additions
+⚠️ *Currently Pending* 😅  
+![Sad Penguin](https://openclipart.org/image/800px/178504)
 
-### Already Implemented
+---
 
-**Tkinter and/or ttkbootstrap**: For testing/fallback GUIs in the desktop application version of the project (Only if Flet will not be used).
+## 📌 Original Project Scope
 
-**BCrypt**: Password hashing for relatively safe storage of user's passwords.
+### ✅ Already Implemented
 
-**MongoDB Atlas**: You know what's even better than a NoSQL database? A NoSQL database on the cloud. Connect to a MongoDB Atlas cluster for user authentication for a non-local database implementation.
+- **MongoDB**: NoSQL database for ride and user data.
+- **Flet Desktop App**: Modern UI for scheduling and ride management.
+- **MVC Pattern**: Modular design for scalability and maintainability.
+- **Object-Oriented Design**: Classes for users, drivers, and rides.
 
-**SQlite**: Having two databases just in case the other fails. You can easily switch between these two by just clicking a button in the login screen.
+> ⚠️ Code structure is actively evolving as new features are added.
 
-### Pending Implementations (May or May Not be Included)
+### 🚧 Pending Features (May or May Not Be Included)
 
-**Render (Cloud Application Platorm)**: For when the project is ready to be deployed.
+- **Scheduling Algorithms**: Optimization with Dijkstra, A*, etc.
+- **Google Maps API**: Routing and distance calculations.
+- **Matplotlib**: Data visualization (e.g., ride frequency, wait times).
+- **FastAPI**: Backend API for ride matching and notifications.
+
+---
+
+## 🔄 Scope Alterations / Additions
+
+### ✅ Finished Implementation
+
+- **Tkinter / ttkbootstrap**: Fallback GUI alternatives if Flet is not used.
+- **BCrypt**: Secure password hashing.
+- **MongoDB Atlas**: Cloud-based MongoDB support.
+- **SQLite**: Local database alternative; toggle via login screen.
+
+### 🚧 Pending Integrations (Optional)
+
+- **Render (Cloud Deployment)**: For future deployment of the live app.
+
+---
+
+> 📎 **Note**: This README will be periodically updated alongside development.
