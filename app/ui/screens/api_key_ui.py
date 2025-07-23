@@ -3,9 +3,11 @@ import flet as ft
 from app.ui.components.containers import default_column, div, default_row
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
-from app.ui.screens.shared_ui import render_page
+from app.ui.screens.shared_ui import render_page, theme_toggle_button, mod_toggle_theme, StatusMessage
 from app.services.api_config import save_api_key, load_api_key, validate_api_key, is_api_configured, clear_api_config
 from app.routing.route_data import PageRoute
+from app.assets.images import set_logo
+from app.ui.animations import container_setup
 
 
 def handle_api_key_entry(page: ft.Page, _):    
@@ -16,19 +18,7 @@ def handle_api_key_entry(page: ft.Page, _):
     # Title
     title = default_text(DefaultTextStyle.TITLE, "Google Maps API Configuration")
     
-    # Description
-    description_text = (
-        "Configure your Google Maps API key for route calculation and mapping features.\n"
-        "You can get your API key from the Google Cloud Console."
-    )
-    
-    if is_configured:
-        description_text = (
-            "✅ API key is currently configured and active.\n"
-            "You can update it below or clear the current configuration."
-        )
-    
-    description = default_text(DefaultTextStyle.SUBTITLE, description_text)
+    description = default_text(DefaultTextStyle.SUBTITLE, "...")
     
     # API Key input field
     api_key_input = default_input_field(input_field_type=DefaultInputFieldType.API_KEY)
@@ -38,75 +28,87 @@ def handle_api_key_entry(page: ft.Page, _):
     
     # Status message
     status_message = ft.Text(value="", size=16)
+    status = StatusMessage(status_message)
     
-    def show_success(message: str):
-        status_message.value = message
-        status_message.color = ft.Colors.GREEN
-        page.update()
+    def update_description(description_control: ft.Text):
+        if is_api_configured():
+            description_text = (
+                "✅ API key is currently configured and active.\n"
+                "You can update it below or clear the current configuration."
+            )
+        else:
+            description_text = (
+                "Configure your Google Maps API key for route calculation and mapping features.\n"
+                "You can get your API key from the Google Cloud Console."
+            )
+        description_control.value = description_text
+        description_control.update()
     
-    def show_error(message: str):
-        status_message.value = message
-        status_message.color = ft.Colors.RED
-        page.update()
+    def set_error(message: str):
+        api_key_input.error_text = message
+        api_key_input.update()
     
-    def show_info(message: str):
-        status_message.value = message
-        status_message.color = ft.Colors.BLUE
-        page.update()
+    def clear_error():
+        api_key_input.error_text = ""
+        api_key_input.update()
     
     def on_save(e):
         """Handle save API key"""
         api_key = api_key_input.value
         
         if not api_key or api_key.strip() == "":
-            api_key_input.error_text = "API Key is required"
-            show_error("Please enter a valid API key")
+            set_error("API Key is required")
+            status.error("Please enter a valid API key")
             return
         
         api_key = api_key.strip()
         
         if not validate_api_key(api_key):
-            api_key_input.error_text = "Invalid API key format"
-            show_error("Invalid API key format. Please check your key.")
+            set_error("Invalid API key format")
+            status.error("Invalid API key format. Please check your key.")
             return
         
         # Clear any previous errors
-        api_key_input.error_text = ""
+        clear_error()
         
         # Save the API key
         if save_api_key(api_key):
-            show_success(f"✅ API key saved successfully! Key: {api_key[:4]}...")
+            status.success(f"✅ API key saved successfully! Key: {api_key[:8]}...")
             # print(f"🔑 API Key configured: {api_key}") # That's a security issue 💀
             
             # Update button states
             update_button_states(True)
         else:
-            show_error("❌ Failed to save API key. Please try again.")
+            status.error("❌ Failed to save API key. Please try again.")
+        update_description(description)
+    
+    def clear_values(e):
+        api_key_input.value = ""
+        clear_error()
+        status_message.value = ""
     
     def on_clear(e):
         """Handle clear API key input"""
-        api_key_input.value = ""
-        api_key_input.error_text = ""
-        status_message.value = ""
+        clear_values(e)
         page.update()
     
     def on_remove_config(e):
         """Handle remove API configuration"""
         if clear_api_config():
-            show_info("🗑️ API configuration cleared successfully")
-            api_key_input.value = ""
-            api_key_input.error_text = ""
+            clear_values(e)
+            status.info("🗑️ API configuration cleared successfully")
             update_button_states(False)
         else:
-            show_error("❌ Failed to clear API configuration")
+            status.error("❌ Failed to clear API configuration")
+        update_description(description)
     
     def on_test_connection(e):
         """Test API key by making a simple request"""
-        show_info("🔄 Testing API key with Google Maps API...")
+        status.info("🔄 Testing API key with Google Maps API...")
         
         api_key = load_api_key()
         if not api_key:
-            show_error("❌ No API key configured to test")
+            status.error("❌ No API key configured to test")
             return
         
         # Test with a simple geocoding request
@@ -122,17 +124,17 @@ def handle_api_key_entry(page: ft.Page, _):
             if response.status_code == 200:
                 data = response.json()
                 if data.get("status") == "OK":
-                    show_success("✅ API key is valid and working!")
+                    status.success("✅ API key is valid and working!")
                 elif data.get("status") == "REQUEST_DENIED":
-                    show_error("❌ API key is invalid or lacks permissions")
+                    status.error("❌ API key is invalid or lacks permissions")
                 else:
-                    show_error(f"❌ API test failed: {data.get('status', 'Unknown error')}")
+                    status.error(f"❌ API test failed: {data.get('status', 'Unknown error')}")
             else:
-                show_error(f"❌ HTTP error: {response.status_code}")
+                status.error(f"❌ HTTP error: {response.status_code}")
         except requests.RequestException as e:
-            show_error(f"❌ Network error: {str(e)}")
+            status.error(f"❌ Network error: {str(e)}")
         except Exception as e:
-            show_error(f"❌ Test failed: {str(e)}")
+            status.error(f"❌ Test failed: {str(e)}")
     
     def on_back_to_dashboard(e):
         """Navigate back to dashboard"""
@@ -187,16 +189,41 @@ def handle_api_key_entry(page: ft.Page, _):
     
     back_row = default_row([back_button])
     
+    # Logo + Theme Switch
+    logo = set_logo()
+    toggleable_logo = container_setup(logo)
+    
+    async def handle_theme_click(e):
+        await mod_toggle_theme(
+            e, page, toggle_controls=[top_row, config_buttons, back_row, main_buttons],
+            toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
+        )
+        
+    theme_toggle = theme_toggle_button(on_click=handle_theme_click)
+    
+    top_row = ft.Row([theme_toggle], ft.MainAxisAlignment.END)
+    
+    description_container = ft.Container(
+        content=description,
+        alignment=ft.alignment.center,
+        expand=True,
+        bgcolor=ft.Colors.SECONDARY_CONTAINER,
+        border_radius=ft.border_radius.all(20),
+        adaptive=True,
+        padding=ft.padding.all(10)
+    )
+    
     # Main content column
     content = default_column(
         controls=[
+            top_row,
+            toggleable_logo,
+            div(),  # Spacing
             title,
+            description_container,
             div(),  # Spacing
-            description,
-            div(),  # Spacing
-            api_key_input,
             status_message,
-            div(),  # Spacing
+            api_key_input,
             main_buttons,
             config_buttons,
             div(),  # Spacing
@@ -204,8 +231,7 @@ def handle_api_key_entry(page: ft.Page, _):
         ]
     )
     
-    # # Container with proper alignment and spacing
-    # container = default_container(content)
-    
     # Render the page
     render_page(page, content)
+    update_description(description)
+    

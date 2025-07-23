@@ -12,7 +12,7 @@ Features:
 - Clean UI with radio button selection
 
 Authors: CPE106L Group 10
-Version: 0.1.9
+Version: 0.2.0
 Date: 2025
 """
 
