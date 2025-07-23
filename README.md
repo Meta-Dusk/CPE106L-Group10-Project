@@ -1,20 +1,66 @@
 # CPE106L-Group10-Project
 
+![Insert Mapua Logo Here](https://malaya.com.ph/wp-content/uploads/2024/11/Mapua.png)
+
 ## Project ATS (Accessible Transportation Scheduler)
 
-### Community Need
+## Members and Roles
+
+#### Dayag Jr., Vicente Nigel S.
+
+> Project Member
+
+#### Dela Cruz, John Andrei M.
+
+> Project Manager
+
+#### Regalado, John Seth B.
+
+> Project Member
+
+## Community Need
 
 Help elderly or individuals with accessibility needs schedule rides with local volunteers or services.
 
-### Original Project Scope
+## How to Run the Project
 
-**Python Data Structures & Optimization Algorithms**: Use scheduling and route optimization algorithms (e.g., Dijkstra, A*).
+### Setup and Open with Windows Terminal
 
-**Object Oriented Design**: Classes for users, drivers, ride requests, and schedules.
+1. Download repository in [GitHub](https://github.com/Meta-Dusk/CPE106L-Group10-Project) by clicking `<> Code` then selecting `Local` and `Download ZIP` or `Open with Visual Studio` (Recommended Visual Studio Code).
+> #### After Downloading
+> Unzip if you downloaded ZIP file into a folder, then navigate to it by doing `cd "path/to/folder/"`, make sure you navigate to the project folder, which contains the `./launch.py`.
+> If the downloaded file is stored in a different drive, you can switch to it by doing `d:` and just replace the letter to whatever drive letter you want to switch to (make sure it is in lowercase).
+2. Once you have navigated to the folder containing the project files, you can then just simply type in the terminal `py launch.py`. To make sure that the launch script is accessible, you can check the files in the current directory (folder) by doing `dir` in the terminal.
+3. Once you have entered `py launch.py` wait a bit, and it will open the launcher for you, which will contain options for you to run.
+> #### Missing Libraries?
+> The launcher has a feature for missing libraries; it can auto-install for you the missing modules, or you can just manually install them. The list shown in the messagebox are case-sensitive, so you can just copy paste them into a `pip install` command.
+> ##### Features to be added:
+> - Auto-install missing libraries by prompting the user during launch.
+> - Relaunch after auto-install has been chosen.
+
+### Ubuntu Virtual Machine (VM)
+
+> Pending :P <br>
+> ![Sad Penguin](https://openclipart.org/image/800px/178504)
+
+## Original Project Scope
+
+### Already Implemented
+
+**Database**: Use MongoDB for flexible ride and user data.
+
+**Flet Desktop App**: Interface for booking rides and managing schedules.
 
 **MVC Design Pattern**: Modular structure for maintainability.
 
-**Database**: Use MongoDB for flexible ride and user data.
+**Object Oriented Design**: Classes for users, drivers, ride requests, and schedules.
+
+> #### Disclaimer
+> Code structure will be frequently updated/refactored depending on the amount of features implemented.
+
+### Pending Implementations (May or May Not be Included)
+
+**Python Data Structures & Optimization Algorithms**: Use scheduling and route optimization algorithms (e.g., Dijkstra, A*).
 
 **API Integration**: Google Maps API for routing and distance calculation.
 
@@ -22,16 +68,18 @@ Help elderly or individuals with accessibility needs schedule rides with local v
 
 **FastAPI**: Backend for ride matching, scheduling, and notifications.
 
-**Flet Desktop App**: Interface for booking rides and managing schedules.
+## Scope Alterations/Additions
 
-### Scope Alterations/Additions
+### Already Implemented
 
-**Tkinter and/or ttkbootstrap**: For testing GUIs for desktop application version of the project (Only if Flet will not be used).
+**Tkinter and/or ttkbootstrap**: For testing/fallback GUIs in the desktop application version of the project (Only if Flet will not be used).
 
-**Render: Cloud Application Platorm**: For when the project is ready to be deployed.
+**BCrypt**: Password hashing for relatively safe storage of user's passwords.
 
-### Setup
+**MongoDB Atlas**: You know what's even better than a NoSQL database? A NoSQL database on the cloud. Connect to a MongoDB Atlas cluster for user authentication for a non-local database implementation.
 
-1. Run `launch.py`.
-2. Enter MongoDB atlas connection string (admin only).
-3. Choose startup mode (1,2,3); select 3 for first-time startup.
+**SQlite**: Having two databases just in case the other fails. You can easily switch between these two by just clicking a button in the login screen.
+
+### Pending Implementations (May or May Not be Included)
+
+**Render (Cloud Application Platorm)**: For when the project is ready to be deployed.
