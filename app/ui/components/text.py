@@ -38,7 +38,7 @@ def default_input_field(
         selection_color=config.selection_color,
         bgcolor=config.bg_color,
         color=config.color,
-        hint_text=generated_hint,
+        hint_text=config.hint_text if config.hint_text is not None else generated_hint,
         hint_style=config.hint_style,
         border_radius=config.border_radius,
         adaptive=config.adaptive,

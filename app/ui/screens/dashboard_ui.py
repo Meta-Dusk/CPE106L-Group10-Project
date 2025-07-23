@@ -1,15 +1,13 @@
 import flet as ft
-import asyncio
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from app.ui.components.containers import div, default_row, default_column
 from app.ui.animations import container_setup
 from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, toggle_theme, theme_toggle_button, open_profile)
+    render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme)
 from app.assets.images import set_logo
 from app.routing.route_data import PageRoute
-from app.utils import enable_control_after_delay
 
 
 def handle_dashboard(page: ft.Page, _):
@@ -18,13 +16,13 @@ def handle_dashboard(page: ft.Page, _):
     logo = set_logo()
     toggleable_logo = container_setup(logo)
     
-    async def mod_toggle_theme(e, delay: float = 2.0):
-        asyncio.create_task(enable_control_after_delay(control_buttons, delay))
-        asyncio.create_task(enable_control_after_delay(other_buttons, delay))
-        asyncio.create_task(enable_control_after_delay(theme_toggle, delay))
-        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    async def handle_theme_click(e):
+        await mod_toggle_theme(
+            e, page, toggle_controls=[other_buttons, control_buttons, theme_toggle],
+            toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
+        )
         
-    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    theme_toggle = theme_toggle_button(on_click=handle_theme_click)
     
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile(page))
