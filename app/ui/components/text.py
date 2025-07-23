@@ -40,3 +40,17 @@ def default_input_field(input_field_type: DefaultInputFieldType) -> ft.TextField
         size_constraints=config.size_constraints,
         expand=config.expand
     )
+
+def mod_input_field(
+    input_field_type: DefaultInputFieldType,
+    **kwargs
+) -> ft.TextField:
+    """Modified input field that allows customization through kwargs"""
+    field = default_input_field(input_field_type)
+    
+    # Apply any additional modifications
+    for key, value in kwargs.items():
+        if hasattr(field, key):
+            setattr(field, key, value)
+    
+    return field

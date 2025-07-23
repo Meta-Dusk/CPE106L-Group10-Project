@@ -124,6 +124,7 @@ class DefaultButton(Enum):
     ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
     PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
     BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
+    SUBMIT = ButtonData(label="Submit", tooltip="Submit the form data", icon=ft.Icons.CHECK)
     
 def preset_button(
     type: DefaultButton,

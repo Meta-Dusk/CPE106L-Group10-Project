@@ -106,6 +106,14 @@ class DefaultInputFieldType(Enum):
         label="Host",
         hint_text="i.e. cluster.mongodb.net"
     )
+    API_KEY = InputFieldConfig(
+        label="API Key",
+        hint_text="Enter your API key here",
+        width=500,
+        password=True,
+        can_reveal_password=True,
+        auto_focus=True
+    )
     
 
 # == Page Styles and Configs ==

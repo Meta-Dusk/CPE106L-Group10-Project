@@ -1,3 +1,21 @@
+"""
+ATraS (Accessible Transportation Scheduler) - Application Launcher
+
+This launcher provides a user-friendly interface for starting the ATraS application
+in different modes (native window, web browser, or setup mode). It automatically
+checks for and installs required dependencies before launching the main application.
+
+Features:
+- Automatic dependency checking and installation
+- Multiple launch modes (Native, Web, Setup)
+- Error handling and user feedback
+- Clean UI with radio button selection
+
+Authors: CPE106L Group 10
+Version: 1.0.0
+Date: 2025
+"""
+
 import sys
 import subprocess
 import tkinter as tk
@@ -6,9 +24,19 @@ import os
 from tkinter import messagebox
 
 
-REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography", "matplotlib"]
+# === CONFIGURATION ===
+# List of required Python modules for the application to function properly
+REQUIRED_MODULES = ["flet", "pymongo", "bcrypt", "cryptography", "matplotlib", "requests"]
+
+# === DEPENDENCY MANAGEMENT FUNCTIONS ===
 
 def check_required_modules():
+    """
+    Check if all required modules are installed.
+    
+    Returns:
+        list: A list of missing module names. Empty list if all modules are available.
+    """
     missing = []
     for mod in REQUIRED_MODULES:
         try:
@@ -17,18 +45,36 @@ def check_required_modules():
             missing.append(mod)
     return missing
 
-# Function to install missing packages using pip
 def install_missing_modules(modules):
+    """
+    Install missing Python modules using pip.
+    
+    Args:
+        modules (list): List of module names to install
+        
+    Returns:
+        bool: True if installation was successful, False otherwise
+    """
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", *modules])
         return True
     except subprocess.CalledProcessError:
         return False
 
-# GUI message using tkinter
+# === USER INTERFACE FUNCTIONS ===
+
 def prompt_install_modules(modules):
+    """
+    Show a GUI dialog asking user permission to install missing modules.
+    
+    Args:
+        modules (list): List of missing module names
+        
+    Returns:
+        bool: True if user agrees to install, False otherwise
+    """
     root = tk.Tk()
-    root.withdraw()
+    root.withdraw()  # Hide the main tkinter window
 
     response = messagebox.askyesno(
         "Missing Required Modules",
@@ -40,10 +86,16 @@ def prompt_install_modules(modules):
     root.destroy()
     return response
 
-# Show fatal error and exit
 def show_fatal_error(modules):
+    """
+    Show an error dialog for failed installations and exit the application.
+    
+    Args:
+        modules (list): List of modules that failed to install
+    """
     root = tk.Tk()
-    root.withdraw()
+    root.withdraw()  # Hide the main tkinter window
+    
     messagebox.showerror(
         "Installation Failed",
         "The following modules could not be installed:\n\n" +
@@ -53,19 +105,23 @@ def show_fatal_error(modules):
     root.destroy()
     sys.exit(1)
 
-# Main check before launching app
+# === MAIN DEPENDENCY CHECK AND INSTALLATION ===
+# Perform dependency check before importing application modules
+
 missing = check_required_modules()
 
 if missing:
+    # Missing modules found - ask user for permission to install
     if prompt_install_modules(missing):
         success = install_missing_modules(missing)
         if not success:
             show_fatal_error(missing)
         else:
             messagebox.showinfo("Success", "All missing modules were installed successfully.")
-            # Optional: Restart the script automatically
+            # Restart the script to ensure new modules are properly loaded
             os.execl(sys.executable, sys.executable, *sys.argv)
     else:
+        # User declined installation - show error and exit
         show_fatal_error(missing)
 else:
     print("\n✅ All required modules are installed.\n")
