@@ -15,12 +15,12 @@ __pycache__/
 *.db
 
 # Ignoring sensitive files
-chaewon_login/auth/keys/
-chaewon_login/auth/enc/
+app/auth/keys/
+app/auth/enc/
 .env
 
 # Ignoring user configs
-chaewon_login/ui/configs/*.json
+app/ui/configs/*.json
 
 # Temporary for now
 pyproject.toml
