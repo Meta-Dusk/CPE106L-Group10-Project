@@ -9,6 +9,7 @@ from app.ui.screens.profile_ui import handle_profile
 from app.ui.screens.shared_ui import render_page
 from app.ui.screens.viewgraphs import handle_viewgraphs
 from app.ui.screens.booking import handle_booking
+from app.ui.screens.api_key_ui import handle_api_key_entry
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.auth.user import is_authenticated
 from app.routing.route_data import RouteHandler, PageRoute
@@ -48,7 +49,8 @@ ROUTE_HANDLERS = {
     PageRoute.RETRY.value: RouteHandler(PageRoute.RETRY.value, check_mongo_connection),
     PageRoute.DASHBOARD.value: RouteHandler(PageRoute.DASHBOARD.value, handle_dashboard, auth_required=True),
     PageRoute.GRAPHS.value: RouteHandler(PageRoute.GRAPHS.value, handle_viewgraphs, auth_required=True),
-    PageRoute.BOOKING.value: RouteHandler(PageRoute.BOOKING.value, handle_booking)
+    PageRoute.BOOKING.value: RouteHandler(PageRoute.BOOKING.value, handle_booking),
+    PageRoute.API_KEY.value: RouteHandler(PageRoute.API_KEY.value, handle_api_key_entry)
 }
 
 DYNAMIC_ROUTE_HANDLERS = [

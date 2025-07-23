@@ -21,6 +21,7 @@ def handle_dashboard(page: ft.Page, _):
     async def mod_toggle_theme(e, delay: float = 2.0):
         asyncio.create_task(enable_control_after_delay(control_buttons, delay))
         asyncio.create_task(enable_control_after_delay(other_buttons, delay))
+        asyncio.create_task(enable_control_after_delay(theme_toggle, delay))
         await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
         
     theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
@@ -42,8 +43,15 @@ def handle_dashboard(page: ft.Page, _):
         tooltip="Show the testing screen for the booking feature"
     )
     
+    api_key_btn = default_action_button(
+        text="API Key",
+        icon=ft.Icons.KEY,
+        on_click=lambda e: page.go(PageRoute.API_KEY.value),
+        tooltip="Configure API key settings"
+    )
+    
     control_buttons = default_row(controls=[profile_btn, logout_btn])
-    other_buttons = default_row(controls=[mathplot_btn, booking_btn])
+    other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn])
     
     form = default_column([
         ft.Row([theme_toggle], ft.MainAxisAlignment.END),
