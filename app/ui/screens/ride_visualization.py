@@ -223,7 +223,7 @@ class RideVisualizationUI:
         try:
             # Clear current chart to force refresh
             self.chart_container.content = ft.Column([
-                ft.Icon(ft.icons.REFRESH, size=100, color=ft.colors.PRIMARY),
+                ft.Icon(ft.Icons.REFRESH, size=100, color=ft.Colors.PRIMARY),
                 ft.Text("Charts Refreshed", size=24, text_align=ft.TextAlign.CENTER),
                 ft.Text("Use the buttons above to view updated analytics", size=16, text_align=ft.TextAlign.CENTER)
             ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
@@ -294,9 +294,9 @@ class RideVisualizationUI:
                     default_text(DefaultTextStyle.TITLE, "🚗 Ride Data Visualization"),
                     default_text(DefaultTextStyle.SUBTITLE, "Select an analysis type to view charts"),
                     ft.Icon(
-                        ft.icons.ANALYTICS,
+                        ft.Icons.ANALYTICS,
                         size=100,
-                        color=ft.colors.BLUE_300,
+                        color=ft.Colors.BLUE_300,
                     ),
                     ft.Text(
                         "Use the buttons above to generate different types of ride analysis charts.",

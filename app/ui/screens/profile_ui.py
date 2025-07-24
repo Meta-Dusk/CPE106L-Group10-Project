@@ -1,12 +1,14 @@
 import flet as ft
 import asyncio
 import re
+import threading
 
 from app.routing.route_data import PageRoute
-from app.db.db_manager import find_user
+from app.db.db_manager import find_user, update_user, check_matching_document
 from app.ui.components.text import default_text, DefaultTextStyle, mod_input_field
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row
+from app.ui.components.containers import div, default_row, spaced_buttons
+from app.ui.components.dialogs import default_notif_dialog
 from app.ui.screens.shared_ui import render_page, preset_logout_button, toggle_theme, theme_toggle_button
 from app.assets.images import set_logo
 from app.ui.animations import container_setup
@@ -15,6 +17,8 @@ from datetime import datetime
 
 
 def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
+    user_doc = find_user(user_id)
+    
     def on_date_picker_change(e):
         dob_field.value = date_picker.value.strftime("%Y-%m-%d")
         page.update()
@@ -61,8 +65,8 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         
     phone_field = mod_input_field(
         label="Phone Number",
-        prefix_text="+63",
-        max_length=16,
+        prefix_text="(+63)",
+        max_length=18,
         on_change=format_phone_number
     )
     email_field = mod_input_field(label="Email", keyboard_type=ft.KeyboardType.EMAIL)
@@ -90,6 +94,66 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
             email_field.error_text = "Invalid email address."
 
         page.update()
+        
+        for i in [full_name_field, address_field, dob_field, phone_field, email_field]:
+            if i.error_text:
+                return
+        
+        check = check_matching_document(
+            filter_query={"username": user_doc["username"]},
+            value_checks={
+                "full_name": full_name_field.value.strip(),
+                "address": address_field.value.strip(),
+                "date_of_birth": dob_field.value.strip(),
+                "phone": phone_field.value.strip(),
+                "email": email_field.value.strip()
+            }
+        )
+        
+        if not check:
+            success = update_user(
+                filter_query={"username": user_doc["username"]},
+                updated_fields={
+                    "full_name": full_name_field.value.strip(),
+                    "address": address_field.value.strip(),
+                    "date_of_birth": dob_field.value.strip(),
+                    "phone": phone_field.value.strip(),
+                    "email": email_field.value.strip()
+                }
+            )
+        else:
+            success = False
+            
+        if success:
+            print(f"✅ User \"{user_doc['username']}\" successfully updated!")
+            dialog_title = default_text(DefaultTextStyle.TITLE, "User Updated")
+            dialog_content = default_text(DefaultTextStyle.SUBTITLE, f"{user_doc['username']}'s details successfully updated!")
+            dialog_icon = ft.Icon(name=ft.Icons.INFO_ROUNDED, color=ft.Colors.PRIMARY, size=50)
+        elif not success and check:
+            print(f"Nothing to update for user \"{user_doc['username']}\"")
+            dialog_title = default_text(DefaultTextStyle.TITLE, "No Updates")
+            dialog_content = default_text(DefaultTextStyle.SUBTITLE, f"Nothing to update for {user_doc['username']}'s details.")
+            dialog_icon = ft.Icon(name=ft.Icons.INFO_ROUNDED, color=ft.Colors.PRIMARY, size=50)
+        else:
+            print("⚠️ No matching user found to update.")
+            dialog_title = default_text(DefaultTextStyle.TITLE, "User Error")
+            dialog_content = default_text(DefaultTextStyle.ERROR, "No matching user found to update.")
+            dialog_icon = ft.Icon(name=ft.Icons.WARNING, color=ft.Colors.ERROR, size=50)
+        
+        dialog = default_notif_dialog(
+            title=dialog_title,
+            icon=dialog_icon,
+            content=dialog_content
+        )
+        
+        page.open(dialog)
+        
+        # Auto-close after n amount of seconds
+        def auto_close():
+            page.close(dialog)
+            page.update()
+
+        threading.Timer(2.0, auto_close).start()
     
     submit_button = default_action_button(text="Save Profile", on_click=validate_fields)
     
@@ -98,18 +162,14 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         address_field,
         dob_field,
         phone_field,
-        email_field,
-        submit_button
+        email_field
     ]
     
     def reset_errors(e):
         for i in input_fields:
-            if isinstance(i, ft.TextField):
-                i.error_text = ""
+            i.error_text = ""
                 
     reset_errors(e)
-    
-    user_doc = find_user(user_id)
 
     if user_doc:
         title = default_text(DefaultTextStyle.TITLE, f"{user_doc['username']}'s Profile")
@@ -132,6 +192,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )
     profile_card_column.controls.extend(input_fields)
+    profile_card_column.controls.extend([submit_button])
     
     profile_card = ft.Card(
         content=ft.Container(
@@ -156,9 +217,13 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
     logout_btn = preset_logout_button(page)
 
     control_buttons = default_row(controls=[logout_btn, back_btn])
+    
+    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
+    
+    top_row = spaced_buttons([exit_btn], [theme_toggle])
 
     render_page(page, [
-        ft.Row([theme_toggle], ft.MainAxisAlignment.END),
+        top_row,
         toggleable_logo,
         div(),
         title,
