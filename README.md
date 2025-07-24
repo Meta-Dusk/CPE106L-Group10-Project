@@ -26,7 +26,7 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 
 ### ⚙️ Setup via Windows Terminal
 
-1. **Download the repository** from [GitHub](https://github.com/Meta-Dusk/CPE106L-Group10-Project) by clicking **`<> Code` → `Download ZIP`** or choose **`Open with Visual Studio Code`** *(recommended)*.
+1. **Download the repository** from [GitHub](https://github.com/Meta-Dusk/CPE106L-Group10-Project) by clicking **`<> Code` → `Download ZIP`** *(recommended)* or choose **`Open with Visual Studio Code`**.
 
 2. **Navigate to the project folder**:
    - If ZIP file was downloaded, extract it.
