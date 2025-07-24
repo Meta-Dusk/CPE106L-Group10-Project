@@ -171,10 +171,11 @@ def launch_main_script(mode: LaunchMode, page: ft.Page):
 def main(page: ft.Page):
     apply_launcher_page_config(page)
 
-    selected_mode = ft.Ref[ft.RadioGroup]()
+    selected_launch_mode = ft.Ref[ft.RadioGroup]()
+    # selected_window_mode = ft.Ref[ft.RadioGroup]()
 
     def on_submit(e):
-        selected = selected_mode.current.value
+        selected = selected_launch_mode.current.value
         for control in [launch_btn, cancel_btn]:
             control.disabled = True
         page.update()
@@ -185,7 +186,8 @@ def main(page: ft.Page):
 
     label = default_text(DefaultTextStyle.TITLE, "How would you like to run the app?")
 
-    launch_modes = launch_mode_radio_group(ref=selected_mode)
+    launch_modes = launch_mode_radio_group(ref=selected_launch_mode)
+    # window_modes = None
 
     launch_btn = preset_button(DefaultButton.LAUNCH, on_click=on_submit)
     launch_btn.autofocus = True

@@ -18,4 +18,4 @@ class PageRoute(Enum):
     DASHBOARD = "/dashboard"
     GRAPHS = "/dashboard/graphs"
     BOOKING = "/dashboard/booking"
-    API_KEY = "/api-key"
+    API_KEY = "/dashboard/api-key"
