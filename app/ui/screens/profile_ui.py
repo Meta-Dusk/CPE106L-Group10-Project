@@ -3,7 +3,7 @@ import asyncio
 import re
 
 from app.routing.route_data import PageRoute
-from app.db.db_manager import find_user
+from app.db.db_manager import find_user, update_user
 from app.ui.components.text import default_text, DefaultTextStyle, mod_input_field
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from app.ui.components.containers import div, default_row
@@ -15,6 +15,8 @@ from datetime import datetime
 
 
 def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
+    user_doc = find_user(user_id)
+    
     def on_date_picker_change(e):
         dob_field.value = date_picker.value.strftime("%Y-%m-%d")
         page.update()
@@ -90,6 +92,25 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
             email_field.error_text = "Invalid email address."
 
         page.update()
+        
+        for i in [full_name_field, address_field, dob_field, phone_field, email_field]:
+            if i.error_text:
+                return
+        
+        success = update_user(
+            filter_query={"username": user_doc["username"]},
+            updated_fields={
+                "full_name": full_name_field.value.strip(),
+                "address": address_field.value.strip(),
+                "date_of_birth": dob_field.value.strip(),
+                "phone": phone_field.value.strip(),
+                "email": email_field.value.strip()
+            }
+        )
+        if success:
+            print(f"✅ User \"{user_doc['username']}\" successfully updated!")
+        else:
+            print("⚠️ No matching user found to update.")
     
     submit_button = default_action_button(text="Save Profile", on_click=validate_fields)
     
@@ -98,18 +119,14 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         address_field,
         dob_field,
         phone_field,
-        email_field,
-        submit_button
+        email_field
     ]
     
     def reset_errors(e):
         for i in input_fields:
-            if isinstance(i, ft.TextField):
-                i.error_text = ""
+            i.error_text = ""
                 
     reset_errors(e)
-    
-    user_doc = find_user(user_id)
 
     if user_doc:
         title = default_text(DefaultTextStyle.TITLE, f"{user_doc['username']}'s Profile")
@@ -132,6 +149,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )
     profile_card_column.controls.extend(input_fields)
+    profile_card_column.controls.extend(submit_button)
     
     profile_card = ft.Card(
         content=ft.Container(

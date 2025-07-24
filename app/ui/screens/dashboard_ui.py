@@ -27,6 +27,8 @@ def handle_dashboard(page: ft.Page, _):
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile(page))
     
+    exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    
     mathplot_btn = default_action_button(
         text="View Plots",
         icon=ft.Icons.AUTO_GRAPH,
@@ -48,8 +50,12 @@ def handle_dashboard(page: ft.Page, _):
         tooltip="Configure API key settings"
     )
     
-    control_buttons = default_row(controls=[profile_btn, logout_btn])
     other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn])
+    control_buttons = default_row(controls=[profile_btn, logout_btn])
+    window_control_buttons_bottom = ft.Row(
+        controls=[exit_btn],
+        alignment=ft.MainAxisAlignment.START
+    )
     
     form = default_column([
         ft.Row([theme_toggle], ft.MainAxisAlignment.END),
@@ -57,7 +63,8 @@ def handle_dashboard(page: ft.Page, _):
         div(),
         title,
         other_buttons,
-        control_buttons
+        control_buttons,
+        window_control_buttons_bottom
     ])
 
     render_page(page, form)

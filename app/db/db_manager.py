@@ -53,6 +53,21 @@ def insert_user(username: str, hashed_password: str, op: bool = False):
         conn = connect_to_sqlite()
         insert_user_sqlite(conn, username, hashed_password, op)
 
+def update_user(filter_query: dict, updated_fields: dict) -> bool:
+    """
+    Update a user document in the collection.
+
+    Args:
+        filter_query (dict): The filter used to find the document (e.g. {"_id": ObjectId(id)} or {"email": "example@example.com"})
+        updated_fields (dict): Dictionary of fields to update
+
+    Returns:
+        bool: True if the update matched a document, False otherwise
+    """
+    update_payload = {"$set": updated_fields}
+    result = get_collection().update_one(filter_query, update_payload)
+    return result.matched_count > 0
+
 def init_database(page: ft.Page = None, callback: Callable = None):
     global collection, sqlite_conn, initialized
     print(f"init_database() Called with mode={db_mode[mode].value}, initialized={initialized}")

@@ -5,7 +5,7 @@ import asyncio
 from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
-from app.ui.components.containers import default_column, default_container, div
+from app.ui.components.containers import default_column, default_container, div, spaced_buttons
 from app.ui.components.dialogs import default_notif_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import preset_button, DefaultButton
@@ -30,7 +30,7 @@ def main_login_ui(page: ft.Page):
     text_switch_to_mongo = f"Switch to MongoDB? (Using: {current_mode})"
 
     login_message = default_text(DefaultTextStyle.TITLE, "Please enter your login credentials.")
-    message = ft.Text(value="", color=ft.Colors.RED)
+    message = ft.Text(value="", color=ft.Colors.ERROR)
     username_input = default_input_field(DefaultInputFieldType.USERNAME)
     password_input = default_input_field(DefaultInputFieldType.PASSWORD)
     confirm_password_input = default_input_field(DefaultInputFieldType.PASSWORD)
@@ -198,10 +198,15 @@ def main_login_ui(page: ft.Page):
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
     control_buttons = [theme_toggle, db_toggle_button]
     
+    exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    exit_btn.expand = False
+    
+    top_row = spaced_buttons([exit_btn], control_buttons)
+    
     # == Page Form ==
     form = default_column([
-        ft.Row(control_buttons, alignment=ft.MainAxisAlignment.END),
-        ft.Row([toggleable_logo], alignment=ft.MainAxisAlignment.CENTER),
+        top_row,
+        toggleable_logo,
         div(),
         login_message,
         username_input,
@@ -210,6 +215,7 @@ def main_login_ui(page: ft.Page):
         action_button,
         toggle_button,
         message,
+        ft.Container(expand=True, bgcolor=ft.Colors.SECONDARY_CONTAINER)
     ])
 
     page.add(default_container(form))

@@ -1,13 +1,12 @@
-import re
 import inspect
 import os
 import flet as ft
 import asyncio
+import json
 
+from pathlib import Path
 
-def is_valid_hex_color(code: str) -> bool:
-    return isinstance(code, str) and re.fullmatch(r"#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})", code) is not None
-
+# == Debug Functions ==
 def where_am_i(stack: int = 1):
     frame = inspect.stack()[stack]  # [0] is current function, [1] is caller
     caller_file = frame.filename  # full path to calling file
@@ -32,6 +31,8 @@ def print_call_chain():
 def log_button_press(name: str, e: ft.ControlEvent):
     print(f"\"{name}\": button pressed!")
 
+
+# == Animation Utility
 async def enable_control_after_delay(control: ft.Control | list[ft.Control], delay: float):
     # Normalize to list if it's a single control
     controls = control if isinstance(control, list) else [control]
@@ -48,10 +49,46 @@ async def enable_control_after_delay(control: ft.Control | list[ft.Control], del
         c.disabled = False
         c.update()
 
+
+# == Other Stuff ==
 def milliseconds_to_seconds(ms: int):
     return ms / 1000
 
 
+# == Launcher Config ==
+LAUNCHER_CONFIG_PATH = Path(__file__).parent / "ui" / "configs" / "launcher_config.json"
+
+def save_launcher_config(
+    launch_mode: str,
+    window_mode: str,
+    file_path: Path = LAUNCHER_CONFIG_PATH
+):
+    config_data = {
+        "launch_mode": launch_mode,
+        "window_mode": window_mode
+    }
+
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=4)
+        print(f"✅ Config saved to {file_path}")
+    except Exception as e:
+        print(f"❌ Failed to save config: {e}")
+
+def load_launcher_config(file_path: Path = LAUNCHER_CONFIG_PATH) -> dict:
+    if not file_path.exists():
+        return {}
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            config_data = json.load(f)
+        return config_data
+    except Exception as e:
+        print(f"❌ Failed to load config: {e}")
+        return {}
+
+
+# == Utils Test ==
 def test():
     print(f"Called from: {where_am_i()}")
     

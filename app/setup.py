@@ -139,7 +139,7 @@ def run_launcher(page: ft.Page):
 
 
 """
-Run setup.py to test the only the setup.
+Run setup.py to test only the setup.
 Use the following command to run:
 py -m app.setup
 """
