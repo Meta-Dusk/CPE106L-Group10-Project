@@ -2,7 +2,7 @@ import flet as ft
 
 from app.ui.components.containers import default_column
 from typing import Callable, Optional
-from app.ui.styles import default_action_button_style, build_action_button_style
+from app.ui.styles import default_action_button_style, RadioChoiceStyle, WindowMode
 from app.utils import log_button_press
 from enum import Enum
 from functools import partial
@@ -15,45 +15,84 @@ class LaunchMode(Enum):
     SETUP = "setup"
 
 DEFAULT_LAUNCH_CHOICES = [
-    (LaunchMode.NATIVE.value, "Native window (default)"),
-    (LaunchMode.WEB.value, "Web browser"),
-    (LaunchMode.SETUP.value, "Run setup")
+    (LaunchMode.NATIVE.value, "Native window (default)", True),
+    (LaunchMode.WEB.value, "Web browser", True),
+    (LaunchMode.SETUP.value, "Run setup", True)
 ]
 
-def launch_mode_radio_choice(
-    value: Optional[str] = None,
-    label: Optional[str | ft.Text] = "Launch Mode",
+DEFAULT_WINDOW_CHOICES = [
+    (WindowMode.WINDOWED.value, "Windowed (default)", True),
+    (WindowMode.FULLSCREEN.value, "Full Screen", True),
+    (WindowMode.BORDERLESS.value, "Borderless", True)
+]
+
+def preset_radio_choice(
+    value: Optional[str] = "Value",
+    label: Optional[str | ft.Text] = "Label",
     label_style: Optional[ft.TextStyle] = None,
-    fill_color: ft.ControlStateValue[ft.Colors] = ft.Colors.PRIMARY
+    fill_color: ft.ControlStateValue[ft.Colors] = None,
+    overlay_color: ft.ControlStateValue[ft.Colors] = None,
+    active_color: ft.ColorValue = ft.Colors.PRIMARY,
+    splash_radius: ft.OptionalNumber = 15,
+    disabled: bool = False,
+    ref: Optional[ft.Ref[ft.Radio]] = None
 ) -> ft.Radio:
     return ft.Radio(
+        ref=ref,
         value=value,
         label=label,
         label_style=label_style or ft.TextStyle(color=ft.Colors.PRIMARY),
-        fill_color=fill_color,
-        active_color=ft.Colors.PRIMARY,
-        splash_radius=15
+        fill_color=fill_color or RadioChoiceStyle.FILL_COLOR.value,
+        overlay_color=overlay_color or RadioChoiceStyle.OVERLAY_COLOR.value,
+        active_color=active_color,
+        splash_radius=splash_radius,
+        disabled=disabled
     )
-    
-def launch_mode_radio_group(
-    ref: Optional[ft.Ref[ft.RadioGroup]] = None,
-    choices: Optional[list[tuple[str, str]]] = None
-) -> ft.RadioGroup:
-    if choices is None:
-        choices = choices or DEFAULT_LAUNCH_CHOICES
 
-    radios = [
-        ft.Row(
-            [launch_mode_radio_choice(value=val, label=lbl)],
-            alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER
+def preset_radio_group(
+    ref: Optional[ft.Ref[ft.RadioGroup]] = None,
+    choices: Optional[list[tuple[str, str, bool]]] = None,
+    selected_value: Optional[str] = None,
+    radio_refs_map: Optional[dict[str, ft.Ref[ft.Radio]]] = None,
+    on_change: Optional[Callable] = None
+) -> ft.RadioGroup:
+    if not choices:
+        raise ValueError("choices must be provided and cannot be empty")
+
+    # Find fallback if selected value is disabled
+    choice_dict = {val: (lbl, enabled) for val, lbl, enabled in choices}
+    is_valid_choice = lambda v: v in choice_dict and choice_dict[v][1]
+    fallback_value = next((val for val, _, enabled in choices if enabled), None)
+
+    selected = selected_value if is_valid_choice(selected_value) else fallback_value
+
+    radios = []
+    for val, lbl, enabled in choices:
+        radio_ref = ft.Ref[ft.Radio]()
+        if radio_refs_map is not None:
+            radio_refs_map[val] = radio_ref
+
+        radio = preset_radio_choice(
+            value=val,
+            label=lbl,
+            disabled=not enabled,
+            ref=radio_ref
         )
-        for val, lbl in choices
-    ]
+        if radio_refs_map is not None:
+            radio_refs_map[val] = radio_ref
+
+        radios.append(
+            ft.Row(
+                [radio],
+                alignment=ft.MainAxisAlignment.START,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER
+            )
+        )
 
     return ft.RadioGroup(
         ref=ref,
-        value=choices[0][0],
+        value=selected,
+        on_change=on_change,
         content=default_column(controls=radios)
     )
 
@@ -84,30 +123,8 @@ def default_action_button(
     if icon:
         button.icon = icon
     return button
-  
-# TODO: Finish transferring components from login_ui.py here
-  
-# def db_toggle_button(
-#     current_mode,
-#     text_switch_to_sqlite,
-#     text_switch_to_mongo,
-    
-# ):
-#     return ft.TextButton(
-#         icon=ft.Icons.CODE_SHARP,
-#         icon_color=ft.Colors.PRIMARY,
-#         text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
-#         tooltip="Switch between available databases",
-#         on_click=handle_db_toggle
-#     )
-    
-    
-# == Preset Buttons ==
-# class ButtonData:
-#     def __init__(self, label: str, tooltip: str, icon: Optional[ft.Icon] = None):
-#         self.label = label
-#         self.tooltip = tooltip
-#         self.icon = icon
+
+
 @dataclass
 class ButtonData:
     label: str
@@ -121,10 +138,10 @@ class DefaultButton(Enum):
     LOGOUT = ButtonData(label="Log Out", tooltip="Log out from the current session", icon=ft.Icons.LOGOUT)
     LOGIN = ButtonData(label="Log In", tooltip="Log into your account", icon=ft.Icons.LOGIN)
     REGISTER = ButtonData(label="Register", tooltip="Register a new account", icon=ft.Icons.HOW_TO_REG)
-    ERROR = ButtonData(label="Okay", tooltip="Acknowledge the error")
     PROFILE = ButtonData(label="My Profile", tooltip="View your profile", icon=ft.Icons.PERSON)
     BACK = ButtonData(label="Back", tooltip="Go back to the previous screen", icon=ft.Icons.KEYBOARD_RETURN)
     SUBMIT = ButtonData(label="Submit", tooltip="Submit the form data", icon=ft.Icons.CHECK)
+    EXIT = ButtonData(label="Exit", tooltip="Close the application")
     
 def preset_button(
     type: DefaultButton,
@@ -136,13 +153,10 @@ def preset_button(
     
     if on_click is None:
         on_click = partial(log_button_press, data.label)
-        
-    if type == DefaultButton.ERROR:
-        style = build_action_button_style(
-            primary=ft.Colors.ERROR,
-            on_primary=ft.Colors.ON_ERROR,
-            highlight=ft.Colors.ERROR
-        )
+    if type == DefaultButton.EXIT:
+        width = 80
+    else:
+        width = None
     
     return default_action_button(
         text=data.label,
@@ -151,6 +165,7 @@ def preset_button(
         on_click=on_click,
         style=style,
         auto_focus=auto_focus,
+        width=width
     )
 
 def test():

@@ -1,6 +1,8 @@
 import flet as ft
+
 from app.assets.images import ICON_PATH
 from app.ui.theme_service import load_theme_mode
+from app.utils import load_launcher_config
 from dataclasses import dataclass
 from enum import Enum
 
@@ -116,10 +118,29 @@ class DefaultInputFieldType(Enum):
     
 
 # == Page Styles and Configs ==
-def apply_default_page_config(page: ft.Page):
+class WindowMode(Enum):
+    WINDOWED = "windowed"
+    FULLSCREEN = "fullscreen"
+    BORDERLESS = "borderless"
+
+def load_window_configs(page: ft.Page):
+    config = load_launcher_config().get("window_mode")
+    if config == WindowMode.BORDERLESS.value:
+        page.window.frameless = True
+        page.decoration = ft.BoxDecoration(
+            border=ft.border.all(5, ft.Colors.INVERSE_PRIMARY),
+        )
+    elif config == WindowMode.FULLSCREEN.value:
+        page.window.full_screen = True
+    else:
+        page.window.full_screen = False
+        page.window.frameless = False
+
+def apply_default_page_config(page: ft.Page, apply_configs: bool = True):
     page.theme = ft.Theme(
-        color_scheme_seed=ft.Colors.DEEP_ORANGE_200,
+        color_scheme_seed=ft.Colors.DEEP_PURPLE_900,
         font_family=DEFAULT_FONT_FAMILY,
+        use_material3=True
     )
     page.theme_mode = load_theme_mode()
     
@@ -128,13 +149,16 @@ def apply_default_page_config(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.window.center()
     page.window.icon = ICON_PATH.as_posix()
+    
+    if apply_configs:
+        load_window_configs(page)
 
 def static_page_config(page: ft.Page):
-    apply_default_page_config(page)
+    apply_default_page_config(page, apply_configs=False)
     page.window.to_front()
     page.window.resizable = False
     page.window.maximizable = False
-    page.window.minimizable = False
+    page.window.full_screen = False
 
 def default_page_border(page: ft.Page):
     page.decoration = ft.BoxDecoration(
@@ -145,14 +169,14 @@ def apply_launcher_page_config(page: ft.Page):
     static_page_config(page)
     default_page_border(page)
     page.title = f"{APP_NAME} | Launcher"
-    page.window.width = 320
-    page.window.height = 350
+    page.window.width = 640
+    page.window.height = 410
     
 def apply_setup_page_config(page: ft.Page, alt: bool = False):
     static_page_config(page)
     default_page_border(page)
     page.title = f"{APP_NAME} | Setup"
-    page.window.width = 600
+    page.window.width = 640
     if alt:
         page.window.height = 550
     else:
@@ -281,3 +305,18 @@ def build_action_button_style(
             ft.ControlState.FOCUSED: mod_button_text_style(seconday_highlight, weight=ft.FontWeight.W_600, size=text_size),
         }
     )
+    
+class RadioChoiceStyle(Enum):
+    FILL_COLOR = {
+        ft.ControlState.DEFAULT: ft.Colors.PRIMARY,
+        ft.ControlState.FOCUSED: ft.Colors.SECONDARY_CONTAINER,
+        ft.ControlState.PRESSED: ft.Colors.PRIMARY,
+        ft.ControlState.HOVERED: ft.Colors.PRIMARY,
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.8, ft.Colors.ON_SURFACE_VARIANT),
+    }
+    OVERLAY_COLOR = {
+        ft.ControlState.PRESSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.HOVERED: ft.Colors.with_opacity(0.25, ft.Colors.TERTIARY),
+        ft.ControlState.FOCUSED: ft.Colors.with_opacity(0.5, ft.Colors.TERTIARY),
+        ft.ControlState.DISABLED: ft.Colors.with_opacity(0.8, ft.Colors.SECONDARY),
+    }

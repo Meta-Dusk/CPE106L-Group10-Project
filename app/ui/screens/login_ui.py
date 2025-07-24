@@ -5,16 +5,16 @@ import asyncio
 from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
-from app.ui.components.containers import default_column, default_container, div
+from app.ui.components.containers import default_column, default_container, div, spaced_buttons
 from app.ui.components.dialogs import default_notif_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import preset_button, DefaultButton
 from app.ui.screens.loading_screen import show_loading_screen
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
-from app.routing.route_data import PageRoute
+from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme
 from app.utils import enable_control_after_delay
-from app.ui.screens.shared_ui import theme_toggle_button, toggle_theme
+from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
@@ -30,7 +30,7 @@ def main_login_ui(page: ft.Page):
     text_switch_to_mongo = f"Switch to MongoDB? (Using: {current_mode})"
 
     login_message = default_text(DefaultTextStyle.TITLE, "Please enter your login credentials.")
-    message = ft.Text(value="", color=ft.Colors.RED)
+    message = ft.Text(value="", color=ft.Colors.ERROR)
     username_input = default_input_field(DefaultInputFieldType.USERNAME)
     password_input = default_input_field(DefaultInputFieldType.PASSWORD)
     confirm_password_input = default_input_field(DefaultInputFieldType.PASSWORD)
@@ -53,9 +53,9 @@ def main_login_ui(page: ft.Page):
     def show_message(text: str, error: bool = False):
         message.value = text
         if error:
-            message.color = ft.Colors.RED
+            message.color = ft.Colors.ERROR
         else:
-            message.color = ft.Colors.GREEN
+            message.color = ft.Colors.TERTIARY
     
     def switch_mode(e):
         mode[is_login] = not mode[is_login]
@@ -177,12 +177,13 @@ def main_login_ui(page: ft.Page):
     logo = set_logo()
     toggleable_logo = container_setup(logo)
     
-    async def mod_toggle_theme(e, delay: float = 2.0):
-        asyncio.create_task(enable_control_after_delay(control_buttons, delay))
-        asyncio.create_task(enable_control_after_delay(action_button, delay))
-        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    async def handle_theme_click(e):
+        await mod_toggle_theme(
+            e, page, toggle_controls=[action_button, control_buttons],
+            toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
+        )
     
-    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    theme_toggle = theme_toggle_button(on_click=handle_theme_click)
     
     # == Buttons ==
     db_toggle_button = ft.TextButton(
@@ -197,10 +198,15 @@ def main_login_ui(page: ft.Page):
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
     control_buttons = [theme_toggle, db_toggle_button]
     
+    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
+    
+    top_row = spaced_buttons([exit_btn], control_buttons)
+    
     # == Page Form ==
     form = default_column([
-        ft.Row(control_buttons, alignment=ft.MainAxisAlignment.END),
-        ft.Row([toggleable_logo], alignment=ft.MainAxisAlignment.CENTER),
+        top_row,
+        toggleable_logo,
         div(),
         login_message,
         username_input,
@@ -208,7 +214,7 @@ def main_login_ui(page: ft.Page):
         confirm_password_input,
         action_button,
         toggle_button,
-        message,
+        message
     ])
 
     page.add(default_container(form))

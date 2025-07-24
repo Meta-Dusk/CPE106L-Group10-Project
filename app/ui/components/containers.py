@@ -1,7 +1,6 @@
 import flet as ft
-import tkinter as tk
 
-from app.ui.components.text import default_input_field, DefaultInputFieldType
+from typing import Optional
 
 
 def default_column(controls: ft.Control | list[ft.Control] | None = None) -> ft.Column:
@@ -41,6 +40,27 @@ def default_row(controls: ft.Control | list[ft.Control] | None = None) -> ft.Row
         alignment=ft.MainAxisAlignment.CENTER,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
         spacing=20
+    )
+    
+def spaced_buttons(
+    left_controls: Optional[list[ft.Control]] = None,
+    right_controls: Optional[list[ft.Control]] = None,
+    spacing: ft.OptionalNumber = 10
+) -> ft.Row:
+    left_row = ft.Row(
+        controls=left_controls,
+        alignment=ft.MainAxisAlignment.START,
+        spacing=spacing
+    )
+    right_row = ft.Row(
+        controls=right_controls,
+        alignment=ft.MainAxisAlignment.END,
+        spacing=spacing
+    )
+    return ft.Row(
+        controls=[left_row, right_row],
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+        expand=True
     )
 
 
