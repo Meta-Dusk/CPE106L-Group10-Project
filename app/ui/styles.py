@@ -128,7 +128,7 @@ def load_window_configs(page: ft.Page):
     if config == WindowMode.BORDERLESS.value:
         page.window.frameless = True
         page.decoration = ft.BoxDecoration(
-            border=ft.border.all(5, ft.Colors.OUTLINE),
+            border=ft.border.all(5, ft.Colors.INVERSE_PRIMARY),
         )
     elif config == WindowMode.FULLSCREEN.value:
         page.window.full_screen = True
@@ -138,7 +138,7 @@ def load_window_configs(page: ft.Page):
 
 def apply_default_page_config(page: ft.Page, apply_configs: bool = True):
     page.theme = ft.Theme(
-        color_scheme_seed=ft.Colors.DEEP_ORANGE_200,
+        color_scheme_seed=ft.Colors.DEEP_PURPLE_900,
         font_family=DEFAULT_FONT_FAMILY,
         use_material3=True
     )

@@ -2,7 +2,7 @@ import flet as ft
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row, default_column
+from app.ui.components.containers import div, default_row, default_column, spaced_buttons
 from app.ui.animations import container_setup
 from app.ui.screens.shared_ui import (
     render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme)
@@ -27,7 +27,8 @@ def handle_dashboard(page: ft.Page, _):
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile(page))
     
-    exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
     
     mathplot_btn = default_action_button(
         text="View Plots",
@@ -52,19 +53,15 @@ def handle_dashboard(page: ft.Page, _):
     
     other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn])
     control_buttons = default_row(controls=[profile_btn, logout_btn])
-    window_control_buttons_bottom = ft.Row(
-        controls=[exit_btn],
-        alignment=ft.MainAxisAlignment.START
-    )
+    top_row = spaced_buttons([exit_btn], [theme_toggle])
     
     form = default_column([
-        ft.Row([theme_toggle], ft.MainAxisAlignment.END),
+        top_row,
         toggleable_logo,
         div(),
         title,
         other_buttons,
-        control_buttons,
-        window_control_buttons_bottom
+        control_buttons
     ])
 
     render_page(page, form)

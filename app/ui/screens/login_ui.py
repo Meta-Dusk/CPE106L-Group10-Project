@@ -198,8 +198,8 @@ def main_login_ui(page: ft.Page):
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
     control_buttons = [theme_toggle, db_toggle_button]
     
-    exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
-    exit_btn.expand = False
+    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
+    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
     
     top_row = spaced_buttons([exit_btn], control_buttons)
     
@@ -214,8 +214,7 @@ def main_login_ui(page: ft.Page):
         confirm_password_input,
         action_button,
         toggle_button,
-        message,
-        ft.Container(expand=True, bgcolor=ft.Colors.SECONDARY_CONTAINER)
+        message
     ])
 
     page.add(default_container(form))
