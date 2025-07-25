@@ -10,9 +10,9 @@ from app.ui.components.dialogs import default_notif_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import preset_button, DefaultButton
 from app.ui.screens.loading_screen import show_loading_screen
+from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme, preset_exit_button
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
-from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme
 from app.utils import enable_control_after_delay
 from app.routing.route_data import PageRoute
 
@@ -41,11 +41,12 @@ def main_login_ui(page: ft.Page):
     is_login = "is_login"
     mode = {is_login: True}
 
-    def clear_errors():
+    def clear_errors(only_error_text: bool = False):
         username_input.error_text = ""
         password_input.error_text = ""
         confirm_password_input.error_text = ""
-        message.value = ""
+        if not only_error_text:
+            message.value = ""
 
     def set_error(text_field: ft.TextField, text: str):
         text_field.error_text = text
@@ -90,6 +91,7 @@ def main_login_ui(page: ft.Page):
                 page.session.set("user_id", username)
                 page.update()
                 await asyncio.sleep(0.5) # Wait for half a second
+                clear_errors(only_error_text=True)
                 page.go(PageRoute.DASHBOARD.value)
             else:
                 set_error(username_input, "Username mismatch.")
@@ -198,8 +200,7 @@ def main_login_ui(page: ft.Page):
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
     control_buttons = [theme_toggle, db_toggle_button]
     
-    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
-    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
+    exit_btn = preset_exit_button(page)
     
     top_row = spaced_buttons([exit_btn], control_buttons)
     

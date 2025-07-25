@@ -112,3 +112,37 @@ class StatusMessage:
 
     def info(self, message: str):
         self.show(message, ft.Colors.ON_SECONDARY_CONTAINER)
+        
+def preset_exit_button(page: ft.Page) -> ft.TextButton:
+    default_text = "Exit"
+
+    text_button = ft.TextButton(
+        text=default_text,
+        adaptive=True
+    )
+
+    def on_hover(e: ft.HoverEvent):
+        text_button.text = "Exit?" if e.data == "true" else default_text
+        text_button.update()
+
+    def on_focus(e: ft.OnFocusEvent):
+        text_button.text = ">Exit?<"
+        text_button.update()
+
+    def on_blur(e):
+        text_button.text = default_text
+        text_button.update()
+
+    def on_click(e):
+        text_button.text = "Exiting..."
+        text_button.update()
+        page.window.close()
+
+    # Attach handlers after creation
+    text_button.on_click = on_click
+    text_button.on_hover = on_hover
+    text_button.on_focus = on_focus
+    text_button.on_blur = on_blur
+
+    return text_button
+

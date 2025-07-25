@@ -3,6 +3,7 @@ import os
 import flet as ft
 import asyncio
 import json
+import re
 
 from pathlib import Path
 
@@ -86,6 +87,23 @@ def load_launcher_config(file_path: Path = LAUNCHER_CONFIG_PATH) -> dict:
     except Exception as e:
         print(f"❌ Failed to load config: {e}")
         return {}
+
+# == Formatting ==
+def format_raw_phone(raw: str) -> str:
+    raw = re.sub(r"\D", "", raw or "")  # Remove non-digits
+    raw = raw[:10]  # Limit to 10 digits
+
+    # Apply formatting: 0912-345-6789
+    if len(raw) >= 4:
+        formatted = raw[:4]
+        if len(raw) >= 7:
+            formatted += "-" + raw[4:7] + "-" + raw[7:]
+        elif len(raw) > 4:
+            formatted += "-" + raw[4:]
+    else:
+        formatted = raw
+
+    return formatted
 
 
 # == Utils Test ==

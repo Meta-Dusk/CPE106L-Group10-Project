@@ -1,5 +1,4 @@
 import flet as ft
-import asyncio
 import re
 import threading
 
@@ -9,10 +8,11 @@ from app.ui.components.text import default_text, DefaultTextStyle, mod_input_fie
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
 from app.ui.components.containers import div, default_row, spaced_buttons
 from app.ui.components.dialogs import default_notif_dialog
-from app.ui.screens.shared_ui import render_page, preset_logout_button, toggle_theme, theme_toggle_button
+from app.ui.screens.shared_ui import (
+    render_page, preset_logout_button, mod_toggle_theme, theme_toggle_button, preset_exit_button)
 from app.assets.images import set_logo
 from app.ui.animations import container_setup
-from app.utils import enable_control_after_delay
+from app.utils import format_raw_phone
 from datetime import datetime
 
 
@@ -47,18 +47,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
     )
     
     def format_phone_number(e):
-        raw = re.sub(r"\D", "", e.control.value or "")  # Remove non-digit characters
-        raw = raw[:10] # Limit to 10 digits
-
-        # Apply formatting: 0912-345-6789
-        formatted = raw
-        if len(raw) >= 4:
-            formatted = raw[:4]
-            if len(raw) >= 7:
-                formatted += "-" + raw[4:7] + "-" + raw[7:]
-            elif len(raw) > 4:
-                formatted += "-" + raw[4:]
-        
+        formatted = format_raw_phone(e.control.value)
         if e.control.value != formatted:
             phone_field.value = formatted
             page.update()
@@ -99,13 +88,15 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
             if i.error_text:
                 return
         
+        formatted_phone = f"+63{raw_phone}"
+        
         check = check_matching_document(
             filter_query={"username": user_doc["username"]},
             value_checks={
                 "full_name": full_name_field.value.strip(),
                 "address": address_field.value.strip(),
                 "date_of_birth": dob_field.value.strip(),
-                "phone": phone_field.value.strip(),
+                "phone": formatted_phone,
                 "email": email_field.value.strip()
             }
         )
@@ -117,7 +108,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
                     "full_name": full_name_field.value.strip(),
                     "address": address_field.value.strip(),
                     "date_of_birth": dob_field.value.strip(),
-                    "phone": phone_field.value.strip(),
+                    "phone": formatted_phone,
                     "email": email_field.value.strip()
                 }
             )
@@ -174,10 +165,15 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
     if user_doc:
         title = default_text(DefaultTextStyle.TITLE, f"{user_doc['username']}'s Profile")
         subtitle = default_text(DefaultTextStyle.SUBTITLE, "Welcome back!" if not user_doc['op'] else "Greetings, admin.")
+        
         full_name_field.value = user_doc.get("full_name", "")
         address_field.value = user_doc.get("address", "")
         dob_field.value = user_doc.get("date_of_birth", "")  # Expected to be "YYYY-MM-DD"
-        phone_field.value = user_doc.get("phone", "")
+        
+        # Format and apply phone
+        raw_phone = user_doc.get("phone", "").removeprefix("+63")  # Remove +63 prefix
+        phone_field.value = format_raw_phone(raw_phone)
+        
         email_field.value = user_doc.get("email", "")
     else:
         title = default_text(DefaultTextStyle.TITLE, "User not found 😢")
@@ -206,19 +202,20 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
     logo = set_logo()
     toggleable_logo = container_setup(logo)
     
-    async def mod_toggle_theme(e, delay: float = 2.0):
-        asyncio.create_task(enable_control_after_delay(control_buttons, delay))
-        asyncio.create_task(enable_control_after_delay(theme_toggle, delay))
-        await toggle_theme(page, theme_toggle, toggleable_logo, logo, e=e)
+    async def handle_theme_click(e):
+        await mod_toggle_theme(
+            e, page, toggle_controls=[control_buttons, theme_toggle],
+            toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
+        )
         
-    theme_toggle = theme_toggle_button(on_click=mod_toggle_theme)
+    theme_toggle = theme_toggle_button(on_click=handle_theme_click)
 
     back_btn = preset_button(DefaultButton.BACK, lambda e: page.go(PageRoute.DASHBOARD.value))
     logout_btn = preset_logout_button(page)
 
     control_buttons = default_row(controls=[logout_btn, back_btn])
     
-    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
+    exit_btn = preset_exit_button(page)
     
     top_row = spaced_buttons([exit_btn], [theme_toggle])
 
