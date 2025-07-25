@@ -3,8 +3,10 @@ import base64
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row
-from app.ui.screens.shared_ui import render_page, preset_logout_button, open_profile, theme_toggle_button, mod_toggle_theme
+from app.ui.components.containers import div, default_row, spaced_buttons
+from app.ui.screens.shared_ui import (
+    render_page, preset_logout_button, open_profile, theme_toggle_button, mod_toggle_theme,
+    preset_exit_button)
 from app.ui.animations import container_setup
 from app.assets.images import set_logo
 from app.routing.route_data import PageRoute
@@ -287,14 +289,17 @@ def handle_viewgraphs(page: ft.Page, _):
         icon=ft.Icons.FULLSCREEN
     )
     
+    exit_btn = preset_exit_button(page)
+    
     # Organize chart buttons in rows
     chart_buttons_row1 = default_row(controls=[frequency_btn, wait_time_btn, coverage_btn])
     chart_buttons_row2 = default_row(controls=[dashboard_btn, refresh_btn, show_graphs_ts])
     
     control_buttons = default_row(controls=[profile_btn, logout_btn, back_btn])
+    top_row = spaced_buttons([exit_btn], [theme_toggle])
 
     render_page(page, [
-        ft.Row([theme_toggle], ft.MainAxisAlignment.END),
+        top_row,
         toggleable_logo,
         div(),
         title,

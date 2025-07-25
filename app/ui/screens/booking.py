@@ -2,8 +2,9 @@ import flet as ft
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row, default_column
-from app.ui.screens.shared_ui import render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme
+from app.ui.components.containers import div, default_row, default_column, spaced_buttons
+from app.ui.screens.shared_ui import (
+    render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button)
 from app.ui.styles import build_action_button_style
 from app.ui.animations import container_setup
 from app.assets.images import generate_random_image, update_image_with_random, set_logo
@@ -65,11 +66,15 @@ def handle_booking(page: ft.Page, _):
         on_click=lambda e: update_image_with_random(random_image)
     )
     
+    exit_btn = preset_exit_button(page)
+    
     example_buttons = default_row([test_btn])
     control_buttons = default_row([logout_btn, back_btn])
     
+    top_row = spaced_buttons([exit_btn], [theme_toggle])
+    
     render_page(page, [
-        ft.Row([theme_toggle], ft.MainAxisAlignment.END),
+        top_row,
         toggleable_logo,
         div(),
         title,

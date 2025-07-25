@@ -1,9 +1,9 @@
 import flet as ft
 
-from app.ui.components.containers import default_column, div, default_row
+from app.ui.components.containers import default_column, div, default_row, spaced_buttons
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
-from app.ui.screens.shared_ui import render_page, theme_toggle_button, mod_toggle_theme, StatusMessage
+from app.ui.screens.shared_ui import render_page, theme_toggle_button, mod_toggle_theme, StatusMessage, preset_exit_button
 from app.services.api_config import save_api_key, load_api_key, validate_api_key, is_api_configured, clear_api_config
 from app.routing.route_data import PageRoute
 from app.assets.images import set_logo
@@ -201,7 +201,9 @@ def handle_api_key_entry(page: ft.Page, _):
         
     theme_toggle = theme_toggle_button(on_click=handle_theme_click)
     
-    top_row = ft.Row([theme_toggle], ft.MainAxisAlignment.END)
+    exit_btn = preset_exit_button(page)
+    
+    top_row = spaced_buttons([exit_btn], [theme_toggle])
     
     description_container = ft.Container(
         content=description,
