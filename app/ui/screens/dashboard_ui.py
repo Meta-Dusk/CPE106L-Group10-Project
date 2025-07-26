@@ -8,11 +8,12 @@ from app.ui.screens.shared_ui import (
     render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme,
     preset_exit_button)
 from app.assets.images import set_logo
+from app.assets.audio_manager import audio, SFX
 from app.routing.route_data import PageRoute
 
 
 def handle_dashboard(page: ft.Page, _):
-    title = default_text(DefaultTextStyle.TITLE, "This is the dashboard 😔🤚")
+    title = default_text(DefaultTextStyle.TITLE, "I AM THE DASHBOARD 😀")
     
     logo = set_logo()
     toggleable_logo = container_setup(logo)
@@ -33,14 +34,14 @@ def handle_dashboard(page: ft.Page, _):
     mathplot_btn = default_action_button(
         text="View Plots",
         icon=ft.Icons.AUTO_GRAPH,
-        on_click=lambda e: page.go(PageRoute.GRAPHS.value),
+        on_click=lambda _: (page.go(PageRoute.GRAPHS.value), audio.play_sfx(SFX.CLICK)),
         tooltip="Show the graphs we've been testing"
     )
     
     booking_btn = default_action_button(
         text="Book Now",
         icon=ft.Icons.CAR_RENTAL,
-        on_click=lambda e: page.go(PageRoute.BOOKING.value),
+        on_click=lambda _: (page.go(PageRoute.BOOKING.value), audio.play_sfx(SFX.CLICK)),
         tooltip="Show the testing screen for the booking feature"
     )
     

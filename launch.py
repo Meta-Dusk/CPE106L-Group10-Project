@@ -118,17 +118,17 @@ else:
     print("\n✅ All required modules are installed.\n")
 
 # == Flet App starts here ==
-# Only import your actual app logic if no missing modules
 import flet as ft
 
 from app.setup_env import setup_env
 from app.ui.styles import apply_launcher_page_config
 from app.ui.components.containers import default_row, div
 from app.ui.components.buttons import (
-    preset_radio_group, DefaultButton, preset_button, LaunchMode,
-    WindowMode, DEFAULT_WINDOW_CHOICES, DEFAULT_LAUNCH_CHOICES)
+    preset_radio_group, DefaultButton, preset_button, LaunchMode, WindowMode,
+    DEFAULT_WINDOW_CHOICES, DEFAULT_LAUNCH_CHOICES)
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.utils import load_launcher_config, save_launcher_config
+from app.assets.audio_manager import audio, setup_audio, BGM
 
 
 # === Setup environment ===
@@ -138,6 +138,7 @@ main_script = Path(__file__).parent / "app" / "main.py"
 
 
 def launch_main_script(launch_mode: LaunchMode, window_mode: WindowMode, page: ft.Page):
+    audio.stop_bgm()
     # Close Flet window before running subprocess
     page.window.close()
     print(
@@ -179,6 +180,7 @@ Window: {window_mode}
 
 
 def main(page: ft.Page):
+    # Launcher setups
     apply_launcher_page_config(page)
 
     selected_launch_mode = ft.Ref[ft.RadioGroup]()
@@ -189,6 +191,10 @@ def main(page: ft.Page):
     config = load_launcher_config()
     initial_launch_mode = config.get("launch_mode")
     initial_window_mode = config.get("window_mode")
+    
+    # Audio setup
+    setup_audio()
+    audio.on_ready(lambda: audio.play_bgm(BGM.GYMNOPEDIE))
     
     def enforce_window_mode_constraints(selected_launch):
         invalid_modes = [WindowMode.FULLSCREEN.value, WindowMode.BORDERLESS.value]
@@ -219,7 +225,7 @@ def main(page: ft.Page):
         ref=selected_window_mode,
         choices=DEFAULT_WINDOW_CHOICES,
         radio_refs_map=window_radio_refs,
-        selected_value=initial_window_mode
+        selected_value=initial_window_mode,
     )
     
     def delayed_init(e):

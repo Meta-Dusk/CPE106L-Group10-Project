@@ -1,9 +1,12 @@
 import flet as ft
+import inspect
+import asyncio
 
 from app.ui.components.containers import default_column
 from typing import Callable, Optional
+from app.assets.audio_manager import audio, SFX
 from app.ui.styles import default_action_button_style, RadioChoiceStyle, WindowMode
-from app.utils import log_button_press
+from app.utils import log_button_press, run_async_in_thread
 from enum import Enum
 from functools import partial
 from dataclasses import dataclass
@@ -54,7 +57,8 @@ def preset_radio_group(
     choices: Optional[list[tuple[str, str, bool]]] = None,
     selected_value: Optional[str] = None,
     radio_refs_map: Optional[dict[str, ft.Ref[ft.Radio]]] = None,
-    on_change: Optional[Callable] = None
+    on_change: Optional[Callable] = None,
+    on_change_sfx: Optional[SFX] = SFX.CLICK
 ) -> ft.RadioGroup:
     if not choices:
         raise ValueError("choices must be provided and cannot be empty")
@@ -89,10 +93,14 @@ def preset_radio_group(
             )
         )
 
+    def wrapped_on_change(e: ft.ControlEvent):
+        audio.play_sfx(on_change_sfx)
+        on_change(e)
+    
     return ft.RadioGroup(
         ref=ref,
         value=selected,
-        on_change=on_change,
+        on_change=wrapped_on_change,
         content=default_column(controls=radios)
     )
 
@@ -105,14 +113,21 @@ def default_action_button(
     width: ft.OptionalNumber = 120,
     height: ft.OptionalNumber = 40,
     auto_focus: bool = False,
-    tooltip: str = None
+    tooltip: str = None,
+    on_click_sfx: Optional[SFX] = SFX.CLICK
 ) -> ft.ElevatedButton:
     if on_click is None:
         on_click = partial(log_button_press, text)
+        
+    def wrapped_on_click(e: ft.ControlEvent):
+        audio.play_sfx(on_click_sfx)
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
     
     button = ft.ElevatedButton(
         text=text,
-        on_click=on_click,
+        on_click=wrapped_on_click,
         width=width,
         height=height,
         style=style,
@@ -148,6 +163,7 @@ def preset_button(
     on_click: Callable[[ft.ElevatedButton], None] = None,
     style: ft.ButtonStyle = default_action_button_style,
     auto_focus: bool = False,
+    on_click_sfx: Optional[SFX] = SFX.CLICK
 ) -> ft.ElevatedButton:
     data = type.value
     
@@ -155,21 +171,22 @@ def preset_button(
         on_click = partial(log_button_press, data.label)
     if type == DefaultButton.EXIT:
         width = 80
+        on_click_sfx = SFX.BACK
     else:
         width = None
+    
+    def wrapped_on_click(e: ft.ControlEvent):
+        audio.play_sfx(on_click_sfx)
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
     
     return default_action_button(
         text=data.label,
         tooltip=data.tooltip,
         icon=data.icon,
-        on_click=on_click,
+        on_click=wrapped_on_click,
         style=style,
         auto_focus=auto_focus,
         width=width
     )
-
-def test():
-    print(LaunchMode.NATIVE.value)
-
-if __name__ == "__main__":
-    test()

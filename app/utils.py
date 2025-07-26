@@ -4,6 +4,7 @@ import flet as ft
 import asyncio
 import json
 import re
+import threading
 
 from pathlib import Path
 
@@ -33,22 +34,15 @@ def log_button_press(name: str, e: ft.ControlEvent):
     print(f"\"{name}\": button pressed!")
 
 
-# == Animation Utility
-async def enable_control_after_delay(control: ft.Control | list[ft.Control], delay: float):
-    # Normalize to list if it's a single control
-    controls = control if isinstance(control, list) else [control]
-
-    # Disable all controls and update
-    for c in controls:
-        c.disabled = True
-        c.update()
+# == Animation Utility ==
+async def enable_control_after_delay(control: ft.Control, delay: float):
+    control.disabled = True
+    control.update()
 
     await asyncio.sleep(delay)
 
-    # Re-enable all controls and update
-    for c in controls:
-        c.disabled = False
-        c.update()
+    control.disabled = False
+    control.update()
 
 
 # == Other Stuff ==
@@ -104,6 +98,29 @@ def format_raw_phone(raw: str) -> str:
         formatted = raw
 
     return formatted
+
+
+# == Threading ==
+def run_async_in_thread(coro):
+    def runner():
+        asyncio.run(coro)
+    threading.Thread(target=runner).start()
+
+_loop = None
+
+def start_background_loop():
+    global _loop
+    _loop = asyncio.new_event_loop()
+
+    def run_loop():
+        asyncio.set_event_loop(_loop)
+        _loop.run_forever()
+
+    thread = threading.Thread(target=run_loop, daemon=True)
+    thread.start()
+
+def get_loop():
+    return _loop
 
 
 # == Utils Test ==

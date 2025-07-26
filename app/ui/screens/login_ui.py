@@ -4,20 +4,24 @@ import asyncio
 
 from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
+from app.assets.audio_manager import audio, setup_audio, SFX, BGM
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
 from app.ui.components.containers import default_column, default_container, div, spaced_buttons
-from app.ui.components.dialogs import default_notif_dialog
+from app.ui.components.dialogs import default_notif_dialog, show_auto_closing_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import preset_button, DefaultButton
 from app.ui.screens.loading_screen import show_loading_screen
 from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme, preset_exit_button
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
-from app.utils import enable_control_after_delay
+from app.utils import enable_control_after_delay, start_background_loop
 from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
+    setup_audio()
+    audio.on_ready(lambda: audio.play_bgm(BGM.GYMNOPEDIE))
+    start_background_loop()
     # == Login Page setup ==
     page.controls.clear()
     apply_default_page_config(page)
@@ -131,6 +135,7 @@ def main_login_ui(page: ft.Page):
         page.update()
 
     def handle_db_toggle(e):
+        audio.play_sfx(SFX.CLICK)
         show_loading_screen(page, f"Switching to {toggle_db().value}...")
 
         def toggle_and_notify():
@@ -163,15 +168,17 @@ def main_login_ui(page: ft.Page):
 
             page.controls.clear()
             page.add(default_container(form))
-            page.open(dialog)
+            asyncio.run(show_auto_closing_dialog(page, dialog, 1.0))
             page.update()
+            # page.open(dialog)
+            # page.update()
             
-            # Auto-close after n amount of seconds
-            def auto_close():
-                page.close(dialog)
-                page.update()
+            # # Auto-close after n amount of seconds
+            # def auto_close():
+            #     page.close(dialog)
+            #     page.update()
 
-            threading.Timer(1.0, auto_close).start()
+            # threading.Timer(1.0, auto_close).start()
 
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
@@ -201,7 +208,7 @@ def main_login_ui(page: ft.Page):
     control_buttons = [theme_toggle, db_toggle_button]
     
     exit_btn = preset_exit_button(page)
-    
+
     top_row = spaced_buttons([exit_btn], control_buttons)
     
     # == Page Form ==
