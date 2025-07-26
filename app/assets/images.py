@@ -127,8 +127,8 @@ def generate_random_image() -> ft.Image:
     return build_image(
         ref=random_ref,
         border_radius=random_border_radius,
-        width=random_width,
-        height=random_height
+        set_width=random_width,
+        set_height=random_height
     )
     
 def update_image_with_random(img: ft.Image):

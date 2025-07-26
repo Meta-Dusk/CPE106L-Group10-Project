@@ -3,7 +3,9 @@ import asyncio
 
 from app.assets.images import set_logo, build_image, ImageData
 from app.assets.audio_manager import setup_audio, audio
-from app.ui.animations import animate_slide_in, container_setup, animated_slide_out, prepare_for_slide_in, teeter_right
+from app.ui.animations import (
+    animate_slide_in, container_setup, animate_slide_out, prepare_for_slide_in, teeter_right,
+    animate_fade_in, animate_fade_out, text_pand)
 from app.ui.styles import apply_default_page_config
 from app.ui.transitions import fade_in
 from app.ui.components.containers import default_column
@@ -36,6 +38,7 @@ async def run_splash_screen(page: ft.Page):
     def cleanup():
         page.controls.clear()
         page.on_keyboard_event = None
+        page.on_click = None
         page.update()
         
     async def await_or_skip(timeout: float) -> bool:
@@ -54,37 +57,76 @@ async def run_splash_screen(page: ft.Page):
         
     skip_event.clear()
         
-    # Setup splash visuals (same as before)
-    brand = build_image(ImageData.METADUSK, relative_scale=1.4)
-    brand.offset = ft.Offset(0.0, -0.1)
+    brand = build_image(ImageData.METADUSK, relative_scale=1.2, visible=False)
+    brand.tooltip = ""
+    brand_animate = container_setup(brand)
+    brand.opacity = 0.0
 
     splash = set_logo()
+    splash.tooltip = ""
+    splash.visible = False
     splash_animate = container_setup(splash)
+    
+    text = ft.Text(
+        value="Group 10",
+        text_align=ft.TextAlign.CENTER,
+        style=ft.TextStyle(size=50, letter_spacing=10, word_spacing=20, weight=ft.FontWeight.W_100),
+        expand=True,
+        scale=ft.Scale(scale=1.0),
+        animate_scale=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)
+    )
+    text_animate = ft.Container(
+        content=text,
+        animate_opacity=ft.Animation(duration=0),
+        animate_offset=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT),
+        animate_rotation=ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT),
+        opacity=0.0,
+        offset=ft.Offset(0, 0),
+        rotate=0,
+        alignment=ft.alignment.center,
+        expand=True
+    )
 
-    splashes = [splash_animate, brand]
+    splashes = [splash_animate, brand_animate, text_animate]
     
     splash_column = default_column([
         ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY),
         ft.Container(ft.Text(""), alignment=ft.alignment.center, expand=True, height=200),
-        splashes
+        *splashes
     ])
 
     splash_container = ft.Container(splash_column, alignment=ft.alignment.center, expand=True)
-
-    splash.visible = False
+    
     page.add(splash_container)
     page.on_keyboard_event = on_skip_event
+    page.on_click = on_skip_event
+    page.update()
+    
+    if await check_skip_and_cleanup(0.01): return
+    
+    text_animate.animate_opacity = ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)
+    await animate_fade_in(text_animate, 2000)
+    await text_pand(text, 2000)
     page.update()
     
     if await check_skip_and_cleanup(2): return
     
+    brand.visible = True
+    await animate_fade_out(text_animate)
+    await animate_fade_in(brand, 2000)
+    page.update()
+    
+    if await check_skip_and_cleanup(2): return
+    
+    await animate_fade_out(brand)
+    text_animate.visible = False
     brand.visible = False
     splash.visible = True
     await toggle_theme()
     
     if await check_skip_and_cleanup(1): return
     
-    await animated_slide_out(splash_animate)
+    await animate_slide_out(splash_animate)
     await prepare_for_slide_in(splash_animate)
     
     if await check_skip_and_cleanup(1): return

@@ -1,6 +1,5 @@
 import flet as ft
 import inspect
-import asyncio
 
 from app.ui.components.containers import default_column
 from typing import Callable, Optional
@@ -97,9 +96,10 @@ def preset_radio_group(
 
     def wrapped_on_change(e: ft.ControlEvent):
         audio.play_sfx(on_change_sfx)
-        result = on_change(e)
-        if inspect.iscoroutine(result):
-            run_async_in_thread(result)
+        if callable(on_change):
+            result = on_change(e)
+            if inspect.iscoroutine(result):
+                run_async_in_thread(result)
     
     return ft.RadioGroup(
         ref=ref,
@@ -122,7 +122,8 @@ def default_action_button(
     tooltip: str = None,
     on_click_sfx: Optional[SFX] = SFX.CLICK,
     disabled: bool = False,
-    visible: bool = True
+    visible: bool = True,
+    expand: Optional[bool | int] = True
 ) -> ft.ElevatedButton:
     if on_click is None:
         on_click = partial(log_button_press, text)
@@ -139,7 +140,7 @@ def default_action_button(
         width=width,
         height=height,
         style=style,
-        expand=2,
+        expand=expand,
         autofocus=auto_focus,
         tooltip=tooltip,
         icon=icon,

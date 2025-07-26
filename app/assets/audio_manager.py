@@ -31,9 +31,12 @@ class SFX(Enum):
 
 class BGM(Enum):
     GYMNOPEDIE = "satie_gymnopedie-no-1.mp3"
-    BACH = "bach_air-on-the-g-string.mp3"
-    CHOPIN = "chopin_nocturne-no-20-in-c-sharp-minor.mp3"
-    TCHAIKOVSKY = "tchaikovsky_swan-lake.mp3"
+    BACH_G_STRING = "bach_air-on-the-g-string.mp3"
+    NOCTURNE_N20_CSM = "chopin_nocturne-no-20-in-c-sharp-minor.mp3"
+    SWAN_LAKE = "tchaikovsky_swan-lake.mp3"
+    ARABESQUE = "debussy_arabesque-no-1.mp3"
+    CONSOLATION = "liszt_consolation-no-3.mp3"
+    REVERIE = "debussy_reverie.mp3"
 
 class AudioManager:
     def __init__(self):

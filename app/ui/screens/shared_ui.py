@@ -8,7 +8,7 @@ from app.routing.route_data import PageRoute
 from app.ui.components.dialogs import confirm_logout_dialog
 from app.ui.components.buttons import preset_button, DefaultButton, reactive_text_button
 from app.ui.components.containers import default_container
-from app.ui.animations import animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right
+from app.ui.animations import animate_slide_in, animate_slide_out, prepare_for_slide_in, teeter_right
 from app.ui.theme_service import save_theme_mode
 from typing import Callable, Optional
 from app.utils import enable_control_after_delay, get_loop, flatten_controls
@@ -49,7 +49,7 @@ async def logo_toggle(
     first_image: ft.Image, second_image: ft.Image,
     e=None
 ):
-    await animated_slide_out(toggleable_logo)
+    await animate_slide_out(toggleable_logo)
     await prepare_for_slide_in(toggleable_logo)
 
     # Toggle the image
@@ -74,15 +74,20 @@ async def toggle_theme(
     second_image: ft.Image = build_image(ImageData.LOGO_DARK),
     e=None
 ):
-    if page.theme_mode == ft.ThemeMode.LIGHT:
-        page.theme_mode = ft.ThemeMode.DARK
-        theme_toggle.icon = ft.Icons.LIGHT_MODE
-    else:
-        page.theme_mode = ft.ThemeMode.LIGHT
-        theme_toggle.icon = ft.Icons.DARK_MODE
-    save_theme_mode(page.theme_mode)
-    await logo_toggle(page, toggleable_logo, current_image, first_image, second_image, e)
-    page.update()
+    async def toggle(e):
+        await asyncio.sleep(0.5)
+        if page.theme_mode == ft.ThemeMode.LIGHT:
+            page.theme_mode = ft.ThemeMode.DARK
+            theme_toggle.icon = ft.Icons.LIGHT_MODE
+        else:
+            page.theme_mode = ft.ThemeMode.LIGHT
+            theme_toggle.icon = ft.Icons.DARK_MODE
+        save_theme_mode(page.theme_mode)
+        page.update()
+            
+    asyncio.create_task(logo_toggle(page, toggleable_logo, current_image, first_image, second_image, e))
+    asyncio.create_task(toggle(e))
+    
 
 def theme_toggle_button(
     on_click: Callable[[ft.ElevatedButton], None] = None,
