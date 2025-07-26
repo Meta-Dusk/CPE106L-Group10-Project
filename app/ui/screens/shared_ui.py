@@ -6,7 +6,7 @@ from app.assets.audio_manager import audio, SFX
 from app.auth.user import logout_yes, logout_no
 from app.routing.route_data import PageRoute
 from app.ui.components.dialogs import confirm_logout_dialog
-from app.ui.components.buttons import preset_button, DefaultButton, default_text_button, reactive_text_button
+from app.ui.components.buttons import preset_button, DefaultButton, reactive_text_button
 from app.ui.components.containers import default_container
 from app.ui.animations import animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right
 from app.ui.theme_service import save_theme_mode

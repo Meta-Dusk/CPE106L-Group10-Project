@@ -1,10 +1,11 @@
 import flet as ft
 import threading
 import asyncio
+import time
 
 from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
-from app.assets.audio_manager import audio, setup_audio, SFX
+from app.assets.audio_manager import audio, SFX
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
 from app.ui.components.containers import default_column, default_container, div, spaced_buttons
 from app.ui.components.dialogs import default_notif_dialog, show_auto_closing_dialog
@@ -19,8 +20,8 @@ from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
-    setup_audio()
-    audio.on_ready(lambda: audio.play_random_bgm())
+    # setup_audio()
+    # audio.on_ready(lambda: audio.play_random_bgm())
     start_background_loop()
     # == Login Page setup ==
     page.controls.clear()
@@ -130,12 +131,11 @@ def main_login_ui(page: ft.Page):
         action_button.update()
 
     def reset(e):
-        page.controls.clear()
+        # page.controls.clear()
         main_login_ui(page)
         page.update()
-
+            
     def handle_db_toggle(e):
-        # audio.play_sfx(SFX.DB)
         show_loading_screen(page, f"Switching to {toggle_db().value}...")
 
         def toggle_and_notify():
@@ -154,7 +154,9 @@ def main_login_ui(page: ft.Page):
                 else:
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
-
+                    
+            time.sleep(0.5)
+            
             dialog_content = default_text(DefaultTextStyle.SUBTITLE, dialog_content_text)
             dialog_title = default_text(DefaultTextStyle.TITLE, dialog_title_text)
 
@@ -164,8 +166,8 @@ def main_login_ui(page: ft.Page):
                 on_dismiss=reset
             )
 
-            page.controls.clear()
-            page.add(default_container(form))
+            # page.controls.clear()
+            # page.add(default_container(form))
             asyncio.run(show_auto_closing_dialog(page, dialog, 1.0))
             page.update()
             # page.open(dialog)

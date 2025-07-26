@@ -268,22 +268,26 @@ def reactive_text_button(
         tooltip=tooltip,
         disabled=disabled
     )
+    def update(e):
+        if text_button.page:
+            text_button.update()
+        e.page.update()
 
     def on_hover(e: ft.HoverEvent):
         text_button.text = on_hover_text if e.data == "true" else text
-        text_button.update()
+        update(e)
 
     def on_focus(e: ft.OnFocusEvent):
         text_button.text = on_focus_text
-        text_button.update()
+        update(e)
 
     def on_blur(e):
         text_button.text = text
-        text_button.update()
+        update(e)
     
     def wrapped_on_click(e: ft.ControlEvent):
         text_button.text = on_click_text
-        text_button.update()
+        update(e)
         audio.play_sfx(on_click_sfx)
         
         result = on_click(e)
