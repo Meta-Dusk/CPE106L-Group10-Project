@@ -1,5 +1,7 @@
 import flet as ft
 
+from app.assets.audio_manager import audio, SFX
+from app.ui.animations import container_setup
 from app.ui.components.containers import default_column, div, default_row, spaced_buttons
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
@@ -7,7 +9,6 @@ from app.ui.screens.shared_ui import render_page, theme_toggle_button, mod_toggl
 from app.services.api_config import save_api_key, load_api_key, validate_api_key, is_api_configured, clear_api_config
 from app.routing.route_data import PageRoute
 from app.assets.images import set_logo
-from app.ui.animations import container_setup
 
 
 def handle_api_key_entry(page: ft.Page, _):    

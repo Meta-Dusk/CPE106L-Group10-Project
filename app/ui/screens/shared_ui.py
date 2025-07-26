@@ -1,19 +1,17 @@
 import flet as ft
 import asyncio
-import inspect
 
 from app.assets.images import ImageData, build_image
 from app.assets.audio_manager import audio, SFX
 from app.auth.user import logout_yes, logout_no
 from app.routing.route_data import PageRoute
 from app.ui.components.dialogs import confirm_logout_dialog
-from app.ui.components.buttons import preset_button, DefaultButton
+from app.ui.components.buttons import preset_button, DefaultButton, default_text_button, reactive_text_button
 from app.ui.components.containers import default_container
-from app.ui.animations import (
-    animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right)
+from app.ui.animations import animate_slide_in, animated_slide_out, prepare_for_slide_in, teeter_right
 from app.ui.theme_service import save_theme_mode
 from typing import Callable, Optional
-from app.utils import enable_control_after_delay, get_loop
+from app.utils import enable_control_after_delay, get_loop, flatten_controls
 
 
 def render_page(page: ft.Page, content: ft.Control):
@@ -29,13 +27,20 @@ def preset_logout_button(
             yes_clicked=lambda e: logout_yes(page, dialog, page_destination),
             no_clicked=lambda e: logout_no(page, dialog)
         )
-    return preset_button(DefaultButton.LOGOUT, on_click=on_click, on_click_sfx=SFX.LOGOUT)
+    return preset_button(DefaultButton.LOGOUT, on_click=on_click, on_click_sfx=SFX.ALERT)
 
 def open_profile(page: ft.Page):
     def handler(e):
         user_id = page.session.get("user_id")
         if user_id:
             page.go(f"/profile/{user_id}")
+    return handler
+
+def open_op(page: ft.Page):
+    def handler(e):
+        user_id = page.session.get("user_id")
+        if user_id:
+            page.go(f"/profile/op/{user_id}")
     return handler
 
 async def logo_toggle(
@@ -81,7 +86,7 @@ async def toggle_theme(
 
 def theme_toggle_button(
     on_click: Callable[[ft.ElevatedButton], None] = None,
-    on_click_sfx: Optional[SFX] = SFX.CLICK
+    on_click_sfx: Optional[SFX] = SFX.THEME
 ):
     def wrapped_on_click(e: ft.ControlEvent):
         audio.play_sfx(on_click_sfx)
@@ -100,19 +105,14 @@ def theme_toggle_button(
     )
     
 async def mod_toggle_theme(
-    e, page: ft.Page, delay: float = 2.0,
+    e, page: ft.Page, delay: float = 1.5,
     toggle_controls: ft.Control | list[ft.Control] = [],
     toggleable_logo: ft.Container = None,
     theme_toggle: ft.IconButton = None,
     logo: ft.Image = None
 ):
     # Flatten all controls
-    compiled_controls = []
-    for control in toggle_controls:
-        if isinstance(control, list):
-            compiled_controls.extend(control)
-        else:
-            compiled_controls.append(control)
+    compiled_controls = flatten_controls(toggle_controls)
         
     for control in compiled_controls:
         asyncio.create_task(enable_control_after_delay(control, delay))
@@ -130,45 +130,24 @@ class StatusMessage:
         self.text_control.update()
 
     def success(self, message: str):
+        audio.play_sfx(SFX.REWARD)
         self.show(message, ft.Colors.TERTIARY)
 
     def error(self, message: str):
+        audio.play_sfx(SFX.ERROR)
         self.show(message, ft.Colors.ERROR)
 
     def info(self, message: str):
+        audio.play_sfx(SFX.NOTIF)
         self.show(message, ft.Colors.ON_SECONDARY_CONTAINER)
-        
-def preset_exit_button(page: ft.Page, on_click_sfx: Optional[SFX] = SFX.EXIT) -> ft.TextButton:
-    default_text = "Exit"
 
-    text_button = ft.TextButton(
-        text=default_text,
-        adaptive=True
+def preset_exit_button(page: ft.Page) -> ft.TextButton:
+    return reactive_text_button(
+        on_click=lambda e: page.window.close(),
+        on_click_sfx=SFX.EXIT,
+        on_click_text="Exiting...",
+        on_focus_text=">Exit?<",
+        on_hover_text="Exit?",
+        text="Exit",
+        width=80
     )
-
-    def on_hover(e: ft.HoverEvent):
-        text_button.text = "Exit?" if e.data == "true" else default_text
-        text_button.update()
-
-    def on_focus(e: ft.OnFocusEvent):
-        text_button.text = ">Exit?<"
-        text_button.update()
-
-    def on_blur(e):
-        text_button.text = default_text
-        text_button.update()
-
-    def on_click(e):
-        audio.play_sfx(SFX.EXIT)
-        text_button.text = "Exiting..."
-        text_button.update()
-        page.window.close()
-
-    # Attach handlers after creation
-    text_button.on_click = on_click
-    text_button.on_hover = on_hover
-    text_button.on_focus = on_focus
-    text_button.on_blur = on_blur
-
-    return text_button
-

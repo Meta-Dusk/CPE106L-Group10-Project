@@ -123,6 +123,18 @@ def get_loop():
     return _loop
 
 
+# == Flet Utilities ==
+def flatten_controls(controls_list: list[ft.Control]) -> list[ft.Control]:
+    compiled_controls = []
+    for control in controls_list:
+        if isinstance(control, list):
+            compiled_controls.extend(control)
+        else:
+            compiled_controls.append(control)
+            
+    return compiled_controls
+
+
 # == Utils Test ==
 def test():
     print(f"Called from: {where_am_i()}")

@@ -1,6 +1,7 @@
 import pygame
 import threading
 import time
+import random
 
 from pathlib import Path
 from enum import Enum
@@ -20,12 +21,19 @@ def run_in_background(func):
 
 class SFX(Enum):
     CLICK = "01-mouse_click.wav"
-    EXIT = "back_style_1_echo_007.wav"
-    BACK = "cursor_style_1.wav"
-    LOGOUT = "back_style_2_echo_007.wav"
+    NOTIF = "back_style_1_echo_007.wav"
+    ALERT = "back_style_2_echo_007.wav"
+    ERROR = "error_style_2_001.wav"
+    DB = "back_style_5_echo_007.wav"
+    THEME = "back_style_5_echo_007.wav"
+    EXIT = "confirm_style_6_004.wav"
+    REWARD = "confirm_style_4_echo_005.wav"
 
 class BGM(Enum):
     GYMNOPEDIE = "satie_gymnopedie-no-1.mp3"
+    BACH = "bach_air-on-the-g-string.mp3"
+    CHOPIN = "chopin_nocturne-no-20-in-c-sharp-minor.mp3"
+    TCHAIKOVSKY = "tchaikovsky_swan-lake.mp3"
 
 class AudioManager:
     def __init__(self):
@@ -102,16 +110,32 @@ class AudioManager:
             sound.set_volume(self._clamp_volume(volume))
             sound.play()
             self._sfx_last_played[sfx_key] = now # Update last played time
-
+    
     def play_bgm(self, bgm_enum: BGM, volume: float = 0.5, loops: int = -1):
-        if not self._ready or self._muted:
+        if not self.can_play:
             return
         if self.current_bgm != bgm_enum.value:
-            pygame.mixer.music.load(self.bgm[bgm_enum.value].as_posix())
+            bgm_path = self.bgm[bgm_enum.value]
+            file_name = bgm_path.name
+            formatted_name = self.format_bgm_name(file_name)
+            print(f"🎵 Now Playing 🎵 | {formatted_name}")
+            pygame.mixer.music.load(bgm_path.as_posix())
             pygame.mixer.music.set_volume(self._clamp_volume(volume))
             pygame.mixer.music.play(loops)
             self.current_bgm = bgm_enum.value
 
+    def play_random_bgm(self, bgm_enums: list[BGM] = None, volume: float = 0.5, loops: int = -1):
+        if not self.can_play:
+            return
+        
+        # Use provided list or fall back to all BGMs
+        bgm_list = bgm_enums if bgm_enums else list(BGM)
+        random_bgm = random.choice(bgm_list)
+        
+        # Play only if it's not already playing
+        if self.current_bgm != random_bgm:
+            self.play_bgm(random_bgm, volume=volume, loops=loops)
+    
     def stop_bgm(self):
         pygame.mixer.music.stop()
         self.current_bgm = None
@@ -130,6 +154,23 @@ class AudioManager:
     @property
     def can_play(self) -> bool:
         return self._ready and not self._muted
+    
+    @staticmethod
+    def format_bgm_name(file_name: str) -> str:
+        # Remove file extension
+        base_name = file_name.removesuffix(".mp3")
+        
+        # Split into author and title
+        if "_" in base_name:
+            author_part, title_part = base_name.split("_", 1)
+        else:
+            author_part, title_part = "Unknown", base_name  # Fallback
+        
+        # Format parts
+        author = author_part.capitalize()
+        title = title_part.replace("-", " ").title()
+        
+        return f"{title} by {author}"
 
 
 # Shared global instance

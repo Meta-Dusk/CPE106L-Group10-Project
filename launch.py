@@ -194,7 +194,7 @@ def main(page: ft.Page):
     
     # Audio setup
     setup_audio()
-    audio.on_ready(lambda: audio.play_bgm(BGM.GYMNOPEDIE))
+    audio.on_ready(lambda: audio.play_random_bgm())
     
     def enforce_window_mode_constraints(selected_launch):
         invalid_modes = [WindowMode.FULLSCREEN.value, WindowMode.BORDERLESS.value]
