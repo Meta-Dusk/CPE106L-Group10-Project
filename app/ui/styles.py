@@ -130,6 +130,7 @@ def load_window_configs(page: ft.Page):
         page.decoration = ft.BoxDecoration(
             border=ft.border.all(5, ft.Colors.INVERSE_PRIMARY),
         )
+        page.window.shadow = True
     elif config == WindowMode.FULLSCREEN.value:
         page.window.full_screen = True
     else:

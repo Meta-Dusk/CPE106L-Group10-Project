@@ -1,23 +1,28 @@
 import flet as ft
 import threading
 import asyncio
+import time
 
 from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
+from app.assets.audio_manager import audio, SFX
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
 from app.ui.components.containers import default_column, default_container, div, spaced_buttons
-from app.ui.components.dialogs import default_notif_dialog
+from app.ui.components.dialogs import default_notif_dialog, show_auto_closing_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
-from app.ui.components.buttons import preset_button, DefaultButton
+from app.ui.components.buttons import preset_button, DefaultButton, default_text_button, reactive_text_button
 from app.ui.screens.loading_screen import show_loading_screen
+from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme, preset_exit_button
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
-from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme
-from app.utils import enable_control_after_delay
+from app.utils import enable_control_after_delay, start_background_loop
 from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
+    # setup_audio()
+    # audio.on_ready(lambda: audio.play_random_bgm())
+    start_background_loop()
     # == Login Page setup ==
     page.controls.clear()
     apply_default_page_config(page)
@@ -26,8 +31,6 @@ def main_login_ui(page: ft.Page):
     text_login = "Already have an account? Login"
     text_register = "Don't have an account? Register"
     current_mode = get_current_mode().value
-    text_switch_to_sqlite = f"Switch to SQLite? (Using: {current_mode})"
-    text_switch_to_mongo = f"Switch to MongoDB? (Using: {current_mode})"
 
     login_message = default_text(DefaultTextStyle.TITLE, "Please enter your login credentials.")
     message = ft.Text(value="", color=ft.Colors.ERROR)
@@ -41,11 +44,12 @@ def main_login_ui(page: ft.Page):
     is_login = "is_login"
     mode = {is_login: True}
 
-    def clear_errors():
+    def clear_errors(only_error_text: bool = False):
         username_input.error_text = ""
         password_input.error_text = ""
         confirm_password_input.error_text = ""
-        message.value = ""
+        if not only_error_text:
+            message.value = ""
 
     def set_error(text_field: ft.TextField, text: str):
         text_field.error_text = text
@@ -53,8 +57,10 @@ def main_login_ui(page: ft.Page):
     def show_message(text: str, error: bool = False):
         message.value = text
         if error:
+            audio.play_sfx(SFX.ERROR)
             message.color = ft.Colors.ERROR
         else:
+            audio.play_sfx(SFX.REWARD)
             message.color = ft.Colors.TERTIARY
     
     def switch_mode(e):
@@ -90,6 +96,7 @@ def main_login_ui(page: ft.Page):
                 page.session.set("user_id", username)
                 page.update()
                 await asyncio.sleep(0.5) # Wait for half a second
+                clear_errors(only_error_text=True)
                 page.go(PageRoute.DASHBOARD.value)
             else:
                 set_error(username_input, "Username mismatch.")
@@ -124,10 +131,10 @@ def main_login_ui(page: ft.Page):
         action_button.update()
 
     def reset(e):
-        page.controls.clear()
+        # page.controls.clear()
         main_login_ui(page)
         page.update()
-
+            
     def handle_db_toggle(e):
         show_loading_screen(page, f"Switching to {toggle_db().value}...")
 
@@ -144,12 +151,12 @@ def main_login_ui(page: ft.Page):
                 if current_mode == DBMode.SQLITE:
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
-                    db_toggle_button.text = text_switch_to_mongo
                 else:
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
-                    db_toggle_button.text = text_switch_to_sqlite
-
+                    
+            time.sleep(0.5)
+            
             dialog_content = default_text(DefaultTextStyle.SUBTITLE, dialog_content_text)
             dialog_title = default_text(DefaultTextStyle.TITLE, dialog_title_text)
 
@@ -159,17 +166,19 @@ def main_login_ui(page: ft.Page):
                 on_dismiss=reset
             )
 
-            page.controls.clear()
-            page.add(default_container(form))
-            page.open(dialog)
+            # page.controls.clear()
+            # page.add(default_container(form))
+            asyncio.run(show_auto_closing_dialog(page, dialog, 1.0))
             page.update()
+            # page.open(dialog)
+            # page.update()
             
-            # Auto-close after n amount of seconds
-            def auto_close():
-                page.close(dialog)
-                page.update()
+            # # Auto-close after n amount of seconds
+            # def auto_close():
+            #     page.close(dialog)
+            #     page.update()
 
-            threading.Timer(1.0, auto_close).start()
+            # threading.Timer(1.0, auto_close).start()
 
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
@@ -186,21 +195,25 @@ def main_login_ui(page: ft.Page):
     theme_toggle = theme_toggle_button(on_click=handle_theme_click)
     
     # == Buttons ==
-    db_toggle_button = ft.TextButton(
+    db_toggle_button = reactive_text_button(
         icon=ft.Icons.CODE_SHARP,
         icon_color=ft.Colors.PRIMARY,
-        text=text_switch_to_sqlite if current_mode == DBMode.MONGO.value else text_switch_to_mongo,
         tooltip="Switch between available databases",
         on_click=handle_db_toggle,
-        disabled=True
+        on_click_sfx=SFX.DB,
+        disabled=True,
+        text=f"DBMode: {current_mode}",
+        on_hover_text="Switch to SQLite?" if current_mode == DBMode.MONGO.value else "Switch to MongoDB?",
+        on_focus_text=">Switch to SQLite?<" if current_mode == DBMode.MONGO.value else ">Switch to MongoDB?<",
+        on_click_text="Switching DBMode...",
+        width=230
     )
-    toggle_button = ft.TextButton(text=text_register, on_click=switch_mode)
+    toggle_button = default_text_button(text=text_register, on_click=switch_mode)
     action_button = preset_button(DefaultButton.LOGIN, on_click=login_or_register)
     control_buttons = [theme_toggle, db_toggle_button]
     
-    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
-    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
-    
+    exit_btn = preset_exit_button(page)
+
     top_row = spaced_buttons([exit_btn], control_buttons)
     
     # == Page Form ==

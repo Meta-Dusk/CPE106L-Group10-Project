@@ -3,6 +3,8 @@ import os
 import flet as ft
 import asyncio
 import json
+import re
+import threading
 
 from pathlib import Path
 
@@ -32,22 +34,15 @@ def log_button_press(name: str, e: ft.ControlEvent):
     print(f"\"{name}\": button pressed!")
 
 
-# == Animation Utility
-async def enable_control_after_delay(control: ft.Control | list[ft.Control], delay: float):
-    # Normalize to list if it's a single control
-    controls = control if isinstance(control, list) else [control]
-
-    # Disable all controls and update
-    for c in controls:
-        c.disabled = True
-        c.update()
+# == Animation Utility ==
+async def enable_control_after_delay(control: ft.Control, delay: float):
+    control.disabled = True
+    control.update()
 
     await asyncio.sleep(delay)
 
-    # Re-enable all controls and update
-    for c in controls:
-        c.disabled = False
-        c.update()
+    control.disabled = False
+    control.update()
 
 
 # == Other Stuff ==
@@ -86,6 +81,58 @@ def load_launcher_config(file_path: Path = LAUNCHER_CONFIG_PATH) -> dict:
     except Exception as e:
         print(f"❌ Failed to load config: {e}")
         return {}
+
+# == Formatting ==
+def format_raw_phone(raw: str) -> str:
+    raw = re.sub(r"\D", "", raw or "")  # Remove non-digits
+    raw = raw[:10]  # Limit to 10 digits
+
+    # Apply formatting: 0912-345-6789
+    if len(raw) >= 4:
+        formatted = raw[:4]
+        if len(raw) >= 7:
+            formatted += "-" + raw[4:7] + "-" + raw[7:]
+        elif len(raw) > 4:
+            formatted += "-" + raw[4:]
+    else:
+        formatted = raw
+
+    return formatted
+
+
+# == Threading ==
+def run_async_in_thread(coro):
+    def runner():
+        asyncio.run(coro)
+    threading.Thread(target=runner).start()
+
+_loop = None
+
+def start_background_loop():
+    global _loop
+    _loop = asyncio.new_event_loop()
+
+    def run_loop():
+        asyncio.set_event_loop(_loop)
+        _loop.run_forever()
+
+    thread = threading.Thread(target=run_loop, daemon=True)
+    thread.start()
+
+def get_loop():
+    return _loop
+
+
+# == Flet Utilities ==
+def flatten_controls(controls_list: list[ft.Control]) -> list[ft.Control]:
+    compiled_controls = []
+    for control in controls_list:
+        if isinstance(control, list):
+            compiled_controls.extend(control)
+        else:
+            compiled_controls.append(control)
+            
+    return compiled_controls
 
 
 # == Utils Test ==

@@ -5,13 +5,14 @@ from app.ui.components.buttons import preset_button, DefaultButton, default_acti
 from app.ui.components.containers import div, default_row, default_column, spaced_buttons
 from app.ui.animations import container_setup
 from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme)
+    render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme,
+    preset_exit_button)
 from app.assets.images import set_logo
 from app.routing.route_data import PageRoute
 
 
 def handle_dashboard(page: ft.Page, _):
-    title = default_text(DefaultTextStyle.TITLE, "This is the dashboard 😔🤚")
+    title = default_text(DefaultTextStyle.TITLE, "🔥 I AM THE DASHBOARD 🔥")
     
     logo = set_logo()
     toggleable_logo = container_setup(logo)
@@ -27,8 +28,7 @@ def handle_dashboard(page: ft.Page, _):
     logout_btn = preset_logout_button(page)
     profile_btn = preset_button(DefaultButton.PROFILE, open_profile(page))
     
-    # exit_btn = preset_button(DefaultButton.EXIT, lambda _: page.window.close())
-    exit_btn = ft.TextButton("Exit", on_click=lambda _: page.window.close())
+    exit_btn = preset_exit_button(page)
     
     mathplot_btn = default_action_button(
         text="View Plots",

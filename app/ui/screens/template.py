@@ -8,8 +8,10 @@ import flet as ft
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton
-from app.ui.components.containers import div, default_row
-from app.ui.screens.shared_ui import render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme
+from app.ui.components.containers import div, default_row, spaced_buttons
+from app.ui.screens.shared_ui import (
+    render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme,
+    preset_exit_button)
 from app.ui.animations import container_setup
 from app.assets.images import set_logo
 from app.routing.route_data import PageRoute
@@ -40,9 +42,10 @@ def handle_template(page: ft.Page, _):
         type=DefaultButton.BACK,
         on_click=lambda e: page.go(PageRoute.DASHBOARD.value)
     )
+    exit_btn = preset_exit_button()
     
-    control_buttons = default_row([logout_btn, back_btn])      # Put essential controls here
-    top_row = ft.Row([theme_toggle], ft.MainAxisAlignment.END) # Put optional controls here
+    control_buttons = default_row([logout_btn, back_btn])      # Put optional controls here
+    top_row = spaced_buttons([exit_btn], [theme_toggle])       # Put essential controls here
     
     # The purpose of `render_page()` is to just put the provided list of controls into a `default_container()`,
     # so you can just insert directly these controls. Just don't put a row inside of a column, since that will

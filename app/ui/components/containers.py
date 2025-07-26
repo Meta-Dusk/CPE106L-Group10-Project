@@ -47,6 +47,16 @@ def spaced_buttons(
     right_controls: Optional[list[ft.Control]] = None,
     spacing: ft.OptionalNumber = 10
 ) -> ft.Row:
+    """
+    Provides spacing for two sets of buttons; separated into left only and right only buttons.
+    
+    Args:
+        left_controls (list[`ft.Control`]): Can be `None`, or have any controls, such as buttons (Like the `exit_btn`). Must be a list of controls.
+        left_controls (list[`ft.Control`]): Also can be `None`. I usually put buttons such as the theme button here. Must be a list of controls.
+        
+    Returns:
+        `ft.Row`: A row that is spaced evenly. Controls are placed at either left or right side only
+    """
     left_row = ft.Row(
         controls=left_controls,
         alignment=ft.MainAxisAlignment.START,

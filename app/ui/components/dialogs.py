@@ -5,6 +5,7 @@ from typing import Callable
 from app.ui.components.buttons import preset_button, DefaultButton
 from app.ui.components.containers import default_column, default_container
 from app.ui.components.text import default_text, DefaultTextStyle
+from app.assets.audio_manager import audio, SFX
 
 
 DEFAULT_TITLE_PADDING = 25
@@ -101,9 +102,11 @@ def error_dialog(
     page: ft.Page = None
 ) -> ft.AlertDialog:
     def close_dialog(e):
+        audio.play_sfx(SFX.ERROR)
         page.close(dialog)
         page.update()
-    okay_btn = preset_button(DefaultButton.OKAY,on_click=close_dialog)
+        
+    okay_btn = preset_button(DefaultButton.OKAY, on_click=close_dialog)
     okay_btn.color = ft.Colors.ON_ERROR
     okay_btn.bgcolor = ft.Colors.ERROR
     title = default_text(DefaultTextStyle.ERROR, input_text="ERROR")
