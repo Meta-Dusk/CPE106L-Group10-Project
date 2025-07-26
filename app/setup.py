@@ -3,8 +3,9 @@ import shutil
 import asyncio
 import subprocess
 
-from app.config import Config
 from cryptography.fernet import Fernet
+from app.config import Config
+from app.assets.audio_manager import audio, setup_audio, SFX
 from app.setup_env import setup_env
 from app.ui.styles import apply_setup_page_config
 from app.ui.components.containers import default_container, default_row, default_column, div
@@ -63,11 +64,13 @@ def handle_setup(
             for f in [username_input, password_input, host_input]:
                 if not f.value.strip():
                     f.error_text = "This field is required."
+            audio.play_sfx(SFX.ERROR)
             page.update()
             return
-
+        audio.play_sfx(SFX.REWARD)
         uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority"
     else:
+        audio.play_sfx(SFX.ERROR)
         uri = entry.value.strip()
         if not uri:
             entry.error_text = "MongoDB URI cannot be empty."
@@ -134,6 +137,8 @@ def perform_encryption(page: ft.Page, uri: str):
     page.update()
     
 def run_launcher(page: ft.Page):
+    audio.play_sfx(SFX.CLICK)
+    audio.stop_bgm()
     page.window.close()
     subprocess.run(["py", "-m", "launch"], check=True)
 
@@ -145,6 +150,8 @@ py -m app.setup
 """
 
 def main(page: ft.Page):
+    setup_audio()
+    audio.on_ready(lambda: audio.play_random_bgm())
     page.controls.clear()
     apply_setup_page_config(page)
     
@@ -214,4 +221,4 @@ def main(page: ft.Page):
     page.add(content)
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(target=main, assets_dir="app/assets")

@@ -1,14 +1,17 @@
 import flet as ft
+import inspect
 
 from app.ui.components.containers import default_column
 from typing import Callable, Optional
+from app.assets.audio_manager import audio, SFX
 from app.ui.styles import default_action_button_style, RadioChoiceStyle, WindowMode
-from app.utils import log_button_press
+from app.utils import log_button_press, run_async_in_thread
 from enum import Enum
 from functools import partial
 from dataclasses import dataclass
 
 
+# == Radio Button Group ==
 class LaunchMode(Enum):
     NATIVE = "native"
     WEB = "web"
@@ -25,6 +28,7 @@ DEFAULT_WINDOW_CHOICES = [
     (WindowMode.FULLSCREEN.value, "Full Screen", True),
     (WindowMode.BORDERLESS.value, "Borderless", True)
 ]
+
 
 def preset_radio_choice(
     value: Optional[str] = "Value",
@@ -54,7 +58,8 @@ def preset_radio_group(
     choices: Optional[list[tuple[str, str, bool]]] = None,
     selected_value: Optional[str] = None,
     radio_refs_map: Optional[dict[str, ft.Ref[ft.Radio]]] = None,
-    on_change: Optional[Callable] = None
+    on_change: Optional[Callable] = None,
+    on_change_sfx: Optional[SFX] = SFX.CLICK
 ) -> ft.RadioGroup:
     if not choices:
         raise ValueError("choices must be provided and cannot be empty")
@@ -89,42 +94,102 @@ def preset_radio_group(
             )
         )
 
+    def wrapped_on_change(e: ft.ControlEvent):
+        audio.play_sfx(on_change_sfx)
+        if callable(on_change):
+            result = on_change(e)
+            if inspect.iscoroutine(result):
+                run_async_in_thread(result)
+    
     return ft.RadioGroup(
         ref=ref,
         value=selected,
-        on_change=on_change,
+        on_change=wrapped_on_change,
         content=default_column(controls=radios)
     )
 
-    
+
+# == Default Buttons ==    
 def default_action_button(
     text: Optional[str] = "Action Button",
     on_click: Callable[[ft.ElevatedButton], None] = None,
     style: ft.ButtonStyle = default_action_button_style,
     icon: ft.IconValue = None,
+    icon_color: ft.ColorValue = None,
     width: ft.OptionalNumber = 120,
     height: ft.OptionalNumber = 40,
     auto_focus: bool = False,
-    tooltip: str = None
+    tooltip: str = None,
+    on_click_sfx: Optional[SFX] = SFX.CLICK,
+    disabled: bool = False,
+    visible: bool = True,
+    expand: Optional[bool | int] = True
 ) -> ft.ElevatedButton:
     if on_click is None:
         on_click = partial(log_button_press, text)
+        
+    def wrapped_on_click(e: ft.ControlEvent):
+        audio.play_sfx(on_click_sfx)
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
     
     button = ft.ElevatedButton(
         text=text,
-        on_click=on_click,
+        on_click=wrapped_on_click,
         width=width,
         height=height,
         style=style,
-        expand=2,
+        expand=expand,
         autofocus=auto_focus,
-        tooltip=tooltip
+        tooltip=tooltip,
+        icon=icon,
+        icon_color=icon_color,
+        disabled=disabled,
+        visible=visible
     )
-    if icon:
-        button.icon = icon
+    return button
+
+def default_text_button(
+    text: Optional[str] = "Text Button",
+    on_click: Callable[[ft.TextButton], None] = None,
+    on_click_sfx: Optional[SFX] = SFX.CLICK,
+    style: ft.ButtonStyle = None,
+    icon: ft.IconValue = None,
+    icon_color: ft.ColorValue = None,
+    width: ft.OptionalNumber = None,
+    height: ft.OptionalNumber = 40,
+    auto_focus: bool = False,
+    tooltip: str = None,
+    disabled: bool = False
+) -> ft.TextButton:
+    if on_click is None:
+        on_click = partial(log_button_press, text)
+        
+    def wrapped_on_click(e: ft.ControlEvent):
+        audio.play_sfx(on_click_sfx)
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
+    
+    button = ft.TextButton(
+        text=text,
+        on_click=wrapped_on_click,
+        style=style,
+        icon=icon,
+        icon_color=icon_color,
+        width=width,
+        height=height,
+        autofocus=auto_focus,
+        tooltip=tooltip,
+        expand=2,
+        disabled=disabled,
+        adaptive=True
+    )
     return button
 
 
+# == Preset Buttons ==
 @dataclass
 class ButtonData:
     label: str
@@ -148,6 +213,7 @@ def preset_button(
     on_click: Callable[[ft.ElevatedButton], None] = None,
     style: ft.ButtonStyle = default_action_button_style,
     auto_focus: bool = False,
+    on_click_sfx: Optional[SFX] = SFX.CLICK
 ) -> ft.ElevatedButton:
     data = type.value
     
@@ -155,21 +221,84 @@ def preset_button(
         on_click = partial(log_button_press, data.label)
     if type == DefaultButton.EXIT:
         width = 80
+        on_click_sfx = SFX.BACK
     else:
         width = None
+    
+    def wrapped_on_click(e: ft.ControlEvent):
+        audio.play_sfx(on_click_sfx)
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
     
     return default_action_button(
         text=data.label,
         tooltip=data.tooltip,
         icon=data.icon,
-        on_click=on_click,
+        on_click=wrapped_on_click,
         style=style,
         auto_focus=auto_focus,
         width=width
     )
 
-def test():
-    print(LaunchMode.NATIVE.value)
+# == Reactive Buttons ==
+def reactive_text_button(
+    text: Optional[str] = "Reactive Text Button",
+    on_click: Callable[[ft.ElevatedButton], None] = None,
+    on_click_sfx: Optional[SFX] = SFX.CLICK,
+    on_click_text: Optional[str] = "Click",
+    on_hover_text: Optional[str] = "Hover",
+    on_focus_text: Optional[str] = "Focus",
+    style: ft.ButtonStyle = None,
+    icon: ft.IconValue = None,
+    icon_color: ft.ColorValue = None,
+    width: ft.OptionalNumber = None,
+    height: ft.OptionalNumber = 40,
+    auto_focus: bool = False,
+    tooltip: str = None,
+    disabled: bool = False
+) -> ft.TextButton:
+    text_button = default_text_button(
+        text=text,
+        style=style,
+        icon=icon,
+        icon_color=icon_color,
+        width=width,
+        height=height,
+        auto_focus=auto_focus,
+        tooltip=tooltip,
+        disabled=disabled
+    )
+    def update(e):
+        if text_button.page:
+            text_button.update()
+        e.page.update()
 
-if __name__ == "__main__":
-    test()
+    def on_hover(e: ft.HoverEvent):
+        text_button.text = on_hover_text if e.data == "true" else text
+        update(e)
+
+    def on_focus(e: ft.OnFocusEvent):
+        text_button.text = on_focus_text
+        update(e)
+
+    def on_blur(e):
+        text_button.text = text
+        update(e)
+    
+    def wrapped_on_click(e: ft.ControlEvent):
+        text_button.text = on_click_text
+        update(e)
+        audio.play_sfx(on_click_sfx)
+        
+        result = on_click(e)
+        if inspect.iscoroutine(result):
+            run_async_in_thread(result)
+
+    # Attach handlers after creation
+    text_button.on_click = wrapped_on_click
+    text_button.on_hover = on_hover
+    text_button.on_focus = on_focus
+    text_button.on_blur = on_blur
+
+    return text_button

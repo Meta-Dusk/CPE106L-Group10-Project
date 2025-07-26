@@ -12,7 +12,7 @@ from app.routing.route_data import PageRoute
 
 
 def handle_dashboard(page: ft.Page, _):
-    title = default_text(DefaultTextStyle.TITLE, "This is the dashboard 😔🤚")
+    title = default_text(DefaultTextStyle.TITLE, "🔥 I AM THE DASHBOARD 🔥")
     
     logo = set_logo()
     toggleable_logo = container_setup(logo)

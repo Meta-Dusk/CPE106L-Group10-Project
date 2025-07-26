@@ -49,7 +49,7 @@ def check_mongo_connection(page: ft.Page):
                     content=dialog_content,
                     on_dismiss=lambda e: page.update()
                 )
-                dialog.open = True
+                page.open(dialog)
                 page.update()
 
         retry_btn = default_action_button(text="Retry Connection", on_click=retry)

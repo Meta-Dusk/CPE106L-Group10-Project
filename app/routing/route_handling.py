@@ -10,6 +10,7 @@ from app.ui.screens.shared_ui import render_page
 from app.ui.screens.viewgraphs import handle_viewgraphs
 from app.ui.screens.booking import handle_booking
 from app.ui.screens.api_key_ui import handle_api_key_entry
+from app.ui.screens.operator_ui import handle_operator
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.auth.user import is_authenticated
 from app.routing.route_data import RouteHandler, PageRoute
@@ -58,6 +59,11 @@ DYNAMIC_ROUTE_HANDLERS = [
     {
         "pattern": re.compile(r"^/profile/(?P<user_id>\w+)$"),
         "handler": handle_profile,
+        "auth_required": True
+    },
+    {
+        "pattern": re.compile(r"^/profile/op/(?P<user_id>\w+)$"),
+        "handler": handle_operator,
         "auth_required": True
     }
 ]
