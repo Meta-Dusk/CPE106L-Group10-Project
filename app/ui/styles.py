@@ -1,7 +1,7 @@
 import flet as ft
 
 from app.assets.images import ICON_PATH
-from app.ui.theme_service import load_theme_mode
+from app.ui.services.theme_service import load_theme_mode
 from app.utils import load_launcher_config
 from dataclasses import dataclass
 from enum import Enum

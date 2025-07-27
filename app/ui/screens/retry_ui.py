@@ -13,7 +13,7 @@ from app.ui.components.buttons import default_action_button
 login_page = PageRoute.LOGIN.value
 retry_page = PageRoute.RETRY.value
 
-def check_mongo_connection(page: ft.Page):
+def check_mongo_connection(page: ft.Page, _):
     collection = connect_to_mongo()
 
     if collection is None:
