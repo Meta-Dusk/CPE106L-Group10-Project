@@ -37,6 +37,7 @@ async def run_splash_screen(page: ft.Page):
     logo = set_logo()
     logo_animate = container_setup(logo)
     logo_animate.visible = False
+    logo_animate.offset = ft.Offset(0.0, 0.0)
     
     icon = set_logo(ImageData.ICON_LIGHT)
     icon_animate = container_setup(icon)
@@ -49,17 +50,17 @@ async def run_splash_screen(page: ft.Page):
     andrei_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.ANDREI.value.description)
     nigel_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.NIGEL.value.description)
     seth_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.SETH.value.description)
-        
+    
     andrei_portrait = ft.Container(ft.Column([andrei_text, andrei], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
     nigel_portrait = ft.Container(ft.Column([nigel_text, nigel], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
     seth_portrait = ft.Container(ft.Column([seth_text, seth], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
     
     portraits = [andrei_portrait, nigel_portrait, seth_portrait]
     
-    portrait_row = container_setup(ft.Row(controls=portraits, alignment=ft.MainAxisAlignment.CENTER, expand=True, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=20))
+    portrait_row = container_setup(ft.Row(controls=portraits, alignment=ft.MainAxisAlignment.CENTER, expand=True, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=100))
     portrait_row.opacity = 0.0
     portrait_row.visible = False
-    portrait_row.offset = ft.Offset(0.0, -2.0)
+    portrait_row.offset = ft.Offset(0.0, 0.0)
     
     text = ft.Text(
         value="Group 10",
@@ -67,7 +68,7 @@ async def run_splash_screen(page: ft.Page):
         style=ft.TextStyle(size=50, letter_spacing=10, word_spacing=20, weight=ft.FontWeight.W_100),
         expand=True,
         visible=False,
-        offset=ft.Offset(0.0, 0.5)
+        offset=ft.Offset(0.0, 0.2)
     )
     
     splashes = [logo_animate, brand_animate, text, icon_animate, portrait_row]
@@ -75,10 +76,15 @@ async def run_splash_screen(page: ft.Page):
     splash_skip_text = ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY)
     splash_filler_container = ft.Container(ft.Text(""), height=170, padding=None)
     
+    splash_stack = ft.Stack(
+        controls=splashes,
+        alignment=ft.alignment.center,
+        fit=ft.StackFit.LOOSE
+    )
     splash_column = ft.Column([
         splash_skip_text,
         splash_filler_container,
-        *splashes # Unpack splashes since you can't nest a list of controls in another list of controls
+        splash_stack
     ], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
 
     splash_container = ft.Container(splash_column, alignment=ft.alignment.center)
@@ -110,16 +116,16 @@ async def run_splash_screen(page: ft.Page):
         await animate_fade_out(brand_animate, 1000)
         brand_animate.visible = False
         logo_animate.visible = True
-        await animate_fade_in(logo_animate, 1000)
-        await toggle_theme(page)
-        await asyncio.sleep(0.5)
+        await animate_fade_in(logo_animate, 500)
         await animate_slide_out(logo_animate)
+        await toggle_theme(page)
         await prepare_for_slide_in(logo_animate)
         await asyncio.sleep(0.5)
-        await toggle_theme(page)
         await animate_slide_in(logo_animate)
+        await toggle_theme(page)
         await teeter_right(logo_animate)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
+        await animate_fade_out(logo_animate, 1000)
         
     success = await splash_animation()
     if not success:

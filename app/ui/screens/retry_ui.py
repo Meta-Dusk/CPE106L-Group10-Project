@@ -14,63 +14,67 @@ from app.routing.route_data import PageRoute
 login_page = PageRoute.LOGIN.value
 retry_page = PageRoute.RETRY.value
 
+
+def retry_ui(page: ft.Page):
+    audio.play_sfx(SFX.ERROR)
+    page.controls.clear()
+    current_image = set_logo(ImageData.ICON_LIGHT)
+
+    warning_title = default_text(DefaultTextStyle.TITLE, "Failed to connect to MongoDB.")
+    warning_title.color = ft.Colors.ERROR
+    
+    warning_desc = default_text(
+        DefaultTextStyle.SUBTITLE,
+        "Please ensure the MongoDB cluster is running or that you have finished setup first!"
+    )
+    
+    error_dialog = default_notif_dialog(
+        title="Failed to Reconnect",
+        content=default_text(DefaultTextStyle.ERROR, "Have you tried running the setup again?")
+    )
+
+    def retry(e):
+        new_collection = init_database()
+        if new_collection is not None:
+            page.go(login_page)
+        else:
+            audio.play_sfx(SFX.ERROR)
+            page.go(retry_page)  # show again if still fails
+            page.open(error_dialog)
+
+    retry_btn = default_action_button(text="Retry Connection", on_click=retry)
+    exit_btn = preset_button(DefaultButton.EXIT, on_click=lambda e: page.window.close())
+    
+    buttons = [retry_btn, exit_btn]
+    buttons_row = default_row(buttons)
+    
+    text_column = default_column([warning_title, warning_desc])
+    text_container = ft.Container(
+        content=text_column,
+        expand=True,
+        padding=20,
+        bgcolor=ft.Colors.SECONDARY_CONTAINER,
+        width=800,
+        height=120,
+        border_radius=30,
+        adaptive=True
+    )
+    
+    retry_ui = default_column([
+        current_image,
+        div(),
+        text_container,
+        buttons_row
+    ])
+
+    page.add(default_container(retry_ui))
+    page.update()
+    return None
+
 def check_mongo_connection(page: ft.Page, _):
     collection = connect_to_mongo()
 
     if collection is None:
-        audio.play_sfx(SFX.ERROR)
-        page.controls.clear()
-        current_image = set_logo(ImageData.ICON_LIGHT)
-
-        warning_title = default_text(DefaultTextStyle.TITLE, "Failed to connect to MongoDB.")
-        warning_title.color = ft.Colors.ERROR
-        
-        warning_desc = default_text(
-            DefaultTextStyle.SUBTITLE,
-            "Please ensure the MongoDB cluster is running or that you have finished setup first!"
-        )
-        
-        error_dialog = default_notif_dialog(
-            title="Failed to Reconnect",
-            content=default_text(DefaultTextStyle.ERROR, "Have you tried running the setup again?")
-        )
-
-        def retry(e):
-            new_collection = init_database()
-            if new_collection is not None:
-                page.go(login_page)
-            else:
-                audio.play_sfx(SFX.ERROR)
-                page.go(retry_page)  # show again if still fails
-                page.open(error_dialog)
-
-        retry_btn = default_action_button(text="Retry Connection", on_click=retry)
-        exit_btn = preset_button(DefaultButton.EXIT, on_click=lambda e: page.window.close())
-        
-        buttons = [retry_btn, exit_btn]
-        buttons_row = default_row(buttons)
-        
-        text_column = default_column([warning_title, warning_desc])
-        text_container = ft.Container(
-            content=text_column,
-            expand=True,
-            padding=20,
-            bgcolor=ft.Colors.SECONDARY_CONTAINER,
-            width=800,
-            height=120,
-            border_radius=30,
-            adaptive=True
-        )
-        
-        retry_ui = default_column([
-            current_image,
-            div(),
-            text_container,
-            buttons_row
-        ])
-
-        page.add(default_container(retry_ui))
-        page.update()
-        return None
+        retry_ui(page)
 
     return collection
