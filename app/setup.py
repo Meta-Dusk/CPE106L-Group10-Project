@@ -146,10 +146,15 @@ def perform_encryption(page: ft.Page, uri: str):
     key = generate_key()
     encrypt_uri(key, uri)
 
+    close_btn = default_action_button(
+        text="Close",
+        on_click=lambda e: run_launcher(page),
+        auto_focus=True
+    )
     dialog = default_alert_dialog(
         title=ft.Text("Setup Complete"),
         content=ft.Text("MongoDB credentials have been encrypted and saved successfully."),
-        actions=[default_action_button(text="Close", on_click=lambda e: run_launcher(page))],
+        actions=[close_btn],
         page=page
     )
     audio.play_sfx(SFX.REWARD)

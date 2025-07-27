@@ -4,7 +4,7 @@ import random
 from enum import Enum
 from pathlib import Path
 from app.ui.services.theme_service import load_theme_mode
-from typing import Optional
+from typing import Optional, Sequence, Tuple
 
 
 ASSETS_DIR = Path(__file__).parent.parent / "assets" / "images"
@@ -32,18 +32,6 @@ class Image:
         return ASSETS_DIR / self.filename
 
 class ImageData(Enum):
-    CHAEWON_STARE = Image(
-        filename="chae_stare.jpg",
-        description="Chaewon staring at you"
-    )
-    CHAEWON_SIDE = Image(
-        filename="chae_side.jpg",
-        description="Chaewon looking at you"
-    )
-    CHAEWON_SAD = Image(
-        filename="chae_sad.jpg",
-        description="Chaewon is sad 😔 because MongoDB is not connected"
-    )
     LOGO_DARK = Image(
         filename="logo_dark.png",
         description="Project ATS(Accessible Transportation Scheduler) Logo but dark",
@@ -59,6 +47,28 @@ class ImageData(Enum):
         description="MetaDusk brand logo",
         width=355, height=265
     )
+    ICON_DARK = Image(
+        filename="icon_dark.png",
+        description="App Icon but dark",
+        width=500, height=369
+    )
+    ICON_LIGHT = Image(
+        filename="icon_light.png",
+        description="App Icon but light",
+        width=500, height=369
+    )
+    ANDREI = Image(
+        filename="andrei.png",
+        description="John Andrei M. Dela Cruz"
+    )
+    NIGEL = Image(
+        filename="nigel.jpg",
+        description="Vicente Nigel S. Dayag Jr."
+    )
+    SETH = Image(
+        filename="seth.jpg",
+        description="John Seth B. Regalado"
+    )
 
 error_content = ft.Container(
     ft.Text(
@@ -70,6 +80,59 @@ error_content = ft.Container(
     alignment=ft.alignment.center,
     adaptive=True
 )
+
+# == Bum ass CircleAvatar; it just doesn't work...
+# def build_avatar(
+#     ref: ImageData = None,
+#     initials: Optional[str] = None,
+#     color: ft.ColorValue = ft.Colors.PRIMARY,
+#     bgcolor: ft.ColorValue = ft.Colors.SECONDARY,
+#     set_width: ft.OptionalNumber = None,
+#     set_height: ft.OptionalNumber = None,
+#     set_size: ft.OptionalNumber = 100,
+#     visible: bool = True,
+#     relative_width: ft.OptionalNumber = None,
+#     relative_height: ft.OptionalNumber = None,
+#     relative_scale: ft.OptionalNumber = None,
+#     tooltip: Optional[str] = None
+# ) -> ft.CircleAvatar:
+#     if ref is not None:
+#         foreground_image_src = ref.value.path
+#         tooltip = ref.value.description if tooltip is None else tooltip
+#         base_width = ref.value.width
+#         base_height = ref.value.height
+#     else:
+#         foreground_image_src = None
+#         base_width = 200
+#         base_height = 200
+
+#     # Relative scaling
+#     if relative_scale is not None:
+#         set_width = base_width * relative_scale
+#         set_height = base_height * relative_scale
+#     else:
+#         if relative_width is not None:
+#             set_width = base_width * relative_width
+#         if relative_height is not None:
+#             set_height = base_height * relative_height
+    
+#     # Absolute sizing overrides relative scaling
+#     if set_size is not None:
+#         set_width = set_size
+#         set_height = set_size
+    
+#     content = ft.Text(value=initials) if initials else None
+    
+#     return ft.CircleAvatar(
+#         content=content,
+#         foreground_image_src=foreground_image_src,
+#         tooltip=tooltip,
+#         # color=color,
+#         # bgcolor=bgcolor,
+#         width=set_width,
+#         height=set_height,
+#         visible=visible
+#     )
     
 def build_image(
     ref: ImageData = None,
@@ -86,16 +149,21 @@ def build_image(
     visible: bool = True,
     relative_width: ft.OptionalNumber = None,
     relative_height: ft.OptionalNumber = None,
-    relative_scale: ft.OptionalNumber = None
+    relative_scale: ft.OptionalNumber = None,
 ) -> ft.Image:
+    base_width, base_height = None, None
+
     if ref is not None and isinstance(ref, ImageData):
         src = ref.value.path
-        tooltip = ref.value.description
-
-        # Use base width and height from ref if not manually overridden
+        tooltip = tooltip or ref.value.description
         base_width = ref.value.width
         base_height = ref.value.height
+    elif src:
+        tooltip = tooltip or "Image"  # fallback tooltip
+        base_width, base_height = 200, 200  # fallback base size
 
+    # Apply scaling if base size is known
+    if base_width and base_height:
         if relative_scale is not None:
             set_width = base_width * relative_scale
             set_height = base_height * relative_scale
@@ -104,10 +172,12 @@ def build_image(
                 set_width = base_width * relative_width
             if relative_height is not None:
                 set_height = base_height * relative_height
-        if set_size is not None:
-            set_width = set_size
-            set_height = set_size
-                
+
+    # Absolute sizing overrides everything else
+    if set_size is not None:
+        set_width = set_size
+        set_height = set_size
+
     return ft.Image(
         src=src,
         width=set_width,
@@ -121,18 +191,38 @@ def build_image(
         visible=visible
     )
     
-def generate_random_image() -> ft.Image:
-    if not list(ImageData):
-        return build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
-    random_ref = random.choice(list(ImageData))
-    random_border_radius = random.randint(0, 100)
-    random_width = random.randint(150, 300)
-    random_height = random.randint(150, 300)
+def generate_random_image(
+    src: Optional[Sequence[ImageData]] = None,
+    random_width: Tuple[int, int] = (150, 300),
+    random_height: Tuple[int, int] = (150, 300),
+    random_border_radius: Tuple[int, int] = (150, 300),
+) -> ft.Image:
+    """
+    Generates a random image based on a provided list.
+    Defaults to all current images defined in `ImageData`.
+
+    Args:
+        src (Sequence[ImageData], optional): A list of `ImageData` items.  If None, uses all defined ImageData enum values.
+        random_width (Tuple[int, int], optional): Min and max range for width.
+        random_height (Tuple[int, int], optional): Min and max range for height.
+        random_border_radius (Tuple[int, int], optional): Min and max range for border radius.
+
+    Returns:
+        ft.Image: A randomly built image with random size and border radius.
+    """
+    if not src:
+        src = list(ImageData)
+    
+    set_random_ref = random.choice(src)
+    set_random_border_radius = random.randint(*random_border_radius)
+    set_random_width = random.randint(*random_width)
+    set_random_height = random.randint(*random_height)
+    
     return build_image(
-        ref=random_ref,
-        border_radius=random_border_radius,
-        set_width=random_width,
-        set_height=random_height
+        ref=set_random_ref,
+        border_radius=set_random_border_radius,
+        set_width=set_random_width,
+        set_height=set_random_height
     )
     
 def update_image_with_random(img: ft.Image):
@@ -145,16 +235,44 @@ def update_image_with_random(img: ft.Image):
     img.height = new_img.height
     img.update()
 
-def set_logo(src: str = None) -> ft.Image:
+def set_logo(
+    src: Optional[ImageData] = None,
+    relative_scale: ft.OptionalNumber = 0.9,
+    tooltip: Optional[str] = "",
+    color: ft.ColorValue = ft.Colors.PRIMARY
+) -> ft.Image:
+    """
+    Builds a logo image based on the current theme mode.
+
+    Args:
+        src (Optional[ImageData]): Optional image override. Defaults to a theme-based logo.
+        relative_scale (float): Scaling multiplier for logo size.
+        tooltip (str): Tooltip text shown on hover.
+
+    Returns:
+        ft.Image: The configured image component.
+    """
+    # Theme-based fallback logo
     if src is None:
-        if load_theme_mode == ft.ThemeMode.DARK:
-            src = ImageData.LOGO_LIGHT.value.path
-        else:
-            src = ImageData.LOGO_DARK.value.path
-    return build_image(src=src, color=ft.Colors.PRIMARY, relative_scale=0.9)
+        src = ImageData.LOGO_DARK if load_theme_mode == ft.ThemeMode.LIGHT else ImageData.LOGO_LIGHT
+    elif src in (ImageData.ICON_DARK, ImageData.ICON_LIGHT):
+        color = None
+        # Theme-based fallback for icons
+        src = ImageData.ICON_DARK if load_theme_mode == ft.ThemeMode.LIGHT else ImageData.ICON_LIGHT
+
+    return build_image(
+        ref=src,
+        color=color,
+        relative_scale=relative_scale,
+        tooltip=tooltip,
+    )
 
 
-""" Run images.py to test the image data and to check the available images. """
+"""
+Run images.py to test the image data and to check the available images.
+Run with:
+py -m app.assets.images
+"""
 
 def test():
     print("\nThe following are the available images:\n")

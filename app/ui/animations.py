@@ -4,7 +4,22 @@ import asyncio
 from app.utils import milliseconds_to_seconds
 
 
-async def text_pand(text: ft.Text, duration_in_milliseconds: int = 500):
+async def animate_zoom_in(control: ft.Control, duration_in_milliseconds: int = 500):
+    control.animate_opacity = ft.Animation(duration=0)
+    control.animate_scale = ft.Animation(duration=0)
+    control.opacity = 0.0
+    control.scale = 0.0
+    control.update()
+    await asyncio.sleep(0.01)
+    control.animate_opacity = ft.Animation(duration=duration_in_milliseconds, curve=ft.AnimationCurve.EASE_IN_OUT)
+    control.animate_scale = ft.Animation(duration=duration_in_milliseconds, curve=ft.AnimationCurve.EASE_IN_OUT)
+    control.opacity = 1.0
+    control.scale = 1.0
+    control.update()
+    
+    await asyncio.sleep(milliseconds_to_seconds(duration_in_milliseconds))
+
+async def animate_text_pand(text: ft.Text, duration_in_milliseconds: int = 500):
     weights = [
         ft.FontWeight.W_100, ft.FontWeight.W_200, ft.FontWeight.W_300,
         ft.FontWeight.W_400, ft.FontWeight.W_500, ft.FontWeight.W_600,
@@ -99,6 +114,6 @@ def container_setup(content: ft.Control | None = None) -> ft.Container:
         opacity=1.0,
         offset=ft.Offset(0, 0),
         rotate=0,
-        alignment=ft.alignment.center,
-        adaptive=True
+        # alignment=ft.alignment.center,
+        # adaptive=True
     )

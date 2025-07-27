@@ -5,11 +5,11 @@ from app.assets.images import set_logo, build_image, ImageData
 from app.assets.audio_manager import setup_audio, audio
 from app.ui.animations import (
     animate_slide_in, animate_slide_out, prepare_for_slide_in, teeter_right, animate_fade_in,
-    animate_fade_out, text_pand, container_setup)
+    animate_fade_out, animate_text_pand, container_setup, animate_zoom_in)
 from app.ui.styles import apply_default_page_config
 from app.ui.transitions import fade_in
-from app.ui.components.containers import default_column
 from app.ui.services.splash_service import SplashHandler
+from app.ui.components.text import default_text, DefaultTextStyle
 from app.routing.route_handling import ROUTE_HANDLERS, handle_not_found, match_dynamic_route
 from app.routing.route_data import PageRoute
 from app.auth.user import is_authenticated
@@ -29,35 +29,59 @@ async def run_splash_screen(page: ft.Page):
     handler = SplashHandler(page)
     page.on_keyboard_event = handler.on_skip_event
         
-    brand = build_image(ImageData.METADUSK, relative_scale=1.2, visible=False)
-    brand.tooltip = ""
-    brand.opacity = 0.0
+    brand = build_image(ImageData.METADUSK, tooltip="")
+    brand_animate = container_setup(brand)
+    brand_animate.opacity = 0.0
+    brand_animate.visible = False
 
     logo = set_logo()
-    logo.tooltip = ""
     logo_animate = container_setup(logo)
     logo_animate.visible = False
+    
+    icon = set_logo(ImageData.ICON_LIGHT)
+    icon_animate = container_setup(icon)
+    icon_animate.visible = False
+    
+    andrei = build_image(ref=ImageData.ANDREI, set_size=200, tooltip="", border_radius=100)
+    nigel = build_image(ref=ImageData.NIGEL, set_size=200, tooltip="", border_radius=100)
+    seth = build_image(ref=ImageData.SETH, set_size=200, tooltip="", border_radius=100)
+    
+    andrei_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.ANDREI.value.description)
+    nigel_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.NIGEL.value.description)
+    seth_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.SETH.value.description)
+        
+    andrei_portrait = ft.Container(ft.Column([andrei_text, andrei], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
+    nigel_portrait = ft.Container(ft.Column([nigel_text, nigel], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
+    seth_portrait = ft.Container(ft.Column([seth_text, seth], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
+    
+    portraits = [andrei_portrait, nigel_portrait, seth_portrait]
+    
+    portrait_row = container_setup(ft.Row(controls=portraits, alignment=ft.MainAxisAlignment.CENTER, expand=True, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=20))
+    portrait_row.opacity = 0.0
+    portrait_row.visible = False
+    portrait_row.offset = ft.Offset(0.0, -2.0)
     
     text = ft.Text(
         value="Group 10",
         text_align=ft.TextAlign.CENTER,
         style=ft.TextStyle(size=50, letter_spacing=10, word_spacing=20, weight=ft.FontWeight.W_100),
         expand=True,
-        visible=False
+        visible=False,
+        offset=ft.Offset(0.0, 0.5)
     )
-
-    splashes = [logo_animate, brand, text]
+    
+    splashes = [logo_animate, brand_animate, text, icon_animate, portrait_row]
     
     splash_skip_text = ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY)
-    splash_filler_container = ft.Container(ft.Text(""), alignment=ft.alignment.center, expand=True, height=170)
+    splash_filler_container = ft.Container(ft.Text(""), height=170, padding=None)
     
-    splash_column = default_column([
+    splash_column = ft.Column([
         splash_skip_text,
         splash_filler_container,
         *splashes # Unpack splashes since you can't nest a list of controls in another list of controls
-    ])
+    ], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
 
-    splash_container = ft.Container(splash_column, alignment=ft.alignment.center, expand=True)
+    splash_container = ft.Container(splash_column, alignment=ft.alignment.center)
     
     page.add(splash_container)
     page.update()
@@ -65,15 +89,26 @@ async def run_splash_screen(page: ft.Page):
     @handler.skippable_animation(auto_cleanup=True)
     async def splash_animation():
         await asyncio.sleep(0.5)
+        icon_animate.visible = True
+        await animate_zoom_in(icon_animate, 1000)
+        await asyncio.sleep(0.5)
+        await animate_fade_out(icon_animate, 1000)
+        icon_animate.visible = False
         text.visible = True
         await animate_fade_in(text, 1000)
-        await text_pand(text, 1000)
+        await animate_text_pand(text, 1000)
         await animate_fade_out(text, 1000)
         text.visible = False
-        brand.visible = True
-        await animate_fade_in(brand, 1000)
-        await animate_fade_out(brand, 1000)
-        brand.visible = False
+        portrait_row.visible = True
+        await animate_fade_in(portrait_row, 1000)
+        await asyncio.sleep(0.5)
+        await animate_fade_out(portrait_row, 1000)
+        portrait_row.visible = False
+        brand_animate.visible = True
+        await animate_fade_in(brand_animate, 1000)
+        await asyncio.sleep(0.5)
+        await animate_fade_out(brand_animate, 1000)
+        brand_animate.visible = False
         logo_animate.visible = True
         await animate_fade_in(logo_animate, 1000)
         await toggle_theme(page)
@@ -88,7 +123,7 @@ async def run_splash_screen(page: ft.Page):
         
     success = await splash_animation()
     if not success:
-        print("User has issued a command: Skip splash screen animations")
+        print("[Splash Screen] Skipping splash screen animations.")
         return # Splash screen skipped
 
 

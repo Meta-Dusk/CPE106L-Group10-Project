@@ -21,7 +21,10 @@ def default_column(
 
 def default_container(
     content: Optional[ft.Control | list[ft.Control]] = None,
-    expand: bool = True
+    expand: bool = True,
+    padding: Optional[ft.PaddingValue] = 40,
+    width: Optional[ft.OptionalNumber] = None,
+    height: Optional[ft.OptionalNumber] = None
 ) -> ft.Container:
     if isinstance(content, list):
         content = default_column(controls=content)
@@ -31,8 +34,10 @@ def default_container(
     return ft.Container(
         content=content,
         alignment=ft.alignment.center,
-        padding=40,
-        expand=expand
+        padding=padding,
+        expand=expand,
+        width=width,
+        height=height
     )
     
 def default_row(
