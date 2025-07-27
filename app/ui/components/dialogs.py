@@ -79,7 +79,7 @@ def default_alert_dialog(
         modal=True,
         adaptive=True,
         scrollable=True,
-        title=default_text(DefaultTextStyle.TITLE,input_text=title) if isinstance(title, str) else title,
+        title=default_text(DefaultTextStyle.TITLE, title) if isinstance(title, str) else title,
         title_padding=ft.padding.all(DEFAULT_TITLE_PADDING),
         content=default_column(
             controls=content if isinstance(content, list) else [content] if content else []

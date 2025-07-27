@@ -41,8 +41,8 @@ def main_login_ui(page: ft.Page):
     confirm_password_input.visible = False
     
     # == Login Setup ==
-    is_login = "is_login"
-    mode = {is_login: True}
+    IS_LOGIN = "is_login"
+    mode = {IS_LOGIN: True}
 
     def clear_errors(only_error_text: bool = False):
         username_input.error_text = ""
@@ -64,9 +64,9 @@ def main_login_ui(page: ft.Page):
             message.color = ft.Colors.TERTIARY
     
     def switch_mode(e):
-        mode[is_login] = not mode[is_login]
-        toggle_button.text = text_register if mode[is_login] else text_login
-        confirm_password_input.visible = not mode[is_login]
+        mode[IS_LOGIN] = not mode[IS_LOGIN]
+        toggle_button.text = text_register if mode[IS_LOGIN] else text_login
+        confirm_password_input.visible = not mode[IS_LOGIN]
         clear_errors()
         update_button()
         page.update()
@@ -76,7 +76,7 @@ def main_login_ui(page: ft.Page):
         
         username = username_input.value.strip()
         password = password_input.value.strip()
-        confirm = confirm_password_input.value.strip() if not mode[is_login] else None
+        confirm = confirm_password_input.value.strip() if not mode[IS_LOGIN] else None
         
         # Validate fields
         if not username:
@@ -88,7 +88,7 @@ def main_login_ui(page: ft.Page):
             page.update()
             return
         
-        if mode[is_login]:  # Login mode
+        if mode[IS_LOGIN]:  # Login mode
             user = find_user(username)
             if user and verify_password(password, user["password"]):
                 show_message(f"Welcome, {username}! (Logged in with {current_mode}.)")
@@ -119,7 +119,7 @@ def main_login_ui(page: ft.Page):
         page.update()
 
     def update_button():
-        if mode[is_login]:
+        if mode[IS_LOGIN]:
             updated_btn = preset_button(DefaultButton.LOGIN, on_click=action_button.on_click)
         else:
             updated_btn = preset_button(DefaultButton.REGISTER, on_click=action_button.on_click)
@@ -155,7 +155,7 @@ def main_login_ui(page: ft.Page):
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
                     
-            time.sleep(0.5)
+            time.sleep(0.25)
             
             dialog_content = default_text(DefaultTextStyle.SUBTITLE, dialog_content_text)
             dialog_title = default_text(DefaultTextStyle.TITLE, dialog_title_text)

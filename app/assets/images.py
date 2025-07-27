@@ -76,6 +76,7 @@ def build_image(
     src: str = None,
     set_width: ft.OptionalNumber = None,
     set_height: ft.OptionalNumber = None,
+    set_size: ft.OptionalNumber = None,
     border_radius: ft.OptionalNumber = 0,
     fit: ft.ImageFit = ft.ImageFit.COVER,
     gapless_playback: bool = True,
@@ -103,6 +104,9 @@ def build_image(
                 set_width = base_width * relative_width
             if relative_height is not None:
                 set_height = base_height * relative_height
+        if set_size is not None:
+            set_width = set_size
+            set_height = set_size
                 
     return ft.Image(
         src=src,
@@ -119,7 +123,7 @@ def build_image(
     
 def generate_random_image() -> ft.Image:
     if not list(ImageData):
-        return default_image()
+        return build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
     random_ref = random.choice(list(ImageData))
     random_border_radius = random.randint(0, 100)
     random_width = random.randint(150, 300)
@@ -140,9 +144,6 @@ def update_image_with_random(img: ft.Image):
     img.width = new_img.width
     img.height = new_img.height
     img.update()
-    
-def default_image() -> ft.Image:
-    return build_image(ref=ImageData.CHAEWON_STARE, border_radius=75)
 
 def set_logo(src: str = None) -> ft.Image:
     if src is None:
@@ -150,7 +151,7 @@ def set_logo(src: str = None) -> ft.Image:
             src = ImageData.LOGO_LIGHT.value.path
         else:
             src = ImageData.LOGO_DARK.value.path
-    return build_image(src=src, color=ft.Colors.PRIMARY)
+    return build_image(src=src, color=ft.Colors.PRIMARY, relative_scale=0.9)
 
 
 """ Run images.py to test the image data and to check the available images. """

@@ -18,6 +18,10 @@ async def text_pand(text: ft.Text, duration_in_milliseconds: int = 500):
         await asyncio.sleep(step_delay)
 
 async def animate_fade_in(control: ft.Control, duration_in_milliseconds: int = 500):
+    control.animate_opacity = ft.Animation(duration=0)
+    control.opacity = 0.0
+    control.update()
+    await asyncio.sleep(0.01)
     control.animate_opacity = ft.Animation(duration=duration_in_milliseconds, curve=ft.AnimationCurve.EASE_IN_OUT)
     control.opacity = 1.0
     control.update()
@@ -95,5 +99,6 @@ def container_setup(content: ft.Control | None = None) -> ft.Container:
         opacity=1.0,
         offset=ft.Offset(0, 0),
         rotate=0,
-        alignment=ft.alignment.center
+        alignment=ft.alignment.center,
+        adaptive=True
     )

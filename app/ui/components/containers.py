@@ -3,7 +3,10 @@ import flet as ft
 from typing import Optional
 
 
-def default_column(controls: ft.Control | list[ft.Control] | None = None) -> ft.Column:
+def default_column(
+    controls: Optional[ft.Control | list[ft.Control]] = None,
+    expand: bool = True
+) -> ft.Column:
     normalized = (
         [controls] if isinstance(controls, ft.Control)
         else controls if isinstance(controls, list)
@@ -13,10 +16,13 @@ def default_column(controls: ft.Control | list[ft.Control] | None = None) -> ft.
         controls=normalized,
         alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        expand=True
+        expand=expand
     )
 
-def default_container(content: ft.Control | list[ft.Control] | None = None) -> ft.Container:
+def default_container(
+    content: Optional[ft.Control | list[ft.Control]] = None,
+    expand: bool = True
+) -> ft.Container:
     if isinstance(content, list):
         content = default_column(controls=content)
     elif content is None:
@@ -26,10 +32,13 @@ def default_container(content: ft.Control | list[ft.Control] | None = None) -> f
         content=content,
         alignment=ft.alignment.center,
         padding=40,
-        expand=True
+        expand=expand
     )
     
-def default_row(controls: ft.Control | list[ft.Control] | None = None) -> ft.Row:
+def default_row(
+    controls: Optional[ft.Control | list[ft.Control]] = None,
+    spacing: ft.OptionalNumber = 20
+) -> ft.Row:
     if controls is None:
         controls = []
     elif not isinstance(controls, list):
@@ -39,7 +48,7 @@ def default_row(controls: ft.Control | list[ft.Control] | None = None) -> ft.Row
         controls=controls,
         alignment=ft.MainAxisAlignment.CENTER,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        spacing=20
+        spacing=spacing
     )
     
 def spaced_buttons(

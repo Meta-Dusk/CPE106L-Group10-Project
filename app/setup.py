@@ -11,9 +11,12 @@ from app.ui.styles import apply_setup_page_config
 from app.ui.components.containers import default_container, default_row, default_column, div
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
-from app.ui.components.dialogs import default_alert_dialog, show_auto_closing_dialog
+from app.ui.components.dialogs import default_alert_dialog, show_auto_closing_dialog, default_notif_dialog
 from pymongo.uri_parser import parse_uri
 from pymongo import MongoClient
+
+
+LOGIN = "login"
 
 
 def validate_mongo_uri(uri: str) -> bool:
@@ -24,8 +27,9 @@ def validate_mongo_uri(uri: str) -> bool:
         client.server_info()
         return True
     except Exception as e:
-        print(f"[MongoDB Error] {e}")
-        return False
+        error = f"[MongoDB Error] {e}"
+        print(error)
+        return error
 
 def ensure_directories():
     for path in [Config.KEY_PATH, Config.ENC_PATH]:
@@ -51,10 +55,10 @@ def delete_directories():
 
 
 def handle_setup(
-    page: ft.Page, entry: ft.TextField, input_mode: dict,
-    username_input=None, password_input=None, host_input=None
+    page: ft.Page, entry: ft.TextField, input_mode: dict[str, bool],
+    username_input=ft.TextField, password_input=ft.TextField, host_input=ft.TextField
 ):
-    if input_mode["login"]:
+    if input_mode[LOGIN]:
         # Build URI from parts
         username = username_input.value.strip()
         password = password_input.value.strip()
@@ -64,10 +68,9 @@ def handle_setup(
             for f in [username_input, password_input, host_input]:
                 if not f.value.strip():
                     f.error_text = "This field is required."
-            audio.play_sfx(SFX.ERROR)
+                    audio.play_sfx(SFX.ERROR)
             page.update()
             return
-        audio.play_sfx(SFX.REWARD)
         uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority&appName=TestCluster"
     else:
         audio.play_sfx(SFX.ERROR)
@@ -78,43 +81,59 @@ def handle_setup(
             return
 
     # URI validation
-    if not validate_mongo_uri(uri):
-        (entry if not input_mode["login"] else host_input).error_text = "Invalid MongoDB URI format."
+    check_validation = validate_mongo_uri(uri)
+    if check_validation is not True:
+        if not input_mode[LOGIN]:
+            entry.error_text = "Invalid MongoDB URI format."
+        else:
+            for input in [username_input, password_input, host_input]:
+                input.error_text = "Something went wrong."
+        audio.play_sfx(SFX.ERROR)
+        error_dialog = default_notif_dialog(
+            title="Setup Error",
+            content=default_text(DefaultTextStyle.ERROR, text=f"{check_validation}")
+        )
+        page.open(error_dialog)
         page.update()
         return
 
     setup_env()
 
     if Config.KEY_PATH.exists() or Config.ENC_PATH.exists():
+        entry.error_text = ""
         def reset_confirmed(e):
             page.close(dialog)
             error_check = delete_directories()
             if error_check is not True:
-                entry.error_text = error_check
+                entry.error_text = "Something went wrong."
+                notif_dialog = default_notif_dialog(
+                    title="File Error",
+                    content=default_text(DefaultTextStyle.ERROR, text=f"{error_check}")
+                )
+                page.open(notif_dialog)
             else:
                 perform_encryption(page, uri)
             page.update()
 
         def reset_canceled(e):
             page.close(dialog)
-            canceled_dialog = ft.AlertDialog(
-                title=ft.Text("Setup Canceled"),
-                content=ft.Text("Setup canceled. No changes were made.")
+            audio.play_sfx(SFX.NOTIF)
+            canceled_dialog = default_notif_dialog(
+                title="Setup Canceled",
+                content=default_text(DefaultTextStyle.SUBTITLE, "Setup canceled. No changes were made.")
             )
-            page.open(canceled_dialog)
-            page.update()
             asyncio.run(show_auto_closing_dialog(page, canceled_dialog, 1.0))
 
-        dialog = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Setup Already Exists"),
-            content=ft.Text("A previous setup already exists.\nDo you want to reset it?"),
+        dialog = default_alert_dialog(
+            title="Setup Already Exists",
+            content=default_text(DefaultTextStyle.SUBTITLE, "Do you want to reset previous setup?"),
             actions=[
-                ft.TextButton("Cancel", on_click=reset_canceled),
-                ft.TextButton("Reset", on_click=reset_confirmed)
+                default_action_button(text="Cancel", on_click=reset_canceled, auto_focus=True),
+                default_action_button(text="Reset", on_click=reset_confirmed)
             ],
-            actions_alignment=ft.MainAxisAlignment.END,
+            page=page
         )
+        audio.play_sfx(SFX.ALERT)
         page.open(dialog)
         page.update()
         return
@@ -130,9 +149,10 @@ def perform_encryption(page: ft.Page, uri: str):
     dialog = default_alert_dialog(
         title=ft.Text("Setup Complete"),
         content=ft.Text("MongoDB credentials have been encrypted and saved successfully."),
-        actions=[ft.TextButton("Close", on_click=lambda e: run_launcher(page))],
+        actions=[default_action_button(text="Close", on_click=lambda e: run_launcher(page))],
         page=page
     )
+    audio.play_sfx(SFX.REWARD)
     page.open(dialog)
     page.update()
     
@@ -156,10 +176,10 @@ def main(page: ft.Page):
     apply_setup_page_config(page)
     
     def switch_mode():
-        input_mode["login"] = not input_mode["login"]
+        input_mode[LOGIN] = not input_mode[LOGIN]
         inputs_column.controls.clear()
 
-        if input_mode["login"]:
+        if input_mode[LOGIN]:
             sublabel.value = "Enter your MongoDB Credentials:"
             inputs_column.controls.extend([username_input, password_input, host_input])
         else:
@@ -167,11 +187,11 @@ def main(page: ft.Page):
             inputs_column.controls.append(entry)
         
         entry.error_text = ""
-        apply_setup_page_config(page, alt=input_mode["login"])
+        apply_setup_page_config(page, alt=input_mode[LOGIN])
         page.update()
 
     
-    input_mode = {"login": False}
+    input_mode = {LOGIN: False}
     
     username_input = default_input_field(DefaultInputFieldType.USERNAME)
     password_input = default_input_field(DefaultInputFieldType.PASSWORD)
@@ -205,11 +225,7 @@ def main(page: ft.Page):
         tooltip="Switch input modes",
         on_click=lambda e: switch_mode()
     )
-    button_row = default_row([
-        save_btn,
-        switch_btn,
-        cancel_btn
-    ])
+    button_row = default_row([save_btn, switch_btn, cancel_btn])
 
     content = default_container([
         label,
