@@ -9,7 +9,7 @@ from app.ui.components.dialogs import confirm_logout_dialog
 from app.ui.components.buttons import preset_button, DefaultButton, reactive_text_button
 from app.ui.components.containers import default_container
 from app.ui.animations import animate_slide_in, animate_slide_out, prepare_for_slide_in, teeter_right
-from app.ui.theme_service import save_theme_mode
+from app.ui.services.theme_service import save_theme_mode
 from typing import Callable, Optional
 from app.utils import enable_control_after_delay, get_loop, flatten_controls
 

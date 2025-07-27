@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import flet as ft
 
-CONFIG_FILE_DIR = Path(__file__).parent / "configs"
+CONFIG_FILE_DIR = Path(__file__).parent.parent / "configs"
 CONFIG_FILE = CONFIG_FILE_DIR  / "theme_config.json"
 
 def save_theme_mode(mode: ft.ThemeMode):

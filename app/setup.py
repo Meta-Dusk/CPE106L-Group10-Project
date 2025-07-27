@@ -68,7 +68,7 @@ def handle_setup(
             page.update()
             return
         audio.play_sfx(SFX.REWARD)
-        uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority"
+        uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority&appName=TestCluster"
     else:
         audio.play_sfx(SFX.ERROR)
         uri = entry.value.strip()
