@@ -3,7 +3,7 @@ import random
 
 from enum import Enum
 from pathlib import Path
-from app.ui.theme_service import load_theme_mode
+from app.ui.services.theme_service import load_theme_mode
 from typing import Optional
 
 

@@ -9,6 +9,7 @@ from app.ui.animations import (
 from app.ui.styles import apply_default_page_config
 from app.ui.transitions import fade_in
 from app.ui.components.containers import default_column
+from app.ui.services.splash_service import SplashHandler
 from app.routing.route_handling import ROUTE_HANDLERS, handle_not_found, match_dynamic_route
 from app.routing.route_data import PageRoute
 from app.auth.user import is_authenticated
@@ -17,55 +18,26 @@ from app.auth.user import is_authenticated
 LOGIN_PAGE = PageRoute.LOGIN.value
 
 
+async def toggle_theme(page: ft.Page):
+    if page.theme_mode == ft.ThemeMode.LIGHT:
+        page.theme_mode = ft.ThemeMode.DARK
+    else:
+        page.theme_mode = ft.ThemeMode.LIGHT
+    page.update()
+
 async def run_splash_screen(page: ft.Page):
-    skip_event = asyncio.Event()
-    skip_triggered = False
-
-    def on_skip_event(e: ft.KeyboardEvent):
-        nonlocal skip_triggered
-        if not skip_triggered:
-            print("User triggered skip!")
-            skip_triggered = True
-            skip_event.set()
-            
-    async def toggle_theme():
-        if page.theme_mode == ft.ThemeMode.LIGHT:
-            page.theme_mode = ft.ThemeMode.DARK
-        else:
-            page.theme_mode = ft.ThemeMode.LIGHT
-        page.update()
-        
-    def cleanup():
-        page.controls.clear()
-        page.on_keyboard_event = None
-        page.on_click = None
-        page.update()
-        
-    async def await_or_skip(timeout: float) -> bool:
-        try:
-            await asyncio.wait_for(skip_event.wait(), timeout)
-        except asyncio.TimeoutError:
-            return False
-        return True
-
-    async def check_skip_and_cleanup(timeout: float) -> bool:
-        if await await_or_skip(timeout):
-            print("Skip was triggered. Skipping remaining splash animations.")
-            cleanup()
-            return True
-        return False
-        
-    skip_event.clear()
+    handler = SplashHandler(page)
+    page.on_keyboard_event = handler.on_skip_event
         
     brand = build_image(ImageData.METADUSK, relative_scale=1.2, visible=False)
     brand.tooltip = ""
     brand_animate = container_setup(brand)
     brand.opacity = 0.0
 
-    splash = set_logo()
-    splash.tooltip = ""
-    splash.visible = False
-    splash_animate = container_setup(splash)
+    logo = set_logo()
+    logo.tooltip = ""
+    logo.visible = False
+    logo_animate = container_setup(logo)
     
     text = ft.Text(
         value="Group 10",
@@ -87,55 +59,56 @@ async def run_splash_screen(page: ft.Page):
         expand=True
     )
 
-    splashes = [splash_animate, brand_animate, text_animate]
+    splashes = [logo_animate, brand_animate, text_animate]
+    
+    splash_skip_text = ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY)
+    splash_filler_container = ft.Container(ft.Text(""), alignment=ft.alignment.center, expand=True, height=200)
     
     splash_column = default_column([
-        ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY),
-        ft.Container(ft.Text(""), alignment=ft.alignment.center, expand=True, height=200),
-        *splashes
+        splash_skip_text,
+        splash_filler_container,
+        *splashes # Unpack splashes since you can't nest a list of controls in another list of controls
     ])
 
     splash_container = ft.Container(splash_column, alignment=ft.alignment.center, expand=True)
     
     page.add(splash_container)
-    page.on_keyboard_event = on_skip_event
-    page.on_click = on_skip_event
     page.update()
     
-    if await check_skip_and_cleanup(0.01): return
-    
-    text_animate.animate_opacity = ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)
-    await animate_fade_in(text_animate, 2000)
-    await text_pand(text, 2000)
-    page.update()
-    
-    if await check_skip_and_cleanup(2): return
-    
-    brand.visible = True
-    await animate_fade_out(text_animate)
-    await animate_fade_in(brand, 2000)
-    page.update()
-    
-    if await check_skip_and_cleanup(2): return
-    
-    await animate_fade_out(brand)
-    text_animate.visible = False
-    brand.visible = False
-    splash.visible = True
-    await toggle_theme()
-    
-    if await check_skip_and_cleanup(1): return
-    
-    await animate_slide_out(splash_animate)
-    await prepare_for_slide_in(splash_animate)
-    
-    if await check_skip_and_cleanup(1): return
-    
-    await toggle_theme()
-    await animate_slide_in(splash_animate)
-    await teeter_right(splash_animate)
-    
-    if await check_skip_and_cleanup(1): return
+    @handler.skippable_animation(auto_cleanup=True)
+    async def splash_animation():
+        text_animate.animate_opacity = ft.Animation(duration=500, curve=ft.AnimationCurve.EASE_IN_OUT)
+        await animate_fade_in(text_animate, 2000)
+        await text_pand(text, 2000)
+        page.update()
+        
+        brand.visible = True
+        await animate_fade_out(text_animate)
+        await animate_fade_in(brand, 2000)
+        page.update()
+        
+        await animate_fade_out(brand)
+        text_animate.visible = False
+        brand.visible = False
+        logo.visible = True
+        await toggle_theme(page)
+        
+        await asyncio.sleep(1)
+        
+        await animate_slide_out(logo_animate)
+        await prepare_for_slide_in(logo_animate)
+        
+        await asyncio.sleep(1)
+        
+        await toggle_theme(page)
+        await animate_slide_in(logo_animate)
+        await teeter_right(logo_animate)
+        
+        await asyncio.sleep(1)
+        
+    success = await splash_animation()
+    if not success:
+        return # Splash screen skipped
 
 
 async def main(page: ft.Page):
