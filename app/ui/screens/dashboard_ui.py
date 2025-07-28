@@ -50,7 +50,14 @@ def handle_dashboard(page: ft.Page, _):
         tooltip="Configure API key settings"
     )
     
-    other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn])
+    mapview_btn = default_action_button(
+        text="View Map",
+        icon=ft.Icons.MAP,
+        on_click=lambda e: page.go(PageRoute.MAP_VIEW.value),
+        tooltip="View the current implementation of the offline map renderer"
+    )
+    
+    other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn, mapview_btn])
     control_buttons = default_row(controls=[profile_btn, logout_btn])
     top_row = spaced_buttons([exit_btn], [theme_toggle])
     title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
