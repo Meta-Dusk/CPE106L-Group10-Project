@@ -1,14 +1,14 @@
 import flet as ft
 import base64
 
+from app.assets.images import set_logo
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row, spaced_buttons
+from app.ui.components.containers import div, default_row, spaced_buttons, preset_container
 from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, open_profile, theme_toggle_button, mod_toggle_theme,
-    preset_exit_button)
+    render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button)
 from app.ui.animations import container_setup
-from app.assets.images import set_logo
+from app.routing.route_helpers import open_profile
 from app.routing.route_data import PageRoute
 from app.services.visualization_service import RideVisualizationService
 
@@ -297,12 +297,13 @@ def handle_viewgraphs(page: ft.Page, _):
     
     control_buttons = default_row(controls=[profile_btn, logout_btn, back_btn])
     top_row = spaced_buttons([exit_btn], [theme_toggle])
-
+    title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
+    
     render_page(page, [
         top_row,
         toggleable_logo,
         div(),
-        title,
+        title_container,
         chart_container,
         div(),
         chart_buttons_row1,

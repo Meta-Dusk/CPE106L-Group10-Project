@@ -7,12 +7,12 @@ from app.auth.hashing import hash_password, verify_password
 from app.assets.images import set_logo
 from app.assets.audio_manager import audio, SFX
 from app.db.db_manager import init_database, get_current_mode, toggle_db, find_user, insert_user, DBMode
-from app.ui.components.containers import default_column, default_container, div, spaced_buttons
+from app.ui.components.containers import default_column, default_container, div, spaced_buttons, preset_container
 from app.ui.components.dialogs import default_notif_dialog, show_auto_closing_dialog
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import preset_button, DefaultButton, default_text_button, reactive_text_button
 from app.ui.screens.loading_screen import show_loading_screen
-from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme, preset_exit_button
+from app.ui.screens.shared_ui import theme_toggle_button, mod_toggle_theme, preset_exit_button, render_page
 from app.ui.animations import container_setup
 from app.ui.styles import apply_default_page_config
 from app.utils import enable_control_after_delay, start_background_loop
@@ -20,8 +20,6 @@ from app.routing.route_data import PageRoute
 
 
 def main_login_ui(page: ft.Page):
-    # setup_audio()
-    # audio.on_ready(lambda: audio.play_random_bgm())
     start_background_loop()
     # == Login Page setup ==
     page.controls.clear()
@@ -41,8 +39,8 @@ def main_login_ui(page: ft.Page):
     confirm_password_input.visible = False
     
     # == Login Setup ==
-    is_login = "is_login"
-    mode = {is_login: True}
+    IS_LOGIN = "is_login"
+    mode = {IS_LOGIN: True}
 
     def clear_errors(only_error_text: bool = False):
         username_input.error_text = ""
@@ -64,9 +62,9 @@ def main_login_ui(page: ft.Page):
             message.color = ft.Colors.TERTIARY
     
     def switch_mode(e):
-        mode[is_login] = not mode[is_login]
-        toggle_button.text = text_register if mode[is_login] else text_login
-        confirm_password_input.visible = not mode[is_login]
+        mode[IS_LOGIN] = not mode[IS_LOGIN]
+        toggle_button.text = text_register if mode[IS_LOGIN] else text_login
+        confirm_password_input.visible = not mode[IS_LOGIN]
         clear_errors()
         update_button()
         page.update()
@@ -76,7 +74,7 @@ def main_login_ui(page: ft.Page):
         
         username = username_input.value.strip()
         password = password_input.value.strip()
-        confirm = confirm_password_input.value.strip() if not mode[is_login] else None
+        confirm = confirm_password_input.value.strip() if not mode[IS_LOGIN] else None
         
         # Validate fields
         if not username:
@@ -88,7 +86,7 @@ def main_login_ui(page: ft.Page):
             page.update()
             return
         
-        if mode[is_login]:  # Login mode
+        if mode[IS_LOGIN]:  # Login mode
             user = find_user(username)
             if user and verify_password(password, user["password"]):
                 show_message(f"Welcome, {username}! (Logged in with {current_mode}.)")
@@ -119,7 +117,7 @@ def main_login_ui(page: ft.Page):
         page.update()
 
     def update_button():
-        if mode[is_login]:
+        if mode[IS_LOGIN]:
             updated_btn = preset_button(DefaultButton.LOGIN, on_click=action_button.on_click)
         else:
             updated_btn = preset_button(DefaultButton.REGISTER, on_click=action_button.on_click)
@@ -131,7 +129,6 @@ def main_login_ui(page: ft.Page):
         action_button.update()
 
     def reset(e):
-        # page.controls.clear()
         main_login_ui(page)
         page.update()
             
@@ -155,7 +152,7 @@ def main_login_ui(page: ft.Page):
                     dialog_content_text = f"You are now using {current_mode.value}."
                     dialog_title_text = "Database Switched"
                     
-            time.sleep(0.5)
+            time.sleep(0.25)
             
             dialog_content = default_text(DefaultTextStyle.SUBTITLE, dialog_content_text)
             dialog_title = default_text(DefaultTextStyle.TITLE, dialog_title_text)
@@ -165,20 +162,8 @@ def main_login_ui(page: ft.Page):
                 content=dialog_content,
                 on_dismiss=reset
             )
-
-            # page.controls.clear()
-            # page.add(default_container(form))
             asyncio.run(show_auto_closing_dialog(page, dialog, 1.0))
             page.update()
-            # page.open(dialog)
-            # page.update()
-            
-            # # Auto-close after n amount of seconds
-            # def auto_close():
-            #     page.close(dialog)
-            #     page.update()
-
-            # threading.Timer(1.0, auto_close).start()
 
         # Run DB switching logic in a background thread
         threading.Thread(target=toggle_and_notify).start()
@@ -216,12 +201,15 @@ def main_login_ui(page: ft.Page):
 
     top_row = spaced_buttons([exit_btn], control_buttons)
     
+    login_message_container = preset_container(login_message, ft.Colors.PRIMARY_CONTAINER)
+    
     # == Page Form ==
     form = default_column([
         top_row,
         toggleable_logo,
         div(),
-        login_message,
+        login_message_container,
+        div(),
         username_input,
         password_input,
         confirm_password_input,
@@ -230,7 +218,7 @@ def main_login_ui(page: ft.Page):
         message
     ])
 
-    page.add(default_container(form))
+    render_page(page, form)
     
     async def delayed_enable_button():
         await enable_control_after_delay(db_toggle_button, 1)

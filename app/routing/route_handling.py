@@ -11,10 +11,13 @@ from app.ui.screens.viewgraphs import handle_viewgraphs
 from app.ui.screens.booking import handle_booking
 from app.ui.screens.api_key_ui import handle_api_key_entry
 from app.ui.screens.operator_ui import handle_operator
+from app.ui.screens.settings import handle_settings
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.auth.user import is_authenticated
 from app.routing.route_data import RouteHandler, PageRoute
 
+
+# == HANDLERS ==
 
 def handle_loading(page: ft.Page, _):
     def after_init():
@@ -42,6 +45,36 @@ def handle_not_found(page: ft.Page, _):
     render_page(page, error_msg)
 
 
+# == ROUTE HELPERS ==
+
+def match_dynamic_route(route: str):
+    for route_handler in DYNAMIC_ROUTE_HANDLERS:
+        match = route_handler.path_regex.match(route)
+        if match:
+            return route_handler, match.groupdict()
+    return None, {}
+
+def get_route_handler(path: str):
+    """
+    Unified route handler lookup for both static and dynamic routes.
+    Returns a tuple: (RouteHandler or None, parameters dict)
+    """
+    # Try static first
+    static_handler = ROUTE_HANDLERS.get(path)
+    if static_handler:
+        return static_handler, {}
+
+    # Then try dynamic
+    return match_dynamic_route(path)
+
+def create_dynamic_route(path_template: str, handler, auth_required=False) -> RouteHandler:
+    # Convert "/profile/:user_id" to regex "^/profile/(?P<user_id>\w+)$"
+    param_names = re.findall(r":(\w+)", path_template)
+    regex_pattern = "^" + re.sub(r":(\w+)", r"(?P<\1>\\w+)", path_template) + "$"
+    path_regex = re.compile(regex_pattern)
+    return RouteHandler(path=path_template, handler=handler, auth_required=auth_required, path_regex=path_regex, param_names=param_names)
+
+
 # == ROUTE REGISTRIES ==
 
 ROUTE_HANDLERS = {
@@ -51,26 +84,11 @@ ROUTE_HANDLERS = {
     PageRoute.DASHBOARD.value: RouteHandler(PageRoute.DASHBOARD.value, handle_dashboard, auth_required=True),
     PageRoute.GRAPHS.value: RouteHandler(PageRoute.GRAPHS.value, handle_viewgraphs, auth_required=True),
     PageRoute.BOOKING.value: RouteHandler(PageRoute.BOOKING.value, handle_booking),
-    PageRoute.API_KEY.value: RouteHandler(PageRoute.API_KEY.value, handle_api_key_entry)
+    PageRoute.API_KEY.value: RouteHandler(PageRoute.API_KEY.value, handle_api_key_entry),
+    PageRoute.SETTINGS.value: RouteHandler(PageRoute.SETTINGS.value, handle_settings, auth_required=True),
 }
 
-# Use for pages that are designed to be unique per user.
 DYNAMIC_ROUTE_HANDLERS = [
-    {
-        "pattern": re.compile(r"^/profile/(?P<user_id>\w+)$"),
-        "handler": handle_profile,
-        "auth_required": True
-    },
-    {
-        "pattern": re.compile(r"^/profile/op/(?P<user_id>\w+)$"),
-        "handler": handle_operator,
-        "auth_required": True
-    }
+    create_dynamic_route(PageRoute.PROFILE.value, handle_profile, auth_required=True),
+    create_dynamic_route(PageRoute.OPERATOR.value, handle_operator, auth_required=True),
 ]
-
-def match_dynamic_route(route: str):
-    for entry in DYNAMIC_ROUTE_HANDLERS:
-        match = entry["pattern"].match(route)
-        if match:
-            return entry, match.groupdict()
-    return None, {}

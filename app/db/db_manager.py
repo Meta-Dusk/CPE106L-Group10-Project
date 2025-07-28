@@ -135,13 +135,3 @@ def init_database(page: ft.Page = None, callback: Callable = None):
         db_init()
         return collection if db_mode[mode] == DBMode.MONGO else sqlite_conn
 
-
-def test():
-    print("Database switching test...\n")
-    print(f"Current DBMode: {get_current_mode().value}\n")
-    init_database()
-    print("\nTime to switch.\n")
-    toggle_db()
-
-if __name__ == "__main__":
-    test()
