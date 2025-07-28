@@ -2,6 +2,7 @@ import pygame
 import threading
 import time
 import random
+import json
 
 from pathlib import Path
 from enum import Enum
@@ -11,6 +12,17 @@ from typing import Callable, List, Dict
 ASSETS_DIR = Path(__file__).parent / "sounds"
 SFX_DIR = ASSETS_DIR / "sfx"
 BGM_DIR = ASSETS_DIR / "music"
+CONFIG_PATH = Path(__file__).parent.parent / "ui" / "configs" / "audio_config.json"
+
+class CONFIG_KEYS(Enum):
+    SFX = "sfx_volume"
+    BGM = "bgm_volume"
+
+DEFAULT_CONFIG = {
+    CONFIG_KEYS.SFX.value: 0.5,
+    CONFIG_KEYS.BGM.value: 0.5
+}
+
 
 # TODO: Try to implement flet-audio as an alternative when app is run in a web environment
 def run_in_background(func):
@@ -43,12 +55,15 @@ class AudioManager:
         self.sfx = {}
         self.bgm = {}
         self.current_bgm = None
-        self._muted = False
+        self._paused = False
         self._ready = False
+        self._muted = False
         self._on_ready_callbacks: List[Callable[[], None]] = []
         self.limit_sfx_rate = False  # Toggle to enable/disable SFX rate limiting
         self._sfx_last_played: Dict[str, float] = {}  # Tracks last play time per SFX
         self._sfx_min_interval = 0.1  # Minimum interval (in seconds) between plays of same SFX
+        self._config = DEFAULT_CONFIG.copy()
+        self.load_config()
 
     def init(self):
         if not pygame.mixer.get_init():
@@ -66,6 +81,42 @@ class AudioManager:
         print("[AudioManager] AudioManager is ready.")
         self._trigger_callbacks()
 
+    def load_config(self):
+        if CONFIG_PATH.exists():
+            try:
+                with open(CONFIG_PATH, "r") as f:
+                    data = json.load(f)
+                    self._config.update(data)
+                    print(f"[AudioManager] Config loaded: {self._config}")
+            except Exception as e:
+                print(f"[AudioManager] Failed to load config: {e}")
+        else:
+            print("[AudioManager] No config file found. Using defaults.")
+
+    def save_config(self):
+        try:
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(self._config, f, indent=4)
+                print("[AudioManager] Config saved.")
+        except Exception as e:
+            print(f"[AudioManager] Failed to save config: {e}")
+            
+    def set_sfx_volume(self, volume: float):
+        self._config[CONFIG_KEYS.SFX.value] = self._clamp_volume(volume)
+        print(f"[AudioManager] Setting SFX volume to: {volume}.")
+        self.save_config()
+
+    def set_bgm_volume(self, volume: float):
+        self._config[CONFIG_KEYS.BGM.value] = self._clamp_volume(volume)
+        print(f"[AudioManager] Setting BGM volume to: {volume}.")
+        self.save_config()
+
+    def get_sfx_volume(self) -> float:
+        return self._config.get(CONFIG_KEYS.SFX.value, 0.5)
+
+    def get_bgm_volume(self) -> float:
+        return self._config.get(CONFIG_KEYS.BGM.value, 0.5)
+    
     def _trigger_callbacks(self):
         for callback in self._on_ready_callbacks:
             try:
@@ -96,12 +147,13 @@ class AudioManager:
     def set_sfx_rate_limit(self, interval_sec: float):
         self._sfx_min_interval = max(0.01, interval_sec) # Avoid zero or negative
     
-    def play_sfx(self, sfx_enum: SFX, volume: float = 0.5):
+    def play_sfx(self, sfx_enum: SFX, volume: float = None):
         if not self.can_play:
             return
         
         now = time.time()
         sfx_key = sfx_enum.value
+        volume = volume if volume is not None else self.get_sfx_volume()
         
         if self.limit_sfx_rate:
             last_played = self._sfx_last_played.get(sfx_key, 0)
@@ -114,7 +166,7 @@ class AudioManager:
             sound.play()
             self._sfx_last_played[sfx_key] = now # Update last played time
     
-    def play_bgm(self, bgm_enum: BGM, volume: float = 0.5, loops: int = -1):
+    def play_bgm(self, bgm_enum: BGM, volume: float = None, loops: int = -1):
         if not self.can_play:
             return
         if self.current_bgm != bgm_enum.value:
@@ -122,6 +174,7 @@ class AudioManager:
             file_name = bgm_path.name
             formatted_name = self.format_bgm_name(file_name)
             print(f"🎵 Now Playing 🎵 | {formatted_name}")
+            volume = volume if volume is not None else self.get_bgm_volume()
             pygame.mixer.music.load(bgm_path.as_posix())
             pygame.mixer.music.set_volume(self._clamp_volume(volume))
             pygame.mixer.music.play(loops)
@@ -142,21 +195,48 @@ class AudioManager:
     def stop_bgm(self):
         pygame.mixer.music.stop()
         self.current_bgm = None
+        self.save_config()
 
-    def mute(self):
-        self._muted = not self._muted
-        if self._muted:
+    def pause(self):
+        self._paused = not self._paused
+        if self._paused:
+            print("[AudioManager] Music paused!")
             pygame.mixer.music.pause()
         else:
+            print("[AudioManager] Music unpaused!")
             pygame.mixer.music.unpause()
+            
+    def mute(self):
+        self._prev_config = self._config.copy()  # Backup current volumes
+        self._config[CONFIG_KEYS.SFX.value] = 0.0
+        self._config[CONFIG_KEYS.BGM.value] = 0.0
+        self.save_config()
+        print("[AudioManager] Muted")
 
+    def unmute(self):
+        if hasattr(self, "_prev_config"):
+            self._config = self._prev_config.copy()
+            self.save_config()
+            print("[AudioManager] Unmuted, restored previous volumes")
+        else:
+            print("[AudioManager] No previous volume to restore")
+
+    def reset_config(self):
+        self._config = DEFAULT_CONFIG.copy()
+        self.save_config()
+        print("[AudioManager] Config reset to default")
+    
     @property
     def muted(self):
         return self._muted
     
     @property
+    def paused(self):
+        return self._paused
+    
+    @property
     def can_play(self) -> bool:
-        return self._ready and not self._muted
+        return self._ready and not self._paused
     
     @staticmethod
     def format_bgm_name(file_name: str) -> str:

@@ -2,7 +2,7 @@ import flet as ft
 
 from app.assets.audio_manager import audio, SFX
 from app.ui.animations import container_setup
-from app.ui.components.containers import default_column, div, default_row, spaced_buttons
+from app.ui.components.containers import default_column, div, default_row, spaced_buttons, preset_container
 from app.ui.components.text import default_text, DefaultTextStyle, default_input_field, DefaultInputFieldType
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
 from app.ui.screens.shared_ui import render_page, theme_toggle_button, mod_toggle_theme, StatusMessage, preset_exit_button
@@ -216,23 +216,23 @@ def handle_api_key_entry(page: ft.Page, _):
         padding=ft.padding.all(10)
     )
     
+    title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
+    
     # Main content column
-    content = default_column(
-        controls=[
-            top_row,
-            toggleable_logo,
-            div(),  # Spacing
-            title,
-            description_container,
-            div(),  # Spacing
-            status_message,
-            api_key_input,
-            main_buttons,
-            config_buttons,
-            div(),  # Spacing
-            back_row
-        ]
-    )
+    content = default_column([
+        top_row,
+        toggleable_logo,
+        div(),  # Spacing
+        title_container,
+        description_container,
+        div(),  # Spacing
+        status_message,
+        api_key_input,
+        main_buttons,
+        config_buttons,
+        div(),  # Spacing
+        back_row
+    ])
     
     # Render the page
     render_page(page, content)

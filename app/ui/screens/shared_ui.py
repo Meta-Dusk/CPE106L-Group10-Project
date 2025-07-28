@@ -14,7 +14,7 @@ from typing import Callable, Optional
 from app.utils import enable_control_after_delay, get_loop, flatten_controls
 
 
-def render_page(page: ft.Page, content: ft.Control):
+def render_page(page: ft.Page, content: list[ft.Control]):
     container = default_container(content)
     page.add(container)
 
@@ -28,20 +28,6 @@ def preset_logout_button(
             no_clicked=lambda e: logout_no(page, dialog)
         )
     return preset_button(DefaultButton.LOGOUT, on_click=on_click, on_click_sfx=SFX.ALERT)
-
-def open_profile(page: ft.Page):
-    def handler(e):
-        user_id = page.session.get("user_id")
-        if user_id:
-            page.go(f"/profile/{user_id}")
-    return handler
-
-def open_op(page: ft.Page):
-    def handler(e):
-        user_id = page.session.get("user_id")
-        if user_id:
-            page.go(f"/profile/op/{user_id}")
-    return handler
 
 async def logo_toggle(
     page: ft.Page, toggleable_logo: ft.Control,
