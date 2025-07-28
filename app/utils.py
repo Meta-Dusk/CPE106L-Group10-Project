@@ -49,6 +49,9 @@ async def enable_control_after_delay(control: ft.Control, delay: float):
 def milliseconds_to_seconds(ms: int):
     return ms / 1000
 
+def conv_percentage(f: float):
+    return int(f*100)
+
 
 # == Launcher Config ==
 LAUNCHER_CONFIG_PATH = Path(__file__).parent / "ui" / "configs" / "launcher_config.json"

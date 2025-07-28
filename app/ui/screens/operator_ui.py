@@ -1,14 +1,15 @@
 import flet as ft
 
-from app.ui.components.text import default_text, DefaultTextStyle
-from app.ui.components.buttons import preset_button, DefaultButton
-from app.ui.components.containers import div, default_row, spaced_buttons
-from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button,
-    open_profile)
-from app.ui.animations import container_setup
 from app.assets.images import set_logo
 from app.db.db_manager import find_user
+from app.ui.components.text import default_text, DefaultTextStyle
+from app.ui.components.buttons import preset_button, DefaultButton
+from app.ui.components.containers import div, default_row, spaced_buttons, preset_container
+from app.ui.screens.shared_ui import (
+    render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button)
+from app.ui.animations import container_setup
+from app.routing.route_helpers import open_profile
+
 
 # TODO: Implement Admin controls for: driver and user verification.
 def handle_operator(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
@@ -42,13 +43,15 @@ def handle_operator(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
     
     control_buttons = default_row([logout_btn, back_btn])
     top_row = spaced_buttons([exit_btn], [theme_toggle])
+    title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
+    subtitle_container = preset_container(subtitle)
     
     render_page(page, [
         top_row,
         toggleable_logo,
         div(),
-        title,
-        subtitle,
+        title_container,
+        subtitle_container,
         div(),
         control_buttons
     ])

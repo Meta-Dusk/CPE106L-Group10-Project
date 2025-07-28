@@ -6,15 +6,15 @@ from app.assets.audio_manager import audio, SFX
 from app.assets.images import set_logo
 from app.db.db_manager import find_user, update_user, check_matching_document
 from app.ui.components.text import default_text, DefaultTextStyle, mod_input_field
-from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row, spaced_buttons
+from app.ui.components.buttons import preset_button, DefaultButton, default_action_button, reactive_text_button
+from app.ui.components.containers import div, default_row, spaced_buttons, preset_container
 from app.ui.components.dialogs import default_notif_dialog, show_auto_closing_dialog
 from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, mod_toggle_theme, theme_toggle_button, preset_exit_button,
-    open_op)
+    render_page, preset_logout_button, mod_toggle_theme, theme_toggle_button, preset_exit_button)
 from app.ui.animations import container_setup
 from app.utils import format_raw_phone
 from app.routing.route_data import PageRoute
+from app.routing.route_helpers import open_op
 from datetime import datetime
 
 
@@ -208,12 +208,11 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
             e, page, toggle_controls=[control_buttons, theme_toggle, submit_button],
             toggleable_logo=toggleable_logo, theme_toggle=theme_toggle, logo=logo
         )
-        
+    
+    # Buttons
     theme_toggle = theme_toggle_button(on_click=handle_theme_click)
-
     back_btn = preset_button(DefaultButton.BACK, lambda e: page.go(PageRoute.DASHBOARD.value))
     logout_btn = preset_logout_button(page)
-    
     op_btn = default_action_button(
         text="Operator Control Center",
         icon=ft.Icons.ADMIN_PANEL_SETTINGS,
@@ -221,19 +220,31 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         tooltip="Show Operator Control Center (ADMIN ONLY)",
         visible=True if user_doc['op'] else False
     )
-
-    control_buttons = default_row(controls=[logout_btn, back_btn, op_btn])
-    
     exit_btn = preset_exit_button(page)
+    settings_btn = reactive_text_button(
+        text="Open Settings",
+        on_click=lambda e: page.go(PageRoute.SETTINGS.value),
+        on_click_text="Opening Settings...",
+        on_hover_text="Open Settings?",
+        on_focus_text=">Open Settings?<",
+        width=200,
+        icon=ft.Icons.SETTINGS,
+        icon_color=ft.Colors.SECONDARY
+    )
     
-    top_row = spaced_buttons([exit_btn], [theme_toggle])
+    # Layouts
+    control_buttons = default_row([logout_btn, back_btn, op_btn])
+    top_row = spaced_buttons([exit_btn], [theme_toggle, settings_btn])
+    title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
+    subtitle_container = preset_container(subtitle)
 
     render_page(page, [
         top_row,
         toggleable_logo,
         div(),
-        title,
-        subtitle,
+        title_container,
+        subtitle_container,
+        div(),
         profile_card,
         div(),
         control_buttons

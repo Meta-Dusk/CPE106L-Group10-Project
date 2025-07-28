@@ -69,7 +69,7 @@ async def prepare_for_slide_in(control: ft.Control):
     control.animate_offset = ft.Animation(duration=0)
     
     # Set origin points
-    control.offset = ft.Offset(-1.0, -0.2)
+    control.offset = ft.Offset(-1.0, 0.0)
     control.update()
     await asyncio.sleep(0.01)  # Let the update apply
 

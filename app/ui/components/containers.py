@@ -98,3 +98,18 @@ def div(
         thickness=thickness
     )
 
+def preset_container(
+    content: ft.Control,
+    bgcolor: ft.ColorValue = ft.Colors.SECONDARY_CONTAINER,
+    border_radius: ft.BorderRadiusValue = 20,
+    padding: ft.PaddingValue = 10
+) -> ft.Container:
+    return ft.Container(
+        content=content,
+        alignment=ft.alignment.center,
+        adaptive=True,
+        border_radius=border_radius,
+        padding=padding,
+        bgcolor=bgcolor,
+        expand=True
+    )

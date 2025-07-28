@@ -2,13 +2,12 @@ import flet as ft
 
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
-from app.ui.components.containers import div, default_row, default_column, spaced_buttons
+from app.ui.components.containers import div, default_row, default_column, spaced_buttons, preset_container
 from app.ui.animations import container_setup
-from app.ui.screens.shared_ui import (
-    render_page, preset_logout_button, theme_toggle_button, open_profile, mod_toggle_theme,
-    preset_exit_button)
+from app.ui.screens.shared_ui import render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button
 from app.assets.images import set_logo
 from app.routing.route_data import PageRoute
+from app.routing.route_helpers import open_profile
 
 
 def handle_dashboard(page: ft.Page, _):
@@ -54,12 +53,14 @@ def handle_dashboard(page: ft.Page, _):
     other_buttons = default_row(controls=[mathplot_btn, booking_btn, api_key_btn])
     control_buttons = default_row(controls=[profile_btn, logout_btn])
     top_row = spaced_buttons([exit_btn], [theme_toggle])
+    title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
     
     form = default_column([
         top_row,
         toggleable_logo,
         div(),
-        title,
+        title_container,
+        div(),
         other_buttons,
         control_buttons
     ])

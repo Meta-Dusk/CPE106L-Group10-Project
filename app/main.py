@@ -10,7 +10,7 @@ from app.ui.styles import apply_default_page_config
 from app.ui.transitions import fade_in
 from app.ui.services.splash_service import SplashHandler
 from app.ui.components.text import default_text, DefaultTextStyle
-from app.routing.route_handling import ROUTE_HANDLERS, handle_not_found, match_dynamic_route
+from app.routing.route_handling import handle_not_found, get_route_handler
 from app.routing.route_data import PageRoute
 from app.auth.user import is_authenticated
 
@@ -18,12 +18,43 @@ from app.auth.user import is_authenticated
 LOGIN_PAGE = PageRoute.LOGIN.value
 
 
+# Some helper functions
+def prow(controls: list[ft.Control]):
+    return ft.Row(
+        controls=controls,
+        alignment=ft.MainAxisAlignment.CENTER,
+        expand=True,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=100
+    )
+
+def pcolumn(controls: list[ft.Control]):
+    return ft.Column(
+        controls=controls,
+        tight=True,
+        alignment=ft.MainAxisAlignment.CENTER,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+    )
+
+def pbuild(controls: list[ft.Control]):
+    pcontrols = pcolumn(controls)
+    return ft.Container(pcontrols)
+
+def preset_build(ref: ImageData):
+    return build_image(
+        ref=ref,
+        set_size=200,
+        tooltip="",
+        border_radius=100
+    )
+
 async def toggle_theme(page: ft.Page):
     if page.theme_mode == ft.ThemeMode.LIGHT:
         page.theme_mode = ft.ThemeMode.DARK
     else:
         page.theme_mode = ft.ThemeMode.LIGHT
     page.update()
+
 
 async def run_splash_screen(page: ft.Page):
     handler = SplashHandler(page)
@@ -43,21 +74,21 @@ async def run_splash_screen(page: ft.Page):
     icon_animate = container_setup(icon)
     icon_animate.visible = False
     
-    andrei = build_image(ref=ImageData.ANDREI, set_size=200, tooltip="", border_radius=100)
-    nigel = build_image(ref=ImageData.NIGEL, set_size=200, tooltip="", border_radius=100)
-    seth = build_image(ref=ImageData.SETH, set_size=200, tooltip="", border_radius=100)
+    andrei = preset_build(ImageData.ANDREI)
+    nigel = preset_build(ImageData.NIGEL)
+    seth = preset_build(ImageData.SETH)
     
     andrei_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.ANDREI.value.description)
     nigel_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.NIGEL.value.description)
     seth_text = default_text(DefaultTextStyle.SUBTITLE, ImageData.SETH.value.description)
     
-    andrei_portrait = ft.Container(ft.Column([andrei_text, andrei], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
-    nigel_portrait = ft.Container(ft.Column([nigel_text, nigel], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
-    seth_portrait = ft.Container(ft.Column([seth_text, seth], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER))
+    andrei_portrait = pbuild([andrei_text, andrei])
+    nigel_portrait = pbuild([nigel_text, nigel])
+    seth_portrait = pbuild([seth_text, seth])
     
     portraits = [andrei_portrait, nigel_portrait, seth_portrait]
     
-    portrait_row = container_setup(ft.Row(controls=portraits, alignment=ft.MainAxisAlignment.CENTER, expand=True, vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=100))
+    portrait_row = container_setup(prow(portraits))
     portrait_row.opacity = 0.0
     portrait_row.visible = False
     portrait_row.offset = ft.Offset(0.0, 0.0)
@@ -73,7 +104,10 @@ async def run_splash_screen(page: ft.Page):
     
     splashes = [logo_animate, brand_animate, text, icon_animate, portrait_row]
     
-    splash_skip_text = ft.Text("Tap or press any key to skip...", italic=True, opacity=0.5, color=ft.Colors.SECONDARY)
+    splash_skip_text = ft.Text(
+        "Tap or press any key to skip...",
+        italic=True, opacity=0.5, color=ft.Colors.SECONDARY
+    )
     splash_filler_container = ft.Container(ft.Text(""), height=170, padding=None)
     
     splash_stack = ft.Stack(
@@ -81,11 +115,14 @@ async def run_splash_screen(page: ft.Page):
         alignment=ft.alignment.center,
         fit=ft.StackFit.LOOSE
     )
-    splash_column = ft.Column([
-        splash_skip_text,
-        splash_filler_container,
-        splash_stack
-    ], tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+    splash_column = ft.Column(
+        [
+            splash_skip_text,
+            splash_filler_container,
+            splash_stack
+        ],
+        tight=True, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER
+    )
 
     splash_container = ft.Container(splash_column, alignment=ft.alignment.center)
     
@@ -130,7 +167,7 @@ async def run_splash_screen(page: ft.Page):
     success = await splash_animation()
     if not success:
         print("[Splash Screen] Skipping splash screen animations.")
-        return # Splash screen skipped
+        return
 
 
 async def main(page: ft.Page):
@@ -145,23 +182,17 @@ async def main(page: ft.Page):
     def route_change(e: ft.RouteChangeEvent):
         page.controls.clear()
 
-        route = ROUTE_HANDLERS.get(page.route)
-        if route:
-            if route.auth_required and not is_authenticated(page):
-                page.go(LOGIN_PAGE)
-                return
-            route.handler(page, e)
-        else:
-            dynamic, params = match_dynamic_route(page.route)
-            if dynamic:
-                if dynamic["auth_required"] and not is_authenticated(page):
-                    page.go(LOGIN_PAGE)
-                    return
-                dynamic["handler"](page, e, **params)
-            else:
-                handle_not_found(page, e)
+        route_handler, params = get_route_handler(page.route)
 
-        fade_in(page)
+        if route_handler:
+            if route_handler.auth_required and not is_authenticated(page):
+                page.go(PageRoute.LOGIN.value)
+                return
+            route_handler.handler(page, e, **params)
+        else:
+            handle_not_found(page, e)
+
+        asyncio.run(fade_in(page))
 
 
     page.on_route_change = route_change

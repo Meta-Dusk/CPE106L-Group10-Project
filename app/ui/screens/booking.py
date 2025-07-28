@@ -1,9 +1,8 @@
 import flet as ft
 
 from app.ui.components.text import default_text, DefaultTextStyle
-from app.ui.components.buttons import (
-    preset_button, DefaultButton, default_action_button, reactive_text_button)
-from app.ui.components.containers import div, default_row, default_column, spaced_buttons
+from app.ui.components.buttons import preset_button, DefaultButton, default_action_button
+from app.ui.components.containers import div, default_row, spaced_buttons, preset_container
 from app.ui.screens.shared_ui import (
     render_page, preset_logout_button, theme_toggle_button, mod_toggle_theme, preset_exit_button)
 from app.ui.animations import container_setup
@@ -13,15 +12,7 @@ from app.routing.route_data import PageRoute
 
 def handle_booking(page: ft.Page, _):
     title = default_text(DefaultTextStyle.TITLE, "Book a Ride?")
-    title_container = ft.Container(
-        content=title,
-        alignment=ft.alignment.center,
-        adaptive=True,
-        border_radius=20,
-        padding=10,
-        bgcolor=ft.Colors.PRIMARY_CONTAINER,
-        expand=True
-    )
+    title_container = preset_container(content=title, bgcolor=ft.Colors.PRIMARY_CONTAINER)
     
     logo = set_logo()
     toggleable_logo = container_setup(logo)
@@ -50,15 +41,7 @@ def handle_booking(page: ft.Page, _):
         expand=True
     )
     
-    buttons_container = ft.Container(
-        content=book_nearby_btn,
-        alignment=ft.alignment.center,
-        adaptive=True,
-        border_radius=20,
-        padding=10,
-        bgcolor=ft.Colors.SECONDARY_CONTAINER,
-        expand=True
-    )
+    buttons_container = preset_container(book_nearby_btn)
     
     control_buttons = default_row([logout_btn, back_btn])
     
