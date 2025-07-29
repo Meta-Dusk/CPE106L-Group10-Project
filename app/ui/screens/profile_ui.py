@@ -5,6 +5,7 @@ import asyncio
 from app.assets.audio_manager import audio, SFX
 from app.assets.images import set_logo
 from app.db.db_manager import find_user, update_user, check_matching_document
+from app.db.sqlite import DBKey
 from app.ui.components.text import default_text, DefaultTextStyle, mod_input_field
 from app.ui.components.buttons import preset_button, DefaultButton, default_action_button, reactive_text_button
 from app.ui.components.containers import div, default_row, spaced_buttons, preset_container
@@ -62,7 +63,7 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         max_length=18,
         on_change=format_phone_number
     )
-    email_field = mod_input_field(label="Email", keyboard_type=ft.KeyboardType.EMAIL)
+    email_field = mod_input_field(label=DBKey.EMAIL.value, keyboard_type=ft.KeyboardType.EMAIL)
     
     def validate_fields(e):
         reset_errors(e)
@@ -96,25 +97,25 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         formatted_phone = f"+63{raw_phone}"
         
         check = check_matching_document(
-            filter_query={"username": user_doc["username"]},
+            filter_query={DBKey.USERNAME.value: user_doc[DBKey.USERNAME.value]},
             value_checks={
-                "full_name": full_name_field.value.strip(),
-                "address": address_field.value.strip(),
-                "date_of_birth": dob_field.value.strip(),
-                "phone": formatted_phone,
-                "email": email_field.value.strip()
+                DBKey.FULL_NAME.value: full_name_field.value.strip(),
+                DBKey.ADDRESS.value: address_field.value.strip(),
+                DBKey.DATE_OF_BIRTH.value: dob_field.value.strip(),
+                DBKey.PHONE.value: formatted_phone,
+                DBKey.EMAIL.value: email_field.value.strip()
             }
         )
         
         if not check:
             success = update_user(
-                filter_query={"username": user_doc["username"]},
+                filter_query={DBKey.USERNAME.value: user_doc[DBKey.USERNAME.value]},
                 updated_fields={
-                    "full_name": full_name_field.value.strip(),
-                    "address": address_field.value.strip(),
-                    "date_of_birth": dob_field.value.strip(),
-                    "phone": formatted_phone,
-                    "email": email_field.value.strip()
+                    DBKey.FULL_NAME.value: full_name_field.value.strip(),
+                    DBKey.ADDRESS.value: address_field.value.strip(),
+                    DBKey.DATE_OF_BIRTH.value: dob_field.value.strip(),
+                    DBKey.PHONE.value: formatted_phone,
+                    DBKey.EMAIL.value: email_field.value.strip()
                 }
             )
         else:
@@ -167,15 +168,15 @@ def handle_profile(page: ft.Page, e: ft.RouteChangeEvent, user_id: str):
         title = default_text(DefaultTextStyle.TITLE, f"{user_doc['username']}'s Profile")
         subtitle = default_text(DefaultTextStyle.SUBTITLE, "Welcome back!" if not user_doc['op'] else "Greetings, admin.")
         
-        full_name_field.value = user_doc.get("full_name", "")
-        address_field.value = user_doc.get("address", "")
-        dob_field.value = user_doc.get("date_of_birth", "")  # Expected to be "YYYY-MM-DD"
+        full_name_field.value = user_doc.get(DBKey.FULL_NAME.value, "")
+        address_field.value = user_doc.get(DBKey.ADDRESS.value, "")
+        dob_field.value = user_doc.get(DBKey.DATE_OF_BIRTH.value, "")  # Expected to be "YYYY-MM-DD"
         
         # Format and apply phone
-        raw_phone = user_doc.get("phone", "").removeprefix("+63")  # Remove +63 prefix
+        raw_phone = user_doc.get(DBKey.PHONE.value, "").removeprefix("+63")  # Remove +63 prefix
         phone_field.value = format_raw_phone(raw_phone)
         
-        email_field.value = user_doc.get("email", "")
+        email_field.value = user_doc.get(DBKey.EMAIL.value, "")
     else:
         title = default_text(DefaultTextStyle.TITLE, "User not found 😢")
         subtitle = default_text(DefaultTextStyle.SUBTITLE, f"User ID: {user_id}")

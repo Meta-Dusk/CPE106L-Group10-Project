@@ -180,7 +180,8 @@ def render_route_debug_overlay(page, tile_stack, path: list[tuple[float, float]]
             bgcolor=ft.Colors.ORANGE,
             border_radius=1.5,
             rotate=ft.Rotate(angle, alignment=ft.alignment.center_left),
-            animate_rotation=ft.Animation(0)
+            animate_rotation=ft.Animation(0),
+            blend_mode=ft.BlendMode.DARKEN
         )
 
         tile_stack.controls.append(line)
