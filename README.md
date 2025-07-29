@@ -21,6 +21,10 @@
 To assist elderly individuals or those with accessibility challenges in scheduling transportation with local volunteers or service providers.
 
 ---
+## 📦 Pre-requisites
+
+- You must have Python>=3.13.5, for compatibility.
+- As for the dependencies (modules/libraries) used, refer to the launcher (when running `launch.py`).
 
 ## 🖥 How to Run the Project
 
