@@ -59,18 +59,13 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 #### 🧩 Missing Libraries?
 
 - The launcher will detect missing modules and prompt to install them automatically.
-- Alternatively, manually install modules:
+- Alternatively, manually install modules listed in the launcher:
 
   ```bash
-  pip install flet pymongo bcrypt cryptography
+  pip install flet pymongo bcrypt cryptography ...
   ```
 
-##### 🔜 Upcoming Launcher Features
-
-- Auto-install libraries on prompt.
-- Relaunch script after successful installation.
-
----
+- The launcher saves user configs, such as window type and launch mode.
 
 ### 🐧 Ubuntu Virtual Machine (VM)
 
@@ -88,14 +83,17 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 - **MVC Pattern**: Modular design for scalability and maintainability.
 - **Object-Oriented Design**: Classes for users, drivers, and rides.
 
+### ☑️ Partially Implemented
+
+- **Matplotlib**: Data visualization (e.g., ride frequency, wait times).
+- **FastAPI**: Backend API for ride matching and notifications.
+- **Google Maps API**: Routing and distance calculations.
+
 > ⚠️ Code structure is actively evolving as new features are added.
 
 ### 🚧 Pending Features (May or May Not Be Included)
 
 - **Scheduling Algorithms**: Optimization with Dijkstra, A*, etc.
-- **Google Maps API**: Routing and distance calculations.
-- **Matplotlib**: Data visualization (e.g., ride frequency, wait times).
-- **FastAPI**: Backend API for ride matching and notifications.
 
 ---
 
@@ -107,6 +105,9 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 - **BCrypt**: Secure password hashing.
 - **MongoDB Atlas**: Cloud-based MongoDB support.
 - **SQLite**: Local database alternative; toggle via login screen.
+- **PyGame**: Music and SFX; 'cuz why not (optional, can be disabled).
+- **GeoPy**: For functions concerning geological data.
+- **Httpx + Aiohttp**: For URL related functionality.
 
 ### 🚧 Pending Integrations (Optional)
 
