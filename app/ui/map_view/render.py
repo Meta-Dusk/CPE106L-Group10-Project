@@ -190,10 +190,23 @@ def render_route_debug_overlay(page, tile_stack, path: list[tuple[float, float]]
     total_km = sum(geodesic(path[i - 1], path[i]).km for i in range(1, len(path)))
     avg_speed_kmh = 40
     est_minutes = (total_km / avg_speed_kmh) * 60
+    
+    def handle_pan(e: ft.DragUpdateEvent, container: ft.Container):
+        dx, dy = e.delta_x, e.delta_y
+        container.left += dx
+        container.top += dy
 
-    label = ft.Container(
-        left=16,
-        top=16,
+        # Optional clamp
+        container.left = max(0, min(container.left, tile_stack.width - 160))
+        container.top = max(0, min(container.top, tile_stack.height - 40))
+
+        # Save position to state
+        state.debug_label_pos[0] = container.left
+        state.debug_label_pos[1] = container.top
+        container.update()
+
+    # Create movable label container
+    movable_label = ft.Container(
         padding=8,
         bgcolor=ft.Colors.ORANGE_100,
         border_radius=8,
@@ -205,8 +218,19 @@ def render_route_debug_overlay(page, tile_stack, path: list[tuple[float, float]]
         )
     )
 
-    tile_stack.controls.append(label)
-    overlay_controls.append(label)
+    # Wrapper that holds absolute position (must be directly in a Stack)
+    label_wrapper = ft.Container(
+        left=state.debug_label_pos[0],
+        top=state.debug_label_pos[1],
+        content=ft.GestureDetector(
+            mouse_cursor=ft.MouseCursor.MOVE,
+            on_pan_update=lambda e: handle_pan(e, label_wrapper),
+            content=movable_label
+        )
+    )
+
+    tile_stack.controls.append(label_wrapper)
+    overlay_controls.append(label_wrapper)
 
     state.route_debug_overlay[0] = overlay_controls
     page.update()

@@ -106,7 +106,7 @@ def handle_mapview(page: ft.Page, _):
     )
     pin_controls = get_pin_controls(set_pickup, set_dropoff, pin_mode_text, pin_status_text)
     booking_controls = get_booking_controls(
-        lambda e: asyncio.run(handle_cancel_simulation(e)),
+        lambda e: handle_cancel_simulation,
         lambda e: asyncio.run(handle_booking(e)),
         pickup_lat_input, pickup_lon_input, dest_lat_input, dest_lon_input, booking_status
     )
