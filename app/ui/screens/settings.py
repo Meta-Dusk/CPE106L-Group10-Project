@@ -26,13 +26,23 @@ def handle_settings(page: ft.Page, _):
         )
     
     def update_sfx(e):
-        value = audio.get_sfx_volume()
+        if audio.muted:
+            value = audio.get_sfx_volume()
+            sfx_volume_slider.disabled = True
+        else:
+            value = sfx_volume_slider.value
+            sfx_volume_slider.disabled = False
         sfx_volume_slider.value = value
         sfx_volume_slider.label = f"SFX -> {conv_percentage(value)}"
         sfx_volume_slider.update()
         
     def update_bgm(e):
-        value = audio.get_bgm_volume()
+        if audio.muted:
+            value = audio.get_bgm_volume()
+            bgm_volume_slider.disabled = True
+        else:
+            value = bgm_volume_slider.value
+            bgm_volume_slider.disabled = False
         bgm_volume_slider.value = value
         bgm_volume_slider.label = f"BGM -> {conv_percentage(value)}"
         bgm_volume_slider.update()

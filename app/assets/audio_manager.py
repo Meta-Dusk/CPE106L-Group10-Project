@@ -180,7 +180,7 @@ class AudioManager:
             pygame.mixer.music.play(loops)
             self.current_bgm = bgm_enum.value
 
-    def play_random_bgm(self, bgm_enums: list[BGM] = None, volume: float = 0.5, loops: int = -1):
+    def play_random_bgm(self, bgm_enums: list[BGM] = None, volume: float = None, loops: int = -1):
         if not self.can_play:
             return
         

@@ -24,3 +24,4 @@ class PageRoute(Enum):
     PROFILE = "/profile/:user_id"
     OPERATOR = "/profile/op/:user_id"
     SETTINGS = "/profile/settings"
+    MAP_VIEW = "/dashboard/mapview"

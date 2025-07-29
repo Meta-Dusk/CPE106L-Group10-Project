@@ -140,5 +140,6 @@ def preset_exit_button(page: ft.Page) -> ft.TextButton:
         on_focus_text=">Exit?<",
         on_hover_text="Exit?",
         text="Exit",
-        width=80
+        width=80,
+        disabled=page.web
     )

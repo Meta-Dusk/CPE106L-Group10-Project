@@ -13,7 +13,7 @@ Features:
 - Clean UI with radio button selection
 
 Authors: CPE106L Group 10
-Version: 0.2.0
+Version: 0.3.0
 Date: 2025
 """
 
@@ -25,11 +25,31 @@ import re
 
 from tkinter import messagebox
 from pathlib import Path
+from enum import Enum
 
 # === CONFIGURATION ===
 REQUIREMENTS_FILE = Path(__file__).resolve().parent / "requirements.txt"
+class MBox(Enum):
+    INFO = "info"
+    ERROR = "error"
+    YES_NO = "yesno"
 
 # === DEPENDENCY MANAGEMENT FUNCTIONS ===
+
+def safe_gc_collect(): # A bit overkill, but it's fine
+    try:
+        import gc
+        gc.collect()
+    except Exception as e:
+        print(f"GC warning (non-fatal): {e}")
+
+def close_tk_window(window):
+    try:
+        window.destroy()
+        del window
+        safe_gc_collect()
+    except Exception as e:
+        print(f"Warning during Tk cleanup: {e}")
 
 def parse_requirements(filename: Path):
     """
@@ -46,12 +66,12 @@ def parse_requirements(filename: Path):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            match = re.match(r"^([a-zA-Z0-9_\-]+)", line)
+            match = re.match(r"^([a-zA-Z0-9_\-\.]+)", line)
             if match:
                 modules.append(match.group(1))
     return modules
 
-def check_required_modules(modules):
+def check_required_modules(modules: list[str]) -> list[str]:
     missing = []
     for mod in modules:
         try:
@@ -67,39 +87,55 @@ def install_requirements_file():
         return True
     except subprocess.CalledProcessError:
         return False
+    finally:
+        safe_gc_collect()
 
 # === USER INTERFACE FUNCTIONS ===
 
-def prompt_install_modules(modules):
+def show_messagebox(title: str, message: str, type: MBox = MBox.INFO):
     root = tk.Tk()
     root.withdraw()
-    response = messagebox.askyesno(
-        "Missing Required Modules",
-        "The following modules are missing:\n\n" +
+    try:
+        if type == MBox.INFO:
+            messagebox.showinfo(title, message)
+        elif type == MBox.ERROR:
+            messagebox.showerror(title, message)
+        elif type == MBox.YES_NO:
+            return messagebox.askyesno(title, message)
+    except Exception as e:
+        print(f"MessageBox error: {e}")
+    finally:
+        close_tk_window(root)
+
+def prompt_install_modules(modules):
+    response = show_messagebox(
+        title="Missing Required Modules",
+        message="The following modules are missing:\n\n" +
         "\n".join(modules) +
-        "\n\nWould you like to install them now?"
+        "\n\nWould you like to install them now?",
+        type=MBox.YES_NO
     )
-    root.destroy()
     return response
 
 def show_fatal_error(modules):
-    root = tk.Tk()
-    root.withdraw()
-    messagebox.showerror(
-        "Installation Failed",
-        "The following modules could not be installed:\n\n" +
+    show_messagebox(
+        title="Installation Failed",
+        message="The following modules could not be installed:\n\n" +
         "\n".join(modules) +
-        "\n\nPlease install them manually."
+        "\n\nPlease install them manually.",
+        type=MBox.ERROR
     )
-    root.destroy()
     sys.exit(1)
 
 # === MAIN DEPENDENCY CHECK AND INSTALLATION ===
 try:
     required_modules = parse_requirements(REQUIREMENTS_FILE)
 except FileNotFoundError as e:
-    tk.Tk().withdraw()
-    messagebox.showerror("Missing File", str(e))
+    show_messagebox(
+        title="Missing File",
+        message=str(e),
+        type=MBox.ERROR
+    )
     sys.exit(1)
 
 missing = check_required_modules(required_modules)
@@ -110,14 +146,20 @@ if missing:
         if not success:
             show_fatal_error(missing)
         else:
-            messagebox.showinfo("Success", "All missing modules were installed successfully.")
+            show_messagebox(
+                title="Success",
+                message="All missing modules were installed successfully.",
+                type=MBox.INFO
+            )
             os.execl(sys.executable, sys.executable, *sys.argv)
     else:
         show_fatal_error(missing)
 else:
     print("\n✅ All required modules are installed.\n")
 
-# == Flet App starts here ==
+
+# === FLET APP STARTS HERE ===
+
 import flet as ft
 
 from app.setup_env import setup_env
@@ -128,7 +170,7 @@ from app.ui.components.buttons import (
     DEFAULT_WINDOW_CHOICES, DEFAULT_LAUNCH_CHOICES)
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.utils import load_launcher_config, save_launcher_config
-from app.assets.audio_manager import audio, setup_audio, BGM
+from app.assets.audio_manager import audio, setup_audio
 
 
 # === Setup environment ===
