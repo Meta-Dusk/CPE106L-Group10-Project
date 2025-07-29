@@ -1,3 +1,4 @@
+import flet as ft
 # Shared mutable state for map view
 
 # Zoom level
@@ -21,3 +22,9 @@ dropoff_pin = [None]
 # (lat, lon) position of moving driver
 driver_marker = [None]
 driver_icon_container = [None]  # Will hold the animated container
+
+# Debug states
+route_debug_overlay: list[ft.Control] = [None] # Holds debug markers/lines
+show_debug_overlay: list[bool] = [True]        # Path overlay
+cancel_simulation_flag: list[bool] = [False]   # Fast-forward simulation
+current_debug_path: list[tuple[float, float]] = []

@@ -15,10 +15,11 @@ from app.routing.route_data import PageRoute
 
 from app.ui.map_view.render import render_map
 from app.ui.map_view.state import (
-    pin_mode, center_tile_x, center_tile_y, center_lon, center_lat, zoom_level)
+    pin_mode, center_tile_x, center_tile_y, center_lon, center_lat, zoom_level, cancel_simulation_flag,
+    show_debug_overlay)
 from app.ui.map_view.ui_elements import (
-    get_zoom_controls, get_pan_controls, get_booking_controls,
-    get_pin_controls, get_tile_stack_container
+    get_zoom_controls, get_pan_controls, get_booking_controls, get_pin_controls, get_tile_stack_container,
+    latlon_text_field, get_debug_controls
 )
 
 
@@ -49,13 +50,13 @@ def handle_mapview(page: ft.Page, _):
     title_container = preset_container(title, ft.Colors.PRIMARY_CONTAINER)
     
     # ─── Inputs & Controls ─────────────────────────
-    pickup_lat_input = ft.TextField(label="Pickup Latitude", width=200)
-    pickup_lon_input = ft.TextField(label="Pickup Longitude", width=200)
-    dest_lat_input = ft.TextField(label="Destination Latitude", width=200)
-    dest_lon_input = ft.TextField(label="Destination Longitude", width=200)
-    booking_status = ft.Text(value="No booking in progress...", size=14)
-    pin_mode_text = ft.Text(value="Current mode: Set Pickup", size=12)
-    pin_status_text = ft.Text(value="No pins set yet.", size=12)
+    pickup_lat_input = latlon_text_field("Pickup Latitude")
+    pickup_lon_input = latlon_text_field("Pickup Longitude")
+    dest_lat_input = latlon_text_field("Destination Latitude")
+    dest_lon_input = latlon_text_field("Destination Longitude")
+    booking_status = default_text(DefaultTextStyle.SUBTITLE, "No booking in progress...")
+    pin_mode_text = default_text(DefaultTextStyle.SUBTITLE, "Current mode: Set Pickup")
+    pin_status_text = default_text(DefaultTextStyle.DEFAULT, "No pins set yet.")
     tile_stack = ft.Stack(width=768, height=768, clip_behavior=ft.ClipBehavior.NONE)
 
     # ─── Pin Mode Handlers ─────────────────────────
@@ -82,6 +83,13 @@ def handle_mapview(page: ft.Page, _):
         except Exception as ex:
             booking_status.value = f"Error: {ex}"
             page.update()
+            
+    def handle_cancel_simulation(e):
+        cancel_simulation_flag[0] = True
+    
+    def handle_toggle_debug(e):
+        show_debug_overlay[0] = not show_debug_overlay[0]
+        print(f"[DEBUG] Toggled debug overlay: {show_debug_overlay[0]}")
 
     # ─── Build Modular UI ──────────────────────────
     zoom_controls = get_zoom_controls(
@@ -98,16 +106,18 @@ def handle_mapview(page: ft.Page, _):
     )
     pin_controls = get_pin_controls(set_pickup, set_dropoff, pin_mode_text, pin_status_text)
     booking_controls = get_booking_controls(
+        lambda e: asyncio.run(handle_cancel_simulation(e)),
         lambda e: asyncio.run(handle_booking(e)),
         pickup_lat_input, pickup_lon_input, dest_lat_input, dest_lon_input, booking_status
     )
     map_container = get_tile_stack_container(tile_stack)
+    debug_btn = get_debug_controls(handle_toggle_debug)
 
     # ─── Layout Composition ────────────────────────
     map_view_section = default_column([
         pin_controls,
         booking_controls,
-        spaced_buttons([zoom_controls], [pan_controls]),
+        spaced_buttons([zoom_controls, debug_btn], [pan_controls]),
         map_container
     ])
 

@@ -33,7 +33,7 @@ class TextStyle:
     color: ft.ColorValue = ft.Colors.PRIMARY
     
 class DefaultTextStyle(Enum):
-    DEFAULT = TextStyle(color=ft.Colors.ON_SECONDARY)
+    DEFAULT = TextStyle(color=ft.Colors.ON_SECONDARY_CONTAINER)
     SUBTITLE = TextStyle(color=ft.Colors.ON_PRIMARY_CONTAINER, size=20)
     TITLE = TextStyle(weight=ft.FontWeight.BOLD, size=25)
     ERROR = TextStyle(color=ft.Colors.ON_ERROR_CONTAINER)
@@ -59,7 +59,7 @@ class InputFieldConfig:
     auto_focus: bool = False
     password: bool = False
     can_reveal_password: bool = False
-    selection_color: ft.ColorValue = ft.Colors.RED
+    selection_color: ft.ColorValue = ft.Colors.INVERSE_PRIMARY
     bg_color: ft.ColorValue = ft.Colors.PRIMARY_CONTAINER
     color: ft.ColorValue = ft.Colors.ON_PRIMARY_CONTAINER
     hint_text: ft.OptionalString = None
