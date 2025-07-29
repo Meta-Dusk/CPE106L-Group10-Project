@@ -12,6 +12,7 @@ from app.ui.screens.booking import handle_booking
 from app.ui.screens.api_key_ui import handle_api_key_entry
 from app.ui.screens.operator_ui import handle_operator
 from app.ui.screens.settings import handle_settings
+from app.ui.screens.map_view import handle_mapview
 from app.ui.components.text import default_text, DefaultTextStyle
 from app.auth.user import is_authenticated
 from app.routing.route_data import RouteHandler, PageRoute
@@ -86,6 +87,7 @@ ROUTE_HANDLERS = {
     PageRoute.BOOKING.value: RouteHandler(PageRoute.BOOKING.value, handle_booking),
     PageRoute.API_KEY.value: RouteHandler(PageRoute.API_KEY.value, handle_api_key_entry),
     PageRoute.SETTINGS.value: RouteHandler(PageRoute.SETTINGS.value, handle_settings, auth_required=True),
+    PageRoute.MAP_VIEW.value: RouteHandler(PageRoute.MAP_VIEW.value, handle_mapview)
 }
 
 DYNAMIC_ROUTE_HANDLERS = [

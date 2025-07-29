@@ -1,6 +1,7 @@
 import flet as ft
 
-from app.ui.styles import DefaultTextStyle, DefaultInputFieldType, InputFieldConfig
+from app.ui.styles import DefaultTextStyle, DefaultInputFieldType
+from typing import Optional
 
 
 def default_text(
@@ -22,7 +23,7 @@ def default_text(
 
 def default_input_field(
     input_field_type: DefaultInputFieldType,
-    label: str | None = None
+    label: ft.OptionalString = None
 ) -> ft.TextField:
     config = input_field_type.value
     generated_hint = f"Please enter your {config.label.lower()} here."
@@ -48,15 +49,15 @@ def default_input_field(
 
 def mod_input_field(
     label: str,
-    input_field_type: DefaultInputFieldType | None = None,
+    input_field_type: Optional[DefaultInputFieldType] = None,
     is_password: bool = False,
     read_only: bool = False,
-    hint_text: str | None = None,
-    suffix: ft.Control | None = None,
+    hint_text: ft.OptionalString = None,
+    suffix: Optional[ft.Control] = None,
     on_change: ft.OptionalControlEventCallable = None,
-    prefix_text: str | None = None,
-    max_length: int | None = None,
-    keyboard_type: ft.KeyboardType | None = None
+    prefix_text: ft.OptionalString = None,
+    max_length: Optional[int] = None,
+    keyboard_type: Optional[ft.KeyboardType] = None
 ) -> ft.TextField:
     config = input_field_type.value if input_field_type is not None else DefaultInputFieldType.DEFAULT.value
     generated_hint = hint_text or f"Please enter your {label.lower()} here."

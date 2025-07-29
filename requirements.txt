@@ -20,6 +20,9 @@ numpy==2.3.2
 pydantic==2.11.7
 dotenv>=0.9.9
 requests==2.32.4
+geopy==2.4.1
+httpx==0.28.1
+aiohttp==3.12.14
 
 # Desktop-only Frameworks
 pygame==2.6.1 # Used for audio
@@ -27,4 +30,7 @@ pygame==2.6.1 # Used for audio
 # MongoDB driver
 pymongo==4.13.2
 
+
 # use `py -m pip list | findstr {package}` for easy search
+# use `pipreqs . --force --encoding=utf-8 --ignore tests,migrations,venv --savepath=requirements_temp.txt`
+# for checking new imports

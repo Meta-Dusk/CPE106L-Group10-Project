@@ -50,7 +50,8 @@ def handle_template(page: ft.Page, _):
     # The purpose of `render_page()` is to just put the provided list of controls into a `default_container()`,
     # so you can just insert directly these controls. Just don't put a row inside of a column, since that will
     # not work. Doing it the other way around also doesn't work.
-    render_page(page, [
+    
+    form = [
         top_row,
         toggleable_logo,
         div(),
@@ -58,4 +59,6 @@ def handle_template(page: ft.Page, _):
         # <- Insert here your main UI elements
         div(),
         control_buttons
-    ])
+    ]
+    
+    render_page(page, form)
