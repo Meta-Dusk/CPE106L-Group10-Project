@@ -22,7 +22,7 @@ async def resolve_location_name(lat: float, lon: float, text_element: ft.Text, p
 def tile_click_handler(
     tile_x, tile_y, offset_x, offset_y,
     page: ft.Page,
-    image_grid: ft.Column,
+    tile_stack: ft.Stack,
     pickup_lat_input: ft.TextField, pickup_lon_input: ft.TextField,
     dest_lat_input: ft.TextField, dest_lon_input: ft.TextField,
     pin_status: ft.Text
@@ -56,7 +56,7 @@ def tile_click_handler(
                 asyncio.run(resolve_location_name(lat, lon, pin_status, "drop-off", page))
 
             render.render_map(
-                page, image_grid,
+                page, tile_stack,
                 pickup_lat_input, pickup_lon_input,
                 dest_lat_input, dest_lon_input,
                 pin_status

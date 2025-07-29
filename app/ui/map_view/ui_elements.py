@@ -7,7 +7,7 @@ from app.ui.map_view import controller
 
 
 def get_zoom_controls(
-    page, image_grid,
+    page, tile_stack,
     pickup_lat_input, pickup_lon_input,
     dest_lat_input, dest_lon_input,
     pin_status
@@ -17,7 +17,7 @@ def get_zoom_controls(
         icon=ft.Icons.ZOOM_IN_MAP,
         tooltip="Zoom in the map view",
         on_click=lambda e: controller.zoom_in(
-            page, image_grid,
+            page, tile_stack,
             pickup_lat_input, pickup_lon_input,
             dest_lat_input, dest_lon_input,
             pin_status
@@ -29,7 +29,7 @@ def get_zoom_controls(
         icon=ft.Icons.ZOOM_OUT_MAP,
         tooltip="Zoom out the map view",
         on_click=lambda e: controller.zoom_out(
-            page, image_grid,
+            page, tile_stack,
             pickup_lat_input, pickup_lon_input,
             dest_lat_input, dest_lon_input,
             pin_status
@@ -43,7 +43,7 @@ def get_zoom_controls(
 
 
 def get_pan_controls(
-    page, image_grid,
+    page, tile_stack,
     pickup_lat_input, pickup_lon_input,
     dest_lat_input, dest_lon_input,
     pin_status
@@ -56,7 +56,7 @@ def get_pan_controls(
                 tooltip="Pan Up",
                 style=default_action_button_style,
                 on_click=lambda e: controller.pan_map(
-                    0, -1, page, image_grid,
+                    0, -1, page, tile_stack,
                     pickup_lat_input, pickup_lon_input,
                     dest_lat_input, dest_lon_input,
                     pin_status
@@ -69,7 +69,7 @@ def get_pan_controls(
                     tooltip="Pan Left",
                     style=default_action_button_style,
                     on_click=lambda e: controller.pan_map(
-                        -1, 0, page, image_grid,
+                        -1, 0, page, tile_stack,
                         pickup_lat_input, pickup_lon_input,
                         dest_lat_input, dest_lon_input,
                         pin_status
@@ -81,7 +81,7 @@ def get_pan_controls(
                     tooltip="Pan Down",
                     style=default_action_button_style,
                     on_click=lambda e: controller.pan_map(
-                        0, 1, page, image_grid,
+                        0, 1, page, tile_stack,
                         pickup_lat_input, pickup_lon_input,
                         dest_lat_input, dest_lon_input,
                         pin_status
@@ -93,7 +93,7 @@ def get_pan_controls(
                     tooltip="Pan Right",
                     style=default_action_button_style,
                     on_click=lambda e: controller.pan_map(
-                        1, 0, page, image_grid,
+                        1, 0, page, tile_stack,
                         pickup_lat_input, pickup_lon_input,
                         dest_lat_input, dest_lon_input,
                         pin_status
@@ -151,13 +151,12 @@ def get_pin_controls(set_pickup, set_dropoff, pin_mode_text, pin_status_text):
     ])
 
 
-def get_image_grid_container(image_grid):
-    # return preset_container(image_grid, ft.Colors.INVERSE_PRIMARY)
+def get_tile_stack_container(tile_stack: ft.Stack):
     return ft.Container(
-        content=image_grid,
-        width=3 * 256,
-        height=3 * 256,
-        bgcolor=ft.Colors.BLACK
+        content=tile_stack,
+        # width=768, height=768,
+        bgcolor=ft.Colors.INVERSE_PRIMARY, border_radius=20,
+        padding=10, alignment=ft.alignment.center, expand=True
     )
 
 

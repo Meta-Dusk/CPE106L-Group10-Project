@@ -18,7 +18,7 @@ from app.ui.map_view.state import (
     pin_mode, center_tile_x, center_tile_y, center_lon, center_lat, zoom_level)
 from app.ui.map_view.ui_elements import (
     get_zoom_controls, get_pan_controls, get_booking_controls,
-    get_pin_controls, get_image_grid_container
+    get_pin_controls, get_tile_stack_container
 )
 
 
@@ -56,7 +56,7 @@ def handle_mapview(page: ft.Page, _):
     booking_status = ft.Text(value="No booking in progress...", size=14)
     pin_mode_text = ft.Text(value="Current mode: Set Pickup", size=12)
     pin_status_text = ft.Text(value="No pins set yet.", size=12)
-    image_grid = ft.Column(spacing=0)
+    tile_stack = ft.Stack(width=768, height=768, clip_behavior=ft.ClipBehavior.NONE)
 
     # ─── Pin Mode Handlers ─────────────────────────
     def update_pin_mode_label():
@@ -74,7 +74,7 @@ def handle_mapview(page: ft.Page, _):
             await simulate_booking(
                 pickup, dest,
                 lambda msg: (booking_status.__setattr__('value', msg), page.update()),
-                page, image_grid,
+                page, tile_stack,
                 pickup_lat_input, pickup_lon_input,
                 dest_lat_input, dest_lon_input,
                 pin_status_text
@@ -85,13 +85,13 @@ def handle_mapview(page: ft.Page, _):
 
     # ─── Build Modular UI ──────────────────────────
     zoom_controls = get_zoom_controls(
-        page, image_grid,
+        page, tile_stack,
         pickup_lat_input, pickup_lon_input,
         dest_lat_input, dest_lon_input,
         pin_status_text
     )
     pan_controls = get_pan_controls(
-        page, image_grid,
+        page, tile_stack,
         pickup_lat_input, pickup_lon_input,
         dest_lat_input, dest_lon_input,
         pin_status_text
@@ -101,7 +101,7 @@ def handle_mapview(page: ft.Page, _):
         lambda e: asyncio.run(handle_booking(e)),
         pickup_lat_input, pickup_lon_input, dest_lat_input, dest_lon_input, booking_status
     )
-    map_container = get_image_grid_container(image_grid)
+    map_container = get_tile_stack_container(tile_stack)
 
     # ─── Layout Composition ────────────────────────
     map_view_section = default_column([
@@ -127,4 +127,4 @@ def handle_mapview(page: ft.Page, _):
 
     # ─── Final Rendering ───────────────────────────
     render_page(page, form)
-    render_map(page, image_grid, pickup_lat_input, pickup_lon_input, dest_lat_input, dest_lon_input, pin_status_text)
+    render_map(page, tile_stack, pickup_lat_input, pickup_lon_input, dest_lat_input, dest_lon_input, pin_status_text)

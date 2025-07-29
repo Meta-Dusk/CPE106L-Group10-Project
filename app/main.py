@@ -10,6 +10,7 @@ from app.ui.styles import apply_default_page_config
 from app.ui.transitions import fade_in
 from app.ui.services.splash_service import SplashHandler
 from app.ui.components.text import default_text, DefaultTextStyle
+from app.ui.map_view.render import cleanup_map_view
 from app.routing.route_handling import handle_not_found, get_route_handler
 from app.routing.route_data import PageRoute
 from app.auth.user import is_authenticated
@@ -181,6 +182,7 @@ async def main(page: ft.Page):
 
     def route_change(e: ft.RouteChangeEvent):
         page.controls.clear()
+        cleanup_map_view()
 
         route_handler, params = get_route_handler(page.route)
 

@@ -20,3 +20,4 @@ dropoff_pin = [None]
 
 # (lat, lon) position of moving driver
 driver_marker = [None]
+driver_icon_container = [None]  # Will hold the animated container
