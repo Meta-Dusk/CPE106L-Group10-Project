@@ -221,7 +221,7 @@ def preset_button(
         on_click = partial(log_button_press, data.label)
     if type == DefaultButton.EXIT:
         width = 80
-        on_click_sfx = SFX.BACK
+        on_click_sfx = SFX.EXIT
     else:
         width = None
     
