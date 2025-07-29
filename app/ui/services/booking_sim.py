@@ -2,15 +2,27 @@ import random
 import asyncio
 import math
 import aiohttp
+import os
 
 import flet as ft
 
 from geopy.distance import geodesic
 from app.ui.map_view import state, render
 from app.ui.map_view.ui_elements import get_driver_icon
+from app.assets.audio_manager import audio, SFX
+from dotenv import load_dotenv
+from pathlib import Path
 
 
-ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjQwNzk5OWI2MjNkYzQyNWY5OGI3NWNiNzkwOGI5OTBkIiwiaCI6Im11cm11cjY0In0="
+ENV_DIR = Path(__file__).parent.parent / ".env"
+
+if ENV_DIR.exists():
+    load_dotenv(dotenv_path=ENV_DIR)
+    print("ORS API Key loaded.")
+else:
+    print("ORS API Key not found...")
+    
+ORS_API_KEY = os.getenv("ORS_API_KEY")
 
 
 async def fetch_route_osm(pickup, destination, api_key: str):
@@ -146,6 +158,7 @@ async def simulate_booking(
     driver_location = get_random_driver_location(*pickup)
     driver_distance = geodesic(pickup, driver_location).km
     status_callback(f"Driver found! {driver_distance:.2f} km away")
+    audio.play_sfx(SFX.ALERT)
 
     state.driver_marker[0] = driver_location
     tile_stack.controls = [c for c in tile_stack.controls if c is not None]
@@ -204,6 +217,7 @@ async def simulate_booking(
         print("[CANCEL] Simulation interrupted.")
         return
     
+    audio.play_sfx(SFX.ALERT)
     status_callback("Driver has arrived. Picking you up...")
     await asyncio.sleep(2)
 
@@ -231,6 +245,7 @@ async def simulate_booking(
     state.driver_marker[0] = destination
     update_driver_position(*destination)
 
+    audio.play_sfx(SFX.REWARD)
     status_callback("Arrived at destination. Thank you for riding! 🚗")
     await asyncio.sleep(2)
     status_callback("")
