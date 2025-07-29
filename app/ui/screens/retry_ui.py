@@ -7,7 +7,7 @@ from app.ui.components.text import default_text, DefaultTextStyle
 from app.ui.components.dialogs import default_notif_dialog
 from app.ui.components.buttons import default_action_button, preset_button, DefaultButton
 from app.db.mongo import connect_to_mongo
-from app.db.db_manager import init_database
+from app.db.db_manager import init_database, toggle_db, get_current_mode
 from app.routing.route_data import PageRoute
 
 
@@ -42,10 +42,17 @@ def retry_ui(page: ft.Page):
             page.go(retry_page)  # show again if still fails
             page.open(error_dialog)
 
+    def switch_db(e):
+        toggle_db()
+        page.controls.clear()
+        page.go(PageRoute.LOGIN.value)
+        page.update()
+    
     retry_btn = default_action_button(text="Retry Connection", on_click=retry)
     exit_btn = preset_button(DefaultButton.EXIT, on_click=lambda e: page.window.close())
+    switch_db_btn = default_action_button(text="Switch to SQLite", on_click=switch_db)
     
-    buttons = [retry_btn, exit_btn]
+    buttons = [retry_btn, exit_btn, switch_db_btn]
     buttons_row = default_row(buttons)
     
     text_column = default_column([warning_title, warning_desc])
