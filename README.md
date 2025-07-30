@@ -23,8 +23,8 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 ---
 ## 📦 Pre-requisites
 
-- You must have Python>=3.13.5, for compatibility.
-- As for the dependencies (modules/libraries) used, refer to the launcher (when running `launch.py`).
+- You must have `python>=3.13.5` (or just any latest version of Python), for compatibility.
+- As for the dependencies _(modules/libraries)_ used, refer to the launcher (when running `launch.py`).
 
 ## 💭 Additional Notes
 
