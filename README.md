@@ -62,6 +62,25 @@ To assist elderly individuals or those with accessibility challenges in scheduli
        - **Native (Default)**: Runs as a desktop application.
        - **Web**: Opens the app in your web browser. Only supports *Windowed* mode.
        - **Run Setup**: Initializes connection settings for MongoDB Atlas (username, password, and host). Optional, but recommended to run once.
+      
+## 📃 Main Features (as of now)
+
+1. **Missing modules auto-download**
+   - Can be triggered via launcher.
+2. **Sensitive data setup handler**
+   - This is triggered once the `run setup` option has been selected in the launcher. This will then run a separate script for setting up sensitive data, such as configuring the MongoDB connection string.
+3. **Dual-database system**
+   - The application can simply switch between using **MongoDB** and **SQLite** based on the user. The default database is MongoDB, and if the application can't connect to MongoDB, you can switch to use the local database instead, which is what SQLite is used for.
+4. **Profile Setup**
+   - The user can make an account in the login screen (which will make an account based on the current database), and the profile setup is optional. You can fill in your details after the login, by clicking the `Profile` button.
+5. **Admin Controls**
+   - Users can become admins, but the only method to become an admin, is through manipulating the user's details in the database itself (as of now, this value field is simply a boolean named `op`).
+6. **Booking Simulation**
+   - Since this application is not yet deployed, the user can just simulate what the booking would look like. A map view is provided, in which the user can navigate with the controls shown above the map view.
+7. **Music and SFX**
+   - While this feature may be unnecessary, the application does have music playing, and also have sound effects. This feature can be disabled in the settings menu, by navigating via the dashboard, to your profile, then click the settings button at the top-right of the screen.
+8. **API Config, View Graphs**
+   - As of now, these features won't do much, but you can navigate to them via the dashboard to see what's currently implemented.
 
 ## 🖥 How to Run the Project
 
