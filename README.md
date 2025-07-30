@@ -26,6 +26,43 @@ To assist elderly individuals or those with accessibility challenges in scheduli
 - You must have Python>=3.13.5, for compatibility.
 - As for the dependencies (modules/libraries) used, refer to the launcher (when running `launch.py`).
 
+## 💭 Additional Notes
+
+1. **Running the Application in Web Mode**
+   - Yes, the application can run in a web browser. Simply set the launcher to **Web Mode**, and it will open the app in your system's default browser.
+   - **Note**: Closing the browser tab **does not** stop the application. You must also close the terminal or command prompt that launched it.
+
+2. **Accessing the App on Mobile Devices**
+   - While the app isn't optimized for mobile screens, it can still be accessed via a mobile browser on the same local network.
+   - To do so:
+     1. Launch the app in **Web Mode** on your PC.
+     2. In the terminal, look for an address like `http://127.0.0.1:xxxxx` or similar.
+     3. Get your actual IP address:
+        - On **Windows**, open a new terminal and run:
+          ```bash
+          ipconfig
+          ```
+        - Find your **IPv4 Address** (e.g., `192.168.0.123`).
+     4. Replace the `127.0.0.1` in the earlier address with your IPv4 address. For example:
+        ```
+        http://192.168.0.123:xxxxx
+        ```
+     5. Open this address in your mobile browser while connected to the same Wi-Fi.
+   - **Note**: Due to limited screen space, some UI elements may not be fully visible or usable on mobile.
+
+3. **Launcher Configuration**
+   - The launcher supports multiple **Window Modes** and **Launch Modes**:
+
+     - **Window Modes**:
+       - **Windowed**: Default mode with a standard window frame.
+       - **Full Screen**: Occupies the entire screen (only works with *Native* launch mode).
+       - **Borderless**: Custom frameless window (useful for aesthetic flexibility).
+
+     - **Launch Modes**:
+       - **Native (Default)**: Runs as a desktop application.
+       - **Web**: Opens the app in your web browser. Only supports *Windowed* mode.
+       - **Run Setup**: Initializes connection settings for MongoDB Atlas (username, password, and host). Optional, but recommended to run once.
+
 ## 🖥 How to Run the Project
 
 ### ⚙️ Setup via Windows Terminal
